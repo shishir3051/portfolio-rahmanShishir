@@ -25,12 +25,20 @@
   --muted2: #717171;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
   padding: 0;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+section[id] {
+  scroll-margin-top: 100px;
 }
 
 .bg-glow {

@@ -17,9 +17,9 @@ const Hero = ({ name, headline }) => {
             B.Sc in SWE (Major in Cybersecurity) | Ethical Hacker Essential (E|HE) | Java Full-Stack Developer. Specialize in secure, high-performance engineering.
           </p>
           <div className="flex flex-wrap gap-4 items-center">
-            <button className="px-8 py-4 bg-gradient-to-br from-accent to-accent2 rounded-xl font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 active:translate-y-px transition-all">
+            <a href="#projects" className="px-8 py-4 bg-gradient-to-br from-accent to-accent2 rounded-xl font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 active:translate-y-px transition-all flex items-center justify-center">
               View Projects
-            </button>
+            </a>
             <a href="#contact" className="px-8 py-4 border border-accent/40 rounded-xl font-bold hover:bg-accent/10 transition-all">
               Connect Now
             </a>
