@@ -190,11 +190,11 @@ const Dashboard = () => {
                     messages.map((m, i) => (
                       <tr key={i} className="hover:bg-panel transition-all">
                         <td className="px-6 py-4">
-                          <div className="font-bold">{m.FullName}</div>
-                          <div className="text-xs text-muted2">{m.Email}</div>
+                          <div className="font-bold">{m.fullname}</div>
+                          <div className="text-xs text-muted2">{m.email}</div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-muted line-clamp-2 max-w-xs">{m.Message}</td>
-                        <td className="px-6 py-4 text-xs text-muted2 whitespace-nowrap">{new Date(m.CreatedAt).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 text-sm text-muted line-clamp-2 max-w-xs">{m.message}</td>
+                        <td className="px-6 py-4 text-xs text-muted2 whitespace-nowrap">{new Date(m.createdat).toLocaleDateString()}</td>
                       </tr>
                     ))
                   )}
@@ -218,13 +218,13 @@ const Dashboard = () => {
                     projects.map((p, i) => (
                       <tr key={i} className="hover:bg-panel transition-all">
                         <td className="px-6 py-4">
-                          <div className="font-bold">{p.Title}</div>
-                          <div className="text-xs text-muted2">{p.ProjectYear}</div>
+                          <div className="font-bold">{p.title}</div>
+                          <div className="text-xs text-muted2">{p.projectyear}</div>
                         </td>
-                        <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold">{p.Tag}</span></td>
+                        <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold">{p.tag}</span></td>
                         <td className="px-6 py-4">
                           <button 
-                            onClick={() => deleteProject(p.Id)}
+                            onClick={() => deleteProject(p.id)}
                             className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
                           >
                             Delete
