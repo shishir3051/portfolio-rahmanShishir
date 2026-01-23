@@ -82,7 +82,7 @@ const ContactForm = () => {
               <span className="text-2xl">📞</span>
               <div>
                 <b className="block text-text">Phone</b>
-                <a href="tel:+123456789" className="text-muted hover:text-accent transition-colors">+123456789</a>
+                <a href="tel:01609277790" className="text-muted hover:text-accent transition-colors">01609277790</a>
               </div>
             </div>
             <div className="flex gap-4 items-start">
@@ -97,11 +97,18 @@ const ContactForm = () => {
           <div className="mt-10 pt-8 border-t border-stroke">
             <h5 className="text-xs font-bold text-muted2 uppercase tracking-widest mb-4">Social</h5>
             <div className="flex flex-wrap gap-2">
-              {['Github', 'LinkedIn', 'Twitter', 'Dribbble'].map(social => (
-                <button key={social} className="px-4 py-2 rounded-full border border-stroke bg-panel text-xs font-bold hover:bg-panel2 hover:border-accent/40 transition-all">
-                  {social}
-                </button>
-              ))}
+              <a href="https://github.com/shishir3051" target="_blank" rel="noopener" className="px-5 py-2 rounded-full border border-stroke bg-panel text-xs font-bold hover:bg-panel2 hover:border-accent/40 transition-all text-text">
+                Github
+              </a>
+              <a href="https://www.linkedin.com/in/rahman-shishir-442867266/" target="_blank" rel="noopener" className="px-5 py-2 rounded-full border border-stroke bg-panel text-xs font-bold hover:bg-panel2 hover:border-accent/40 transition-all text-text">
+                LinkedIn
+              </a>
+              <button disabled className="px-5 py-2 rounded-full border border-stroke bg-panel text-xs font-bold opacity-50 cursor-not-allowed">
+                Twitter
+              </button>
+              <button disabled className="px-5 py-2 rounded-full border border-stroke bg-panel text-xs font-bold opacity-50 cursor-not-allowed">
+                Dribbble
+              </button>
             </div>
           </div>
         </div>

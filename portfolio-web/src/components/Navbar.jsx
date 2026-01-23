@@ -9,7 +9,6 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
     <header className="sticky top-0 z-20 backdrop-blur-lg bg-white/70 dark:bg-black/40 border-b border-stroke">
       <nav className="container mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 font-extrabold tracking-tighter text-xl">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-accent to-accent2 shadow-lg shadow-accent/40"></div>
           <span className="text-text">Rahman Shishir</span>
         </div>
 

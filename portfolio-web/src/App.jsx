@@ -349,9 +349,9 @@ function App() {
       </main>
 
       <footer className="py-12 border-t border-stroke mt-20">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-muted2 text-sm font-semibold">
-          <p>© {new Date().getFullYear()} Rahman Shishir. All rights reserved.</p>
-          <div className="flex gap-6">
+        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-muted font-bold text-sm">
+          <p>© {new Date().getFullYear()} Rahman Shishir</p>
+          <div className="flex gap-8">
             <a href="https://github.com/shishir3051" target="_blank" rel="noopener" className="hover:text-text transition-colors">GitHub</a>
             <a href="https://www.linkedin.com/in/rahman-shishir-442867266/" className="hover:text-text transition-colors" target="_blank" rel="noopener">LinkedIn</a>
             <a href="#" className="hover:text-text transition-colors">Privacy Policy</a>
