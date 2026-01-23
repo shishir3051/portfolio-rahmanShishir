@@ -260,13 +260,15 @@ function App() {
           >
             <div className="grid md:grid-cols-3 gap-6">
               {projects.length > 0 ? (
-                projects.map((project, i) => (
+                projects.map((p, i) => (
                   <ProjectCard 
                     key={i} 
-                    title={project.title}
-                    description={project.desc}
-                    tag={project.tag}
-                    date={project.year}
+                    title={p.title}
+                    description={p.desc}
+                    tag={p.tag}
+                    date={p.year}
+                    role={p.role}
+                    onClick={() => setSelectedProject(p)}
                   />
                 ))
               ) : (
@@ -274,15 +276,41 @@ function App() {
                 <>
                   <ProjectCard 
                     title="Efficient SWIFT ISO 20022 MT-MX Transition"
-                    description="A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition."
+                    description="A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition. Built with a focus on security and high performance."
                     tag="FinTech / Security"
                     date="2024"
+                    role="Junior Software Engineer"
+                    onClick={() => setSelectedProject({
+                      title: "Efficient SWIFT ISO 20022 MT-MX Transition",
+                      year: "2024",
+                      role: "Junior Software Engineer",
+                      desc: "A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition.",
+                      details: [
+                        "Implemented ISO 20022 migration tools.",
+                        "Handled high-volume transaction logging with SQL Server.",
+                        "Built complex grid interfaces with ExtJS."
+                      ],
+                      tech: ["Java", "ExtJS", "Spring Boot", "MSSQL"]
+                    })}
                   />
                   <ProjectCard 
                     title="Cybersecurity Dashboard"
-                    description="Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications."
+                    description="Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications. Features automated scanning and graph visualization."
                     tag="Cybersecurity / Neo4j"
                     date="2024"
+                    role="Lead Developer"
+                    onClick={() => setSelectedProject({
+                      title: "Cybersecurity Dashboard",
+                      year: "2024",
+                      role: "Lead Developer",
+                      desc: "Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications.",
+                      details: [
+                        "Visualized network threats using Neo4j.",
+                        "Automated vulnerability scanning.",
+                        "Created dark-mode security analysis UI."
+                      ],
+                      tech: ["React", "Node.js", "Neo4j", "Tailwind"]
+                    })}
                   />
                 </>
               )}
