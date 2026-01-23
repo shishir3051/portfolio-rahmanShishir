@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -36,7 +37,8 @@ app.use((req, res, next) => {
 app.use(cors({ origin: "*" })); // restrict in production
 app.use(express.json({ limit: "1mb" }));
 
-// Serve admin dashboard static file
+// Serve admin dashboard static files (fallback to public.bak)
+app.use("/public", express.static(path.join(__dirname, "public.bak")));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
 // =======================
@@ -239,11 +241,15 @@ app.get("/api/messages", requireAdmin, async (req, res) => {
 // ADMIN DASHBOARD & HOME
 // =======================
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+  const dashboardPath = path.join(__dirname, "public.bak", "dashboard.html");
+  if (fs.existsSync(dashboardPath)) return res.sendFile(dashboardPath);
+  res.status(404).send("Dashboard not found (check public.bak)");
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  const indexPath = path.join(__dirname, "public.bak", "index.html");
+  if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
+  res.json({ ok: true, message: "Portfolio API is running. Frontend is on Netlify." });
 });
 
 //Public API to fetch projects
