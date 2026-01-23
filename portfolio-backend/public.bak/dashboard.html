@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Dashboard</title>
+
+<style>
+:root{
+  --bg:#0b0b0f;
+  --card:rgba(255,255,255,.06);
+  --stroke:rgba(255,255,255,.12);
+  --text:#fff;
+  --muted:rgba(255,255,255,.7);
+  --accent:#7f5af0;
+}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+body{margin:0;background:var(--bg);color:var(--text)}
+.wrap{max-width:1100px;margin:auto;padding:22px}
+.card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:14px}
+h1{margin:0;font-size:22px}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.right{margin-left:auto}
+button,input,textarea,select{
+  padding:10px 12px;border-radius:12px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+  color:var(--text);outline:none
+}
+button{cursor:pointer;font-weight:700}
+button.primary{background:linear-gradient(135deg,var(--accent),#2cb67d);border:none}
+.tabs{display:flex;gap:10px;margin:16px 0}
+.tab{cursor:pointer}
+.tab.active{border-color:var(--accent);background:rgba(127,90,240,.2)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top}
+th{color:var(--muted);text-align:left;font-size:13px}
+.pill{padding:4px 10px;border-radius:999px;border:1px solid var(--stroke);font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+
+/* Project Form Styles */
+.form-section{margin-top:16px}
+.form-section-title{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;font-weight:600}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-field{margin-bottom:10px}
+.form-field label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
+.form-field input, .form-field textarea {width:100%}
+textarea{min-height:80px;resize:vertical;font-family:inherit}
+.form-actions{margin-top:20px;padding-top:16px;border-top:1px solid var(--stroke)}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header class="row">
+  <div>
+    <h1>Admin Dashboard</h1>
+    <div class="muted">Messages & Projects</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="messages">Messages</button>
+  <button class="tab" data-tab="projects">Projects</button>
+</div>
+
+<button id="showKeyBtn" class="primary" style="margin-bottom:20px; display:none" onclick="toggleAdminKey(true)">Show Admin Key</button>
+
+<div id="adminKeyCard" class="card" style="max-width:400px; margin-bottom:20px">
+  <div class="muted">Admin Key</div>
+  <div class="row" style="margin-top:8px">
+    <input id="adminKey" placeholder="Paste ADMIN_KEY" />
+    <button id="saveKey" class="primary">Save</button>
+    <button onclick="resetAdminKey()">Reset</button>
+  </div>
+  <div id="keyStatus" class="muted"></div>
+</div>
+
+<!-- ================= MESSAGES ================= -->
+<section id="messages">
+<div class="card">
+  <div class="row">
+    <span class="pill">Contact Messages</span>
+    <div class="right row">
+      <select id="msgSize">
+        <option>10</option>
+        <option selected>25</option>
+        <option>50</option>
+      </select>
+      <button onclick="loadMessages()">Refresh</button>
+    </div>
+  </div>
+
+  <div id="msgMeta" class="muted" style="margin:10px 0"></div>
+
+  <div style="overflow:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Email</th><th>Message</th><th>Created</th>
+        </tr>
+      </thead>
+      <tbody id="msgBody"></tbody>
+    </table>
+  </div>
+
+  <div class="row right" style="margin-top:10px">
+    <button onclick="prev()">Prev</button>
+    <button onclick="next()">Next</button>
+  </div>
+</div>
+</section>
+
+<!-- ================= PROJECTS ================= -->
+<section id="projects" style="display:none">
+<div class="grid2">
+
+<div class="card">
+  <div class="row">
+    <span class="pill">Projects</span>
+    <button class="right" onclick="loadProjects()">Refresh</button>
+  </div>
+  <div id="projMeta" class="muted"></div>
+  <table>
+    <thead><tr><th>ID</th><th>Title</th><th>Year</th><th>Tag</th><th>Actions</th></tr></thead>
+    <tbody id="projBody"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <span class="pill">Add Project</span>
+
+  <div class="form-section">
+    <div class="form-section-title">Basic Information</div>
+    <div class="form-field">
+      <label for="pTitle">Title *</label>
+      <input id="pTitle" placeholder="Enter project title" />
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label for="pTag">Tag</label>
+        <input id="pTag" placeholder="e.g., Featured" />
+      </div>
+      <div class="form-field">
+        <label for="pYear">Year</label>
+        <input id="pYear" placeholder="e.g., 2024" />
+      </div>
+    </div>
+    <div class="form-field">
+      <label for="pDesc">Description</label>
+      <textarea id="pDesc" placeholder="Brief description of the project"></textarea>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Project Details</div>
+    <div class="form-field">
+      <label for="pRole">Your Role</label>
+      <input id="pRole" placeholder="e.g., Full Stack Developer" />
+    </div>
+    <div class="form-field">
+      <label for="pTech">Technologies</label>
+      <input id="pTech" placeholder="React, Node.js, MongoDB (comma separated)" />
+    </div>
+    <div class="form-field">
+      <label for="pDetails">Key Details</label>
+      <textarea id="pDetails" placeholder="One detail per line
+• Implemented user authentication
+• Built responsive UI
+• Optimized database queries"></textarea>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Links & Settings</div>
+    <div class="form-field">
+      <label for="pLive">Live URL</label>
+      <input id="pLive" placeholder="https://example.com" />
+    </div>
+    <div class="form-field">
+      <label for="pRepo">Repository URL</label>
+      <input id="pRepo" placeholder="https://github.com/username/repo" />
+    </div>
+    <div class="form-field">
+      <label for="pSort">Sort Order</label>
+      <input id="pSort" type="number" value="0" placeholder="0" />
+    </div>
+  </div>
+
+    <div class="form-actions" style="display:flex; gap:10px;">
+    <button class="primary" style="flex:1" onclick="addProject()">Add Project</button>
+    <button class="secondary" style="flex:1" onclick="clearForm()">Clear Form</button>
+    <div id="pStatus" class="muted" style="margin-top:8px"></div>
+  </div>
+</div>
+
+</div>
+</section>
+
+</div>
+
+<script>
+const API_BASE = "http://localhost:4000";
+let msgPage = 1;
+
+const $ = id => document.getElementById(id);
+
+function getKey(){ return localStorage.getItem("ADMIN_KEY") || ""; }
+function setKey(v){ localStorage.setItem("ADMIN_KEY", v); }
+
+function clearForm() {
+  $("pTitle").value = "";
+  $("pTag").value = "";
+  $("pYear").value = "";
+  $("pDesc").value = "";
+  $("pRole").value = "";
+  $("pTech").value = "";
+  $("pDetails").value = "";
+  $("pLive").value = "";
+  $("pRepo").value = "";
+  $("pSort").value = "0";
+  $("pStatus").textContent = "Form cleared";
+  setTimeout(() => $("pStatus").textContent = "", 1500);
+}
+
+// Admin Key Management
+function toggleAdminKey(show) {
+  $("adminKeyCard").style.display = show ? "" : "none";
+  $("showKeyBtn").style.display = show ? "none" : "";
+}
+
+function resetAdminKey() {
+  localStorage.removeItem("ADMIN_KEY");
+  $("adminKey").value = "";
+  $("keyStatus").textContent = "Admin key cleared";
+  
+  // Clear the messages table
+  $("msgBody").innerHTML = "";
+  $("msgMeta").textContent = "";
+  
+  setTimeout(() => $("keyStatus").textContent = "", 2000);
+}
+
+// Initialize
+const savedKey = getKey();
+$("adminKey").value = savedKey;
+if(savedKey) {
+  toggleAdminKey(false);
+}
+
+$("saveKey").onclick = () => {
+  const key = $("adminKey").value.trim();
+  setKey(key);
+  $("keyStatus").textContent = key ? "Saved" : "Cleared";
+  if(key) {
+    // Load messages with the new key
+    loadMessages();
+    setTimeout(() => toggleAdminKey(false), 800);
+  }
+};
+
+// DEMO MODE: Auto-fill form if ?demo=true
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('demo') === 'true') {
+  setTimeout(() => {
+    $("pTitle").value = "HealthTrack Telemedicine Platform";
+    $("pTag").value = "Healthcare / SaaS";
+    $("pYear").value = "2024";
+    $("pDesc").value = "A secure, HIPAA-compliant telemedicine platform connecting patients with specialists via video consultations. Features include appointment scheduling, e-prescriptions, and real-time chat.";
+    $("pRole").value = "Lead Backend Engineer";
+    $("pTech").value = "Node.js, GraphQL, PostgreSQL, WebRTC, Docker";
+    $("pDetails").value = "Architected microservices using Docker/Kubernetes.\nImplemented secure WebRTC video streaming.\nIntegrated Stripe for payment processing.\nBuilt real-time notification system with Redis.";
+    $("pLive").value = "https://healthtrack-demo.com";
+    $("pRepo").value = "https://github.com/user/healthtrack";
+    $("pStatus").textContent = "✨ Demo Mode: Pre-filled with Real-World Project!";
+  }, 500);
+}
+
+async function api(url, options = {}){
+  const headers = options.headers || {};
+  if(getKey()) headers["x-admin-key"] = getKey();
+  return fetch(API_BASE + url, {...options, headers});
+}
+
+/* Tabs */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    $("messages").style.display = t.dataset.tab==="messages"?"":"none";
+    $("projects").style.display = t.dataset.tab==="projects"?"":"none";
+  };
+});
+
+/* Messages */
+async function loadMessages(){
+  $("msgMeta").textContent="Loading...";
+  $("msgBody").innerHTML="";
+  const size = $("msgSize").value;
+
+  const res = await api(`/api/messages?page=${msgPage}&size=${size}`);
+  if(!res.ok){ $("msgMeta").textContent="Unauthorized / error"; return; }
+  const d = await res.json();
+
+  $("msgMeta").textContent = `Total ${d.total} | Page ${d.page}`;
+  $("msgBody").innerHTML = d.messages.map(m=>`
+    <tr>
+      <td>${m.Id}</td>
+      <td>${m.FullName}</td>
+      <td>${m.Email}</td>
+      <td>${m.Message}</td>
+      <td>${new Date(m.CreatedAt).toLocaleString()}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="5" class="muted">No messages</td></tr>`;
+}
+
+function next(){ msgPage++; loadMessages(); }
+function prev(){ msgPage=Math.max(1,msgPage-1); loadMessages(); }
+
+/* Projects */
+async function loadProjects(){
+  $("projMeta").textContent="Loading...";
+  // Use public endpoint to get all fields including DetailsJson
+  const res = await fetch("/api/public/projects");
+  const d = await res.json();
+  
+  if(d.ok && d.projects){
+    $("projMeta").textContent=`Count ${d.projects.length}`;
+    $("projBody").innerHTML = d.projects.map(p=>`
+      <tr>
+        <td>${p.Id}</td>
+        <td>${p.Title}</td>
+        <td>${p.ProjectYear}</td>
+        <td><span class="pill" style="font-size:0.8rem">${p.Tag}</span></td>
+        <td>
+           <button class="secondary" style="padding:4px 8px; font-size:0.8rem" onclick='viewProject(${JSON.stringify(p).replace(/'/g, "&#39;")})'>View</button>
+           <button class="primary" style="padding:4px 8px; font-size:0.8rem; background:var(--error)" onclick="deleteProject(${p.Id})">Delete</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+}
+
+async function deleteProject(id) {
+   if(!confirm("Are you sure you want to delete this project?")) return;
+   const res = await api(`/api/projects/${id}`, { method: "DELETE" });
+   const d = await res.json();
+   if(d.ok) {
+     loadProjects();
+   } else {
+     alert("Failed to delete: " + d.error);
+   }
+}
+
+function viewProject(p) {
+  $("pTitle").value = p.Title || "";
+  $("pTag").value = p.Tag || "";
+  $("pYear").value = p.ProjectYear || "";
+  $("pDesc").value = p.Description || "";
+  $("pRole").value = p.Role || "";
+  $("pTech").value = p.TechCsv || "";
+  
+  // Handle details JSON parsing safe
+  let details = [];
+  try { details = JSON.parse(p.DetailsJson || "[]"); } catch(e){}
+  $("pDetails").value = details.join("\n");
+  
+  $("pLive").value = p.LiveUrl || "";
+  $("pRepo").value = p.RepoUrl || "";
+  $("pSort").value = p.SortOrder || 0;
+  
+  // Scroll form into view
+  $("pTitle").scrollIntoView({behavior: "smooth"});
+  $("pStatus").textContent = "Loaded details for: " + p.Title;
+}
+
+async function addProject(){
+  $("pStatus").textContent="Saving...";
+  const payload={
+    title:$("pTitle").value,
+    tag:$("pTag").value,
+    desc:$("pDesc").value,
+    year:$("pYear").value,
+    role:$("pRole").value,
+    tech:$("pTech").value.split(","),
+    details:$("pDetails").value.split("\n"),
+    live:$("pLive").value,
+    repo:$("pRepo").value,
+    sortOrder:Number($("pSort").value||0)
+  };
+  const res = await api("/api/projects",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const d = await res.json();
+  $("pStatus").textContent = d.ok ? "Project added" : d.error;
+  loadProjects();
+}
+
+loadMessages();
+</script>
+</body>
+</html>

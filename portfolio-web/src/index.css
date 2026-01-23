@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0b0b0f;
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel2: rgba(255, 255, 255, 0.08);
+  --stroke: rgba(255, 255, 255, 0.1);
+  --accent: #7f5af0;
+  --accent2: #2cb67d;
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.7);
+  --muted2: rgba(255, 255, 255, 0.5);
+  --radius: 24px;
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --panel: rgba(0, 0, 0, 0.03);
+  --panel2: rgba(0, 0, 0, 0.05);
+  --stroke: rgba(0, 0, 0, 0.08);
+  --text: #1a1a1a;
+  --muted: #4a4a4a;
+  --muted2: #717171;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 15%, var(--accent), transparent 45%),
+              radial-gradient(circle at 80% 85%, var(--accent2), transparent 40%);
+  filter: blur(120px);
+  z-index: -2;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+[data-theme="light"] .bg-glow {
+  opacity: 0.2;
+}
+
+.glass {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(16px);
+  border-radius: var(--radius);
+  transition: transform 0.25s ease, background 0.2s ease;
+}
+
+.glass:hover {
+  transform: translateY(-6px);
+  background: var(--panel2);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
