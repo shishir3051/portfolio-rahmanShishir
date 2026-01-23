@@ -1,6 +1,7 @@
 [build]
-  command = "cd portfolio-web && npm install && npm run build"
-  publish = "portfolio-web/dist"
+  base = "portfolio-web"
+  command = "npm install && npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
