@@ -1,26 +1,17 @@
-const sql = require('mssql');
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  port: parseInt(process.env.DB_PORT),
-  database: process.env.DB_NAME,
-  options: {
-    encrypt: process.env.DB_ENCRYPT === 'true',
-    trustServerCertificate: process.env.DB_TRUST_CERT === 'true'
-  }
-};
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_SERVER}/${process.env.DB_NAME}`,
+});
 
 async function checkProjects() {
   try {
-    const pool = await sql.connect(config);
-    const result = await pool.request().query("SELECT Id, Title FROM dbo.Projects");
-    console.log("Projects in DB:", result.recordset);
+    const result = await pool.query("SELECT Id, Title FROM Projects");
+    console.log("Projects in DB:", result.rows);
     process.exit(0);
   } catch (err) {
-    console.error("SQL Error:", err);
+    console.error("DB Error:", err);
     process.exit(1);
   }
 }

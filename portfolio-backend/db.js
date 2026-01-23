@@ -1,39 +1,24 @@
-const sql = require("mssql");
+const { Pool } = require("pg");
 
-const config = {
-  server: process.env.DB_SERVER,          // host only
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+const isProduction = process.env.NODE_ENV === "production";
 
-  options: {
-    instanceName: process.env.DB_INSTANCE, // named instance
-    encrypt: String(process.env.DB_ENCRYPT).toLowerCase() === "true",
-    trustServerCertificate: String(process.env.DB_TRUST_CERT).toLowerCase() === "true",
-  },
+// For Render/Cloud, use DATABASE_URL. 
+// For local, you can use separate vars or just a local URL.
+const connectionString = process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_SERVER}/${process.env.DB_NAME}`;
 
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000,
-  },
+const pool = new Pool({
+  connectionString: connectionString,
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
+});
 
-  // helps avoid quick timeouts on slow/blocked connections
-  connectionTimeout: 30000,
-  requestTimeout: 30000,
-};
-
-let pool;
-
-async function getPool() {
-  try {
-    if (pool) return pool;
-    pool = await sql.connect(config);
-    return pool;
-  } catch (e) {
-    pool = null; // IMPORTANT: don’t cache a failed pool
-    throw e;
-  }
+async function query(text, params) {
+  const res = await pool.query(text, params);
+  return res;
 }
 
-module.exports = { sql, getPool };
+module.exports = { 
+  query,
+  pool,
+  // Helper to maintain some compatibility with original getPool if needed
+  getPool: () => pool 
+};

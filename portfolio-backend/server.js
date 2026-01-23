@@ -5,7 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const { sql, getPool } = require("./db");
+const { query } = require("./db");
 
 const app = express();
 
@@ -95,19 +95,12 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       .toString()
       .slice(0, 512);
 
-    const pool = await getPool();
-    await pool.request()
-      .input("FullName", sql.NVarChar(120), name)
-      .input("Email", sql.NVarChar(254), email)
-      .input("Message", sql.NVarChar(sql.MAX), message)
-      .input("IpAddress", sql.NVarChar(64), ip)
-      .input("UserAgent", sql.NVarChar(512), ua)
-      .query(`
-        INSERT INTO dbo.ContactMessages
+    await query(`
+        INSERT INTO ContactMessages
           (FullName, Email, Message, IpAddress, UserAgent)
         VALUES
-          (@FullName, @Email, @Message, @IpAddress, @UserAgent)
-      `);
+          ($1, $2, $3, $4, $5)
+      `, [name, email, message, ip, ua]);
 
     res.json({ ok: true });
   } catch (err) {
@@ -121,26 +114,25 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 // =======================
 app.get("/api/projects", async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request().query(`
+    const result = await query(`
       SELECT Id, Title, Tag, Description, ProjectYear, Role,
              TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder
-      FROM dbo.Projects
-      WHERE IsActive = 1
+      FROM Projects
+      WHERE IsActive = true
       ORDER BY SortOrder ASC, Id DESC
     `);
 
-    const projects = result.recordset.map(r => ({
-      id: r.Id,
-      title: r.Title,
-      tag: r.Tag,
-      desc: r.Description,
-      year: r.ProjectYear,
-      role: r.Role,
-      tech: (r.TechCsv || "").split(",").map(x => x.trim()).filter(Boolean),
-      details: safeJsonArray(r.DetailsJson),
-      live: r.LiveUrl,
-      repo: r.RepoUrl
+    const projects = result.rows.map(r => ({
+      id: r.id,
+      title: r.title,
+      tag: r.tag,
+      desc: r.description,
+      year: r.projectyear,
+      role: r.role,
+      tech: (r.techcsv || "").split(",").map(x => x.trim()).filter(Boolean),
+      details: safeJsonArray(r.detailsjson),
+      live: r.liveurl,
+      repo: r.repourl
     }));
 
     res.json({ ok: true, projects });
@@ -171,29 +163,27 @@ app.post("/api/projects", requireAdmin, async (req, res) => {
       sortOrder: Number(req.body?.sortOrder || 0)
     };
 
-    const pool = await getPool();
-    const result = await pool.request()
-      .input("Title", sql.NVarChar(200), title)
-      .input("Tag", sql.NVarChar(80), payload.tag || null)
-      .input("Description", sql.NVarChar(800), payload.desc || null)
-      .input("ProjectYear", sql.NVarChar(10), payload.year || null)
-      .input("Role", sql.NVarChar(120), payload.role || null)
-      .input("TechCsv", sql.NVarChar(800), payload.tech.join(",") || null)
-      .input("DetailsJson", sql.NVarChar(sql.MAX), JSON.stringify(payload.details))
-      .input("LiveUrl", sql.NVarChar(500), payload.live || null)
-      .input("RepoUrl", sql.NVarChar(500), payload.repo || null)
-      .input("SortOrder", sql.Int, payload.sortOrder)
-      .query(`
-        INSERT INTO dbo.Projects
+    const result = await query(`
+        INSERT INTO Projects
           (Title, Tag, Description, ProjectYear, Role,
            TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder)
-        OUTPUT INSERTED.Id
         VALUES
-          (@Title, @Tag, @Description, @ProjectYear, @Role,
-           @TechCsv, @DetailsJson, @LiveUrl, @RepoUrl, @SortOrder)
-      `);
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING Id
+      `, [
+        title, 
+        payload.tag, 
+        payload.desc, 
+        payload.year, 
+        payload.role, 
+        payload.tech.join(","), 
+        JSON.stringify(payload.details), 
+        payload.live, 
+        payload.repo, 
+        payload.sortOrder
+      ]);
 
-    res.json({ ok: true, id: result.recordset[0].Id });
+    res.json({ ok: true, id: result.rows[0].id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, error: "Server error" });
@@ -203,11 +193,7 @@ app.post("/api/projects", requireAdmin, async (req, res) => {
 app.delete("/api/projects/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
-    const pool = await getPool();
-    await pool.request()
-      .input("Id", sql.Int, id)
-      .query("DELETE FROM dbo.Projects WHERE Id = @Id");
-    
+    await query("DELETE FROM Projects WHERE Id = $1", [id]);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -224,29 +210,24 @@ app.get("/api/messages", requireAdmin, async (req, res) => {
     const size = Math.min(100, Math.max(5, Number(req.query.size || 25)));
     const offset = (page - 1) * size;
 
-    const pool = await getPool();
-
-    const totalResult = await pool.request().query(`
+    const totalResult = await query(`
       SELECT COUNT(1) AS Total
-      FROM dbo.ContactMessages
+      FROM ContactMessages
     `);
 
-    const result = await pool.request()
-      .input("offset", sql.Int, offset)
-      .input("size", sql.Int, size)
-      .query(`
+    const result = await query(`
         SELECT Id, FullName, Email, Message, IpAddress, UserAgent, CreatedAt
-        FROM dbo.ContactMessages
+        FROM ContactMessages
         ORDER BY CreatedAt DESC
-        OFFSET @offset ROWS FETCH NEXT @size ROWS ONLY
-      `);
+        LIMIT $1 OFFSET $2
+      `, [size, offset]);
 
     res.json({
       ok: true,
       page,
       size,
-      total: Number(totalResult.recordset?.[0]?.Total || 0),
-      messages: result.recordset || []
+      total: Number(totalResult.rows?.[0]?.total || 0),
+      messages: result.rows || []
     });
   } catch (err) {
     console.error(err);
@@ -268,13 +249,12 @@ app.get("/", (req, res) => {
 //Public API to fetch projects
 app.get("/api/public/projects", async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request().query(`
+    const result = await query(`
       SELECT Id, Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder
-      FROM dbo.Projects
+      FROM Projects
       ORDER BY SortOrder ASC, ProjectYear DESC
     `);
-    res.json({ ok: true, projects: result.recordset });
+    res.json({ ok: true, projects: result.rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, error: "Server error" });

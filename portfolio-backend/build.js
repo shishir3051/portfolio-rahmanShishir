@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
-const sql = require('mssql');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 // Configuration
@@ -8,17 +8,10 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const DIST_DIR = path.join(__dirname, 'dist');
 
 // DB Config
-const dbConfig = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  port: parseInt(process.env.DB_PORT),
-  database: process.env.DB_NAME,
-  options: {
-    encrypt: process.env.DB_ENCRYPT === 'true',
-    trustServerCertificate: process.env.DB_TRUST_CERT === 'true'
-  }
-};
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_SERVER}/${process.env.DB_NAME}`,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+});
 
 async function build() {
   console.log("🚀 Starting Static Build for Netlify...");
@@ -29,32 +22,32 @@ async function build() {
     console.log("✔ Cleaned dist/ folder");
 
     // 2. Fetch Projects from DB
-    console.log("⏳ Fetching projects from Local DB...");
-    const pool = await sql.connect(dbConfig);
-    const result = await pool.request().query(`
+    console.log("⏳ Fetching projects from DB...");
+    const result = await pool.query(`
       SELECT Id, Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder
-      FROM dbo.Projects
+      FROM Projects
+      WHERE IsActive = true
       ORDER BY SortOrder ASC, ProjectYear DESC
     `);
-    const projectsRaw = result.recordset;
+    const projectsRaw = result.rows;
     console.log(`✔ Found ${projectsRaw.length} projects`);
 
     // Map DB rows to frontend format (matching index.html's fetchProjects logic)
     const projects = projectsRaw.map(p => {
        let details = [];
-       try { details = JSON.parse(p.DetailsJson || "[]"); } catch(e){}
+       try { details = JSON.parse(p.detailsjson || "[]"); } catch(e){}
        
        return {
-           id: String(p.Id),
-           title: p.Title,
-           tag: p.Tag,
-           desc: p.Description,
-           year: p.ProjectYear,
-           role: p.Role,
-           tech: p.TechCsv ? p.TechCsv.split(',').map(s=>s.trim()) : [],
+           id: String(p.id),
+           title: p.title,
+           tag: p.tag,
+           desc: p.description,
+           year: p.projectyear,
+           role: p.role,
+           tech: p.techcsv ? p.techcsv.split(',').map(s=>s.trim()) : [],
            details: details,
-           live: p.LiveUrl,
-           repo: p.RepoUrl
+           live: p.liveurl,
+           repo: p.repourl
        };
     });
     let html = await fs.readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
