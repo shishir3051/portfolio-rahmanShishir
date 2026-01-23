@@ -8,17 +8,22 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [adminKey, setAdminKey] = useState(localStorage.getItem("ADMIN_KEY") || "");
   const [status, setStatus] = useState("");
-  const [newProject, setNewProject] = useState({
+  const [editingId, setEditingId] = useState(null);
+  
+  const initialProjectState = {
     title: "",
     tag: "",
     desc: "",
     year: new Date().getFullYear().toString(),
     role: "Lead Developer",
     tech: "",
+    details: "", // Bullet points separated by new lines
     live: "",
     repo: "",
     sortOrder: 0
-  });
+  };
+
+  const [projectForm, setProjectForm] = useState(initialProjectState);
 
   const fetchMessages = async () => {
     try {
@@ -74,32 +79,54 @@ const Dashboard = () => {
     }
   };
 
-  const addProject = async (e) => {
+  const startEdit = (p) => {
+    setEditingId(p.id);
+    setProjectForm({
+      title: p.title || "",
+      tag: p.tag || "",
+      desc: p.desc || p.description || "",
+      year: p.year || p.projectyear || "",
+      role: p.role || "",
+      tech: Array.isArray(p.tech) ? p.tech.join(", ") : (p.techcsv || ""),
+      details: Array.isArray(p.details) ? p.details.join("\n") : (typeof p.detailsjson === 'string' ? JSON.parse(p.detailsjson).join("\n") : ""),
+      live: p.live || p.liveurl || "",
+      repo: p.repo || p.repourl || "",
+      sortOrder: p.sortOrder || p.sortorder || 0
+    });
+    setActiveTab('add-project');
+  };
+
+  const saveProject = async (e) => {
     e.preventDefault();
-    setStatus("Adding project...");
+    const isEdit = !!editingId;
+    setStatus(isEdit ? "Updating project..." : "Adding project...");
+    
     try {
-      const res = await fetch(`${API_BASE}/api/projects`, {
-        method: "POST",
+      const url = isEdit ? `${API_BASE}/api/projects/${editingId}` : `${API_BASE}/api/projects`;
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method: method,
         headers: { 
           'Content-Type': 'application/json',
           'x-admin-key': adminKey 
         },
         body: JSON.stringify({
-          ...newProject,
-          tech: newProject.tech.split(",").map(s => s.trim()).filter(Boolean)
+          ...projectForm,
+          tech: projectForm.tech.split(",").map(s => s.trim()).filter(Boolean),
+          details: projectForm.details.split("\n").map(s => s.trim()).filter(Boolean)
         })
       });
+      
       const data = await res.json();
       if (data.ok) {
-        setStatus("Project Added!");
-        setNewProject({
-          title: "", tag: "", desc: "", year: new Date().getFullYear().toString(),
-          role: "Lead Developer", tech: "", live: "", repo: "", sortOrder: 0
-        });
+        setStatus(isEdit ? "Project Updated!" : "Project Added!");
+        setProjectForm(initialProjectState);
+        setEditingId(null);
         setActiveTab('projects');
         fetchProjects();
       } else {
-        setStatus("Error: " + (data.error || "Failed to add project"));
+        setStatus("Error: " + (data.error || "Failed to save project"));
       }
     } catch (err) {
       setStatus("Failed to connect to backend");
@@ -164,8 +191,12 @@ const Dashboard = () => {
               Projects ({projects.length})
             </button>
             <button 
-              onClick={() => setActiveTab('add-project')}
-              className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'add-project' ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
+              onClick={() => {
+                setEditingId(null);
+                setProjectForm(initialProjectState);
+                setActiveTab('add-project');
+              }}
+              className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'add-project' && !editingId ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
             >
               + Add Project
             </button>
@@ -219,16 +250,24 @@ const Dashboard = () => {
                       <tr key={i} className="hover:bg-panel transition-all">
                         <td className="px-6 py-4">
                           <div className="font-bold">{p.title}</div>
-                          <div className="text-xs text-muted2">{p.projectyear}</div>
+                          <div className="text-xs text-muted2">{p.year || p.projectyear}</div>
                         </td>
                         <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold">{p.tag}</span></td>
                         <td className="px-6 py-4">
-                          <button 
-                            onClick={() => deleteProject(p.id)}
-                            className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => startEdit(p)}
+                              className="bg-accent/20 text-accent hover:bg-accent/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => deleteProject(p.id)}
+                              className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -238,14 +277,14 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="p-8">
-              <h2 className="text-xl font-bold mb-6">Create New Project</h2>
-              <form onSubmit={addProject} className="grid md:grid-cols-2 gap-6">
+              <h2 className="text-xl font-bold mb-6">{editingId ? 'Edit Project' : 'Create New Project'}</h2>
+              <form onSubmit={saveProject} className="grid md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Project Title</label>
                   <input 
                     type="text" required
-                    value={newProject.title}
-                    onChange={e => setNewProject({...newProject, title: e.target.value})}
+                    value={projectForm.title}
+                    onChange={e => setProjectForm({...projectForm, title: e.target.value})}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="E.g. AI Portfolio"
                   />
@@ -254,8 +293,8 @@ const Dashboard = () => {
                   <label className="text-xs font-bold text-muted uppercase">Tag / Category</label>
                   <input 
                     type="text"
-                    value={newProject.tag}
-                    onChange={e => setNewProject({...newProject, tag: e.target.value})}
+                    value={projectForm.tag}
+                    onChange={e => setProjectForm({...projectForm, tag: e.target.value})}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="E.g. Full-stack / AI"
                   />
@@ -263,9 +302,9 @@ const Dashboard = () => {
                 <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Description</label>
                   <textarea 
-                    value={newProject.desc}
-                    onChange={e => setNewProject({...newProject, desc: e.target.value})}
-                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent min-h-[100px] resize-none"
+                    value={projectForm.desc}
+                    onChange={e => setProjectForm({...projectForm, desc: e.target.value})}
+                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent min-h-[80px] resize-none"
                     placeholder="Short description..."
                   />
                 </div>
@@ -273,27 +312,46 @@ const Dashboard = () => {
                   <label className="text-xs font-bold text-muted uppercase">Year</label>
                   <input 
                     type="text"
-                    value={newProject.year}
-                    onChange={e => setNewProject({...newProject, year: e.target.value})}
+                    value={projectForm.year}
+                    onChange={e => setProjectForm({...projectForm, year: e.target.value})}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                   />
                 </div>
                 <div className="grid gap-2">
+                  <label className="text-xs font-bold text-muted uppercase">Role</label>
+                  <input 
+                    type="text"
+                    value={projectForm.role}
+                    onChange={e => setProjectForm({...projectForm, role: e.target.value})}
+                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
+                    placeholder="E.g. Lead Developer"
+                  />
+                </div>
+                <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Tech Stack (comma separated)</label>
                   <input 
                     type="text"
-                    value={newProject.tech}
-                    onChange={e => setNewProject({...newProject, tech: e.target.value})}
+                    value={projectForm.tech}
+                    onChange={e => setProjectForm({...projectForm, tech: e.target.value})}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="React, Node.js, SQL"
+                  />
+                </div>
+                <div className="grid gap-2 md:col-span-2">
+                  <label className="text-xs font-bold text-muted uppercase">Key Points (one per line)</label>
+                  <textarea 
+                    value={projectForm.details}
+                    onChange={e => setProjectForm({...projectForm, details: e.target.value})}
+                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent min-h-[100px] resize-none"
+                    placeholder="Implemented ISO 20022 migration tools...&#10;Handled high-volume transactions..."
                   />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Live URL</label>
                   <input 
                     type="url"
-                    value={newProject.live}
-                    onChange={e => setNewProject({...newProject, live: e.target.value})}
+                    value={projectForm.live}
+                    onChange={e => setProjectForm({...projectForm, live: e.target.value})}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="https://..."
                   />
@@ -302,14 +360,14 @@ const Dashboard = () => {
                   <label className="text-xs font-bold text-muted uppercase">Repo URL</label>
                   <input 
                     type="url"
-                    value={newProject.repo}
-                    onChange={e => setNewProject({...newProject, repo: e.target.value})}
+                    value={projectForm.repo}
+                    onChange={e => setProjectForm({...projectForm, repo: e.target.value})}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="https://github.com/..."
                   />
                 </div>
                 <button type="submit" className="md:col-span-2 bg-accent hover:bg-accent/80 transition-all py-4 rounded-xl font-bold shadow-lg shadow-accent/20">
-                  Save Project
+                  {editingId ? 'Update Project' : 'Save Project'}
                 </button>
               </form>
             </div>

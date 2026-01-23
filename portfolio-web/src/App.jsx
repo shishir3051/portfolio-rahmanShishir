@@ -5,12 +5,14 @@ import Section from './components/Section';
 import ProjectCard from './components/ProjectCard';
 import ContactForm from './components/ContactForm';
 import Dashboard from './components/Dashboard';
+import ProjectModal from './components/ProjectModal';
 
 function App() {
   const [view, setView] = useState('portfolio');
   const [projects, setProjects] = useState([]);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true');
+  const [selectedProject, setSelectedProject] = useState(null);
 
   useEffect(() => {
     // Basic routing for /admin
@@ -328,6 +330,13 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {selectedProject && (
+        <ProjectModal 
+          project={selectedProject} 
+          onClose={() => setSelectedProject(null)} 
+        />
+      )}
     </div>
   );
 }

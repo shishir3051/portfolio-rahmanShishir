@@ -206,6 +206,43 @@ app.delete("/api/projects/:id", requireAdmin, async (req, res) => {
   }
 });
 
+app.put("/api/projects/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const title = String(req.body?.title || "").trim();
+    if (!title)
+      return res.status(400).json({ ok: false, error: "Title is required." });
+
+    const payload = {
+      tag: String(req.body?.tag || "").trim(),
+      desc: String(req.body?.desc || "").trim(),
+      year: String(req.body?.year || "").trim(),
+      role: String(req.body?.role || "").trim(),
+      tech: Array.isArray(req.body?.tech) ? req.body.tech : [],
+      details: Array.isArray(req.body?.details) ? req.body.details : [],
+      live: String(req.body?.live || "").trim(),
+      repo: String(req.body?.repo || "").trim(),
+      sortOrder: Number(req.body?.sortOrder || 0)
+    };
+
+    await query(`
+        UPDATE Projects
+        SET Title = $1, Tag = $2, Description = $3, ProjectYear = $4, Role = $5,
+            TechCsv = $6, DetailsJson = $7, LiveUrl = $8, RepoUrl = $9, SortOrder = $10
+        WHERE Id = $11
+      `, [
+        title, payload.tag, payload.desc, payload.year, payload.role,
+        payload.tech.join(","), JSON.stringify(payload.details),
+        payload.live, payload.repo, payload.sortOrder, id
+      ]);
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
 // =======================
 // VIEW MESSAGES (ADMIN)
 // =======================
