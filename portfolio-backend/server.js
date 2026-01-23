@@ -10,6 +10,9 @@ const { query } = require("./db");
 
 const app = express();
 
+// Required for express-rate-limit on Render
+app.set("trust proxy", 1);
+
 // =======================
 // MIDDLEWARE
 // =======================
