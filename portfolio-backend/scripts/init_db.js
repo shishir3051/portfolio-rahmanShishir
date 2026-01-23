@@ -1,7 +1,7 @@
+require('dotenv').config();
 const { query } = require('../db');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
 
 async function init() {
   console.log("⏳ Initializing database...");
