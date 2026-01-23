@@ -1,4 +1,8 @@
 [build]
-  base = "portfolio-web"
-  command = "npm run build"
-  publish = "dist"
+  command = "cd portfolio-web && npm install && npm run build"
+  publish = "portfolio-web/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
