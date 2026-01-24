@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view, activeSection }) => {
+const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view, activeSection, onLogoClick }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Contact'];
@@ -9,18 +9,30 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
     <header className="sticky top-0 z-20 backdrop-blur-lg bg-white/70 dark:bg-black/40 border-b border-stroke">
       <nav className="container mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 font-extrabold tracking-tighter text-xl">
-          <span className="text-text">Rahman Shishir</span>
+          <button onClick={onLogoClick || (() => window.location.hash = '')} className="text-text hover:text-accent transition-colors cursor-pointer">
+            Rahman Shishir
+          </button>
         </div>
 
         <div className="hidden md:flex items-center gap-2">
           {navItems.map((item) => {
             const id = item.toLowerCase();
-            const isActive = activeSection === id;
+            const isActive = view === 'portfolio' && activeSection === id;
+            const handleClick = (e) => {
+              if (view !== 'portfolio') {
+                e.preventDefault();
+                // First navigate to home, then to the section
+                window.location.hash = '';
+                setTimeout(() => {
+                  window.location.hash = id;
+                }, 50);
+              }
+            };
             return (
               <a
                 key={item}
-                href={view === 'dashboard' ? '#' : `#${id}`}
-                onClick={view === 'dashboard' ? () => window.location.href = `/#${id}` : undefined}
+                href={`#${id}`}
+                onClick={handleClick}
                 className={`px-4 py-2 rounded-xl transition-all text-sm font-bold ${
                   isActive 
                   ? 'text-accent bg-accent/10' 
@@ -31,6 +43,12 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
               </a>
             );
           })}
+          <a href="#/blog" className="px-4 py-2 rounded-xl transition-all text-sm font-bold text-muted hover:text-text hover:bg-white/10 dark:hover:bg-white/5">
+            Blog
+          </a>
+          <a href="#/uses" className="px-4 py-2 rounded-xl transition-all text-sm font-bold text-muted hover:text-text hover:bg-white/10 dark:hover:bg-white/5">
+            Uses
+          </a>
         </div>
 
         <div className="flex items-center gap-3">

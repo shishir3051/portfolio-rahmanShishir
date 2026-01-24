@@ -25,3 +25,17 @@ CREATE TABLE ContactMessages (
     UserAgent TEXT,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create BlogPosts table
+CREATE TABLE BlogPosts (
+    Id SERIAL PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    Excerpt TEXT,
+    Content TEXT,
+    Category VARCHAR(100),
+    ReadTime VARCHAR(50),
+    Featured BOOLEAN DEFAULT FALSE,
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -13,16 +13,20 @@
   --muted: rgba(255, 255, 255, 0.7);
   --muted2: rgba(255, 255, 255, 0.5);
   --radius: 24px;
+  
+  /* Typography */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 [data-theme="light"] {
-  --bg: #ffffff;
-  --panel: rgba(0, 0, 0, 0.03);
-  --panel2: rgba(0, 0, 0, 0.05);
-  --stroke: rgba(0, 0, 0, 0.08);
-  --text: #1a1a1a;
-  --muted: #4a4a4a;
-  --muted2: #717171;
+  --bg: #f9f9fb;
+  --panel: #ffffff;
+  --panel2: #f3f4f6;
+  --stroke: rgba(0, 0, 0, 0.06);
+  --text: #0f172a;
+  --muted: #475569;
+  --muted2: #94a3b8;
 }
 
 html {
@@ -34,9 +38,13 @@ body {
   color: var(--text);
   margin: 0;
   padding: 0;
+  font-family: var(--font-body);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
 section[id] {
   scroll-margin-top: 100px;
 }
@@ -71,11 +79,52 @@ section[id] {
 
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateY(30px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+.reveal-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-up.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+
+.bg-glow-radial {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  filter: blur(80px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: -1;
+}
+
+[data-theme="light"] .bg-glow-radial {
+  opacity: 0.08;
+}
+
+/* Footer Specifics */
+.footer-title-bg {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.05);
+  color: transparent;
+}
+[data-theme="light"] .footer-title-bg {
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.05);
 }

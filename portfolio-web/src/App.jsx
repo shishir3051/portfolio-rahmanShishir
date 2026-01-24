@@ -6,29 +6,63 @@ import ProjectCard from './components/ProjectCard';
 import ContactForm from './components/ContactForm';
 import Dashboard from './components/Dashboard';
 import ProjectModal from './components/ProjectModal';
+import Footer from './components/Footer';
+import Blog from './pages/Blog';
+import Uses from './pages/Uses';
+import Legal from './pages/Legal';
+import Terms from './pages/Terms';
 
 function App() {
   const [view, setView] = useState('portfolio');
+  const [page, setPage] = useState('home'); // For Blog, Uses, Privacy, Terms
   const [projects, setProjects] = useState([]);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true');
   const [selectedProject, setSelectedProject] = useState(null);
+  const [activeSection, setActiveSection] = useState('home');
+
+  // Hash-based routing
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1); // Remove #
+      
+      // Check if it's a page route (/blog, /uses, etc.)
+      if (hash.startsWith('/')) {
+        const route = hash.slice(1); // Remove /
+        if(['blog', 'uses', 'privacy', 'terms'].includes(route)) {
+          setPage(route);
+          setView('page');
+        } else {
+          setPage('home');
+          setView('portfolio');
+        }
+      } 
+      // Check for admin route
+      else if (hash === 'admin' || window.location.pathname === '/admin') {
+        setView('dashboard');
+      }
+      // Regular section hash or home
+      else {
+        setPage('home');
+        setView('portfolio');
+      }
+    };
+
+    handleHashChange(); // Handle initial load
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
-    // Basic routing for /admin
     if (window.location.pathname === '/admin') {
       setView('dashboard');
     }
   }, []);
 
-
   useEffect(() => {
-    // Theme application
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
     // Reveal Animations Observer
@@ -59,7 +93,7 @@ function App() {
       reveals.forEach(el => revealObserver.unobserve(el));
       sections.forEach(el => spyObserver.unobserve(el));
     };
-  }, [view]); // Re-run when view changes (e.g. back to portfolio)
+  }, [view, page]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -118,17 +152,42 @@ function App() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   
-  const handleAdminLogin = () => {
-    setIsAdmin(true);
-    localStorage.setItem('isAdmin', 'true');
-  };
-
   const handleLogout = () => {
     setIsAdmin(false);
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('ADMIN_KEY');
     setView('portfolio');
   };
+
+  const navigateToHome = () => {
+    window.location.hash = '';
+    setPage('home');
+    setView('portfolio');
+  };
+
+  // Render pages (Blog, Uses, Privacy, Terms)
+  if (view === 'page') {
+    return (
+      <div className="min-h-screen">
+        <div className="bg-glow"></div>
+        <Navbar 
+          onDashboardClick={() => setView('dashboard')} 
+          theme={theme} 
+          toggleTheme={toggleTheme}
+          isAdmin={isAdmin}
+          onLogout={handleLogout}
+          view={view}
+          activeSection={activeSection}
+          onLogoClick={navigateToHome}
+        />
+        {page === 'blog' && <Blog />}
+        {page === 'uses' && <Uses />}
+        {page === 'privacy' && <Legal />}
+        {page === 'terms' && <Terms />}
+        <Footer />
+      </div>
+    );
+  }
 
   if (view === 'dashboard') {
     return (
@@ -160,7 +219,7 @@ function App() {
       />
       
       <main>
-        <section id="home" className="reveal">
+        <section id="home">
           <Hero 
             name="Rahman Shishir" 
             headline="B.Sc in SWE (Major in Cybersecurity) | Software Engineer | Ethical Hacker Essential (E|HE) | Java Full-Stack Developer"
@@ -272,7 +331,6 @@ function App() {
                   />
                 ))
               ) : (
-                // Default/Placeholder projects if DB is empty
                 <>
                   <ProjectCard 
                     title="Efficient SWIFT ISO 20022 MT-MX Transition"
@@ -347,17 +405,8 @@ function App() {
           </Section>
         </div>
       </main>
-
-      <footer className="py-12 border-t border-stroke mt-20">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-muted font-bold text-sm">
-          <p>© {new Date().getFullYear()} Rahman Shishir</p>
-          <div className="flex gap-8">
-            <a href="https://github.com/shishir3051" target="_blank" rel="noopener" className="hover:text-text transition-colors">GitHub</a>
-            <a href="https://www.linkedin.com/in/rahman-shishir-442867266/" className="hover:text-text transition-colors" target="_blank" rel="noopener">LinkedIn</a>
-            <a href="#" className="hover:text-text transition-colors">Privacy Policy</a>
-          </div>
-        </div>
-      </footer>
+      
+      <Footer />
 
       {selectedProject && (
         <ProjectModal 
