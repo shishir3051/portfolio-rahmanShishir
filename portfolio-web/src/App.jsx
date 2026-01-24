@@ -116,7 +116,7 @@ function App() {
     { name: "Cybersecurity & Ethical Hacking", level: "94%" },
     { name: "Penetration Testing", level: "90%" },
     { name: "Front-End Development (ExtJs)", level: "86%" },
-    { name: "Neo4j Graph Database", level: "82%" },
+    { name: "Neo4j Graph Database", level: "83%" },
     { name: "Full-stack Engineering", level: "90%" },
   ];
 
