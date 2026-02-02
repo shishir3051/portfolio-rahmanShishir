@@ -29,7 +29,7 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
         <div className={`mx-auto max-w-6xl transition-all duration-500 rounded-[2rem] border ${scrolled
           ? 'bg-panel/40 backdrop-blur-3xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
           : 'bg-transparent border-transparent'
-          } px-4 py-2 grid grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] gap-2 items-center`}>
+          } px-4 py-2 flex xl:grid xl:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] justify-between gap-2 items-center`}>
 
           {/* Logo Section - Column 1 */}
           <div className="flex justify-start">
