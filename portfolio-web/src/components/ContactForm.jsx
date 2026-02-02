@@ -40,44 +40,45 @@ const ContactForm = () => {
       >
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-muted font-black text-xs uppercase tracking-widest ml-1">Identity</label>
+            <label className="text-muted font-black text-[10px] uppercase tracking-[0.3em] ml-2">Identity</label>
             <input
               type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Your full name"
-              className="w-full px-6 py-4 rounded-2xl bg-panel border border-stroke text-text focus:bg-panel2 focus:border-accent outline-none transition-all placeholder:text-muted2 font-bold"
+              className="w-full px-6 py-5 rounded-2xl bg-panel/40 border border-white/10 text-text focus:bg-panel2 focus:border-accent/50 outline-none transition-all placeholder:text-muted2 font-bold shadow-sm"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-muted font-black text-xs uppercase tracking-widest ml-1">Electronic Mail</label>
+            <label className="text-muted font-black text-[10px] uppercase tracking-[0.3em] ml-2">Electronic Mail</label>
             <input
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="email@example.com"
-              className="w-full px-6 py-4 rounded-2xl bg-panel border border-stroke text-text focus:bg-panel2 focus:border-accent outline-none transition-all placeholder:text-muted2 font-bold"
+              className="w-full px-6 py-5 rounded-2xl bg-panel/40 border border-white/10 text-text focus:bg-panel2 focus:border-accent/50 outline-none transition-all placeholder:text-muted2 font-bold shadow-sm"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-muted font-black text-xs uppercase tracking-widest ml-1">Narrative</label>
+          <label className="text-muted font-black text-[10px] uppercase tracking-[0.3em] ml-2">Narrative</label>
           <textarea
             required
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             placeholder="How can I assist with your next project?"
-            className="w-full px-6 py-4 rounded-2xl bg-panel border border-stroke text-text min-h-[200px] focus:bg-panel2 focus:border-accent outline-none transition-all resize-none placeholder:text-muted2 font-bold"
+            className="w-full px-6 py-5 rounded-2xl bg-panel/40 border border-white/10 text-text min-h-[180px] focus:bg-panel2 focus:border-accent/50 outline-none transition-all resize-none placeholder:text-muted2 font-bold shadow-sm"
           ></textarea>
         </div>
         <button
           type="submit"
-          className="group relative w-full md:w-auto px-10 py-5 bg-text text-bg rounded-2xl font-black transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 overflow-hidden"
+          className="group relative w-full md:w-auto px-12 py-5 bg-gradient-to-r from-accent to-accent2 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-3 overflow-hidden shadow-lg shadow-accent/20"
         >
           <span className="relative z-10">TRANSMIT MESSAGE</span>
-          <Send className="w-5 h-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          <Send className="w-4 h-4 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
         </button>
         {status && <p className="text-sm font-bold text-accent2 font-mono uppercase tracking-widest">{status}</p>}
       </motion.form>
@@ -88,58 +89,58 @@ const ContactForm = () => {
         viewport={{ margin: "-50px" }}
         className="space-y-6"
       >
-        <div className="glass -mx-6 rounded-none sm:mx-0 sm:rounded-3xl p-6 sm:p-10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 blur-3xl -z-10 rounded-full"></div>
+        <div className="bg-panel/40 backdrop-blur-3xl border border-white/10 -mx-6 rounded-none sm:mx-0 sm:rounded-[2.5rem] p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 blur-[80px] -z-10 rounded-full"></div>
 
-          <h4 className="font-black text-xs uppercase tracking-[0.2em] mb-10 text-muted2">Access Points</h4>
+          <h4 className="font-black text-[10px] uppercase tracking-[0.3em] mb-12 text-muted2 border-b border-white/5 pb-4">Access Points</h4>
 
-          <div className="space-y-8">
-            <div className="flex gap-5 items-start">
-              <div className="w-12 h-12 rounded-xl bg-accent/5 border border-accent/20 flex items-center justify-center shrink-0">
-                <Mail className="w-5 h-5 text-accent" />
+          <div className="space-y-10">
+            <div className="flex gap-6 items-start group">
+              <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <Mail className="w-6 h-6 text-accent" />
               </div>
               <div>
                 <span className="block text-[10px] font-black text-muted2 uppercase tracking-widest mb-1">Direct Email</span>
-                <a href="mailto:gaziur.rahman4311@gmail.com" className="text-lg font-bold hover:text-accent transition-colors">gaziur.rahman4311@gmail.com</a>
+                <a href="mailto:gaziur.rahman4311@gmail.com" className="text-lg font-bold hover:text-accent transition-colors block">gaziur.rahman4311@gmail.com</a>
               </div>
             </div>
 
-            <div className="flex gap-5 items-start">
-              <div className="w-12 h-12 rounded-xl bg-accent2/5 border border-accent2/20 flex items-center justify-center shrink-0">
-                <Phone className="w-5 h-5 text-accent2" />
+            <div className="flex gap-6 items-start group">
+              <div className="w-14 h-14 rounded-2xl bg-accent2/10 border border-accent2/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <Phone className="w-6 h-6 text-accent2" />
               </div>
               <div>
                 <span className="block text-[10px] font-black text-muted2 uppercase tracking-widest mb-1">Mobile</span>
-                <a href="tel:01609277790" className="text-lg font-bold hover:text-accent2 transition-colors">+880 1609 277790</a>
+                <a href="tel:01609277790" className="text-lg font-bold hover:text-accent2 transition-colors block">+880 1609 277790</a>
               </div>
             </div>
 
-            <div className="flex gap-5 items-start">
-              <div className="w-12 h-12 rounded-xl bg-white/5 border border-stroke flex items-center justify-center shrink-0">
-                <MapPin className="w-5 h-5 text-white" />
+            <div className="flex gap-6 items-start group">
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="w-6 h-6 text-accent" />
               </div>
               <div>
                 <span className="block text-[10px] font-black text-muted2 uppercase tracking-widest mb-1">Headquarters</span>
-                <span className="text-lg font-bold text-text">Dhaka, Bangladesh</span>
+                <span className="text-lg font-bold text-text block">Dhaka, Bangladesh</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 pt-10 border-t border-stroke">
-            <h5 className="text-[10px] font-black text-muted2 uppercase tracking-widest mb-6">Network Connections</h5>
+          <div className="mt-14 pt-12 border-t border-white/10">
+            <h5 className="text-[10px] font-black text-muted2 uppercase tracking-widest mb-8">Network Connections</h5>
             <div className="flex flex-wrap gap-4">
               {[
-                { icon: <Github className="w-4 h-4" />, label: "GitHub", href: "https://github.com/shishir3051" },
-                { icon: <Linkedin className="w-4 h-4" />, label: "LinkedIn", href: "https://www.linkedin.com/in/rahman-shishir-442867266/" },
-                { icon: <Twitter className="w-4 h-4" />, label: "Twitter", href: "#" },
-                { icon: <Globe className="w-4 h-4" />, label: "Website", href: "#" }
+                { icon: <Github className="w-5 h-5" />, label: "GitHub", href: "https://github.com/shishir3051" },
+                { icon: <Linkedin className="w-5 h-5" />, label: "LinkedIn", href: "https://www.linkedin.com/in/rahman-shishir-442867266/" },
+                { icon: <Twitter className="w-5 h-5" />, label: "Twitter", href: "#" },
+                { icon: <Globe className="w-5 h-5" />, label: "Website", href: "#" }
               ].map((link, i) => (
                 <a
                   key={i}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stroke bg-white/5 text-xs font-bold hover:bg-accent/10 hover:border-accent hover:text-accent transition-all"
+                  className="flex items-center gap-3 px-6 py-3.5 rounded-2xl border border-white/10 bg-white/5 text-xs font-black uppercase tracking-widest hover:bg-accent/10 hover:border-accent/40 hover:text-accent transition-all duration-300"
                 >
                   {link.icon}
                   {link.label}
