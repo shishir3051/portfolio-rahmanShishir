@@ -53,12 +53,38 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Scroll detection for active section
+  useEffect(() => {
+    if (view !== 'portfolio' || page !== 'home') return;
+
+    const options = {
+      root: null,
+      rootMargin: '-40% 0px -40% 0px', // Trigger when section is in middle of viewport
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, options);
+
+    const sections = ['home', 'about', 'skills', 'experience', 'education', 'projects', 'services', 'contact'];
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [view, page]);
+
   // Professional scroll-to-section effect
   useEffect(() => {
     if (view === 'portfolio' && page === 'home') {
       const hash = window.location.hash.slice(1);
       if (hash && !hash.startsWith('/')) {
-        // Delay slightly to ensure the portfolio view is rendered
         const timer = setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {

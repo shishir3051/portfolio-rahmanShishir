@@ -12,44 +12,59 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Contact'];
+  const navItems = [
+    { name: 'Home', id: 'home' },
+    { name: 'About', id: 'about' },
+    { name: 'Skills', id: 'skills' },
+    { name: 'Experience', id: 'experience' },
+    { name: 'Projects', id: 'projects' },
+    { name: 'Contact', id: 'contact' }
+  ];
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-4' : 'py-6'
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}
     >
       <nav className="container mx-auto px-6">
-        <div className={`mx-auto max-w-6xl transition-all duration-300 rounded-3xl border ${scrolled
-          ? 'bg-panel/70 backdrop-blur-2xl border-stroke shadow-2xl'
+        <div className={`mx-auto max-w-5xl transition-all duration-500 rounded-[2rem] border ${scrolled
+          ? 'bg-panel/40 backdrop-blur-3xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
           : 'bg-transparent border-transparent'
-          } px-6 h-16 flex items-center justify-between`}>
+          } px-4 py-2 flex items-center justify-between`}>
 
-          <div className="flex items-center gap-2 group cursor-pointer" onClick={onLogoClick || (() => window.location.hash = '')}>
-            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:bg-accent transition-all">
-              <Terminal className="w-5 h-5 text-accent group-hover:text-white transition-colors" />
+          {/* Logo Section */}
+          <div
+            className="flex items-center gap-3 group cursor-pointer pl-2"
+            onClick={onLogoClick || (() => window.location.hash = '')}
+          >
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform duration-300">
+              <Terminal className="w-5 h-5 text-white" />
             </div>
-            <span className="font-extrabold tracking-tighter text-xl hidden sm:block">
-              RAHMAN <span className="text-accent">SHISHIR</span>
-            </span>
+            <div className="flex flex-col -gap-1">
+              <span className="font-black tracking-tight text-lg leading-none">
+                RAHMAN <span className="text-accent">SHISHIR</span>
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted2">Portfolio</span>
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
             {view !== 'dashboard' && navItems.map((item) => {
-              const id = item.toLowerCase();
-              const isActive = view === 'portfolio' && activeSection === id;
+              const isActive = view === 'portfolio' && activeSection === item.id;
               return (
                 <a
-                  key={item}
-                  href={`#${id}`}
-                  className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive ? 'text-accent' : 'text-muted hover:text-text'
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className={`relative px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${isActive
+                    ? (theme === 'dark' ? 'text-white' : 'text-accent')
+                    : 'text-muted hover:text-text'
                     }`}
                 >
-                  {item}
+                  <span className="relative z-10">{item.name}</span>
                   {isActive && (
                     <motion.div
                       layoutId="activeNav"
-                      className="absolute inset-0 bg-accent/10 rounded-xl -z-10"
+                      className="absolute inset-0 bg-gradient-to-r from-accent/20 to-accent2/20 border border-white/10 rounded-xl -z-0"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -58,60 +73,66 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
             })}
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Actions */}
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="w-10 h-10 rounded-xl border border-stroke bg-panel/30 flex items-center justify-center hover:bg-panel transition-all text-muted hover:text-text"
+              className="w-10 h-10 rounded-xl border border-white/5 bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all text-muted hover:text-text group"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === 'dark' ? <Sun className="w-4 h-4 group-hover:rotate-45 transition-transform" /> : <Moon className="w-4 h-4 group-hover:-rotate-12 transition-transform" />}
             </button>
 
             {isAdmin && (
-              <div className="flex items-center gap-2 border-l border-stroke pl-3">
+              <div className="flex items-center gap-2 border-l border-white/10 pl-2">
                 <button
                   onClick={onDashboardClick}
-                  className={`w-10 h-10 rounded-xl border border-stroke flex items-center justify-center transition-all ${view === 'dashboard' ? 'bg-accent text-white border-accent' : 'bg-panel/30 text-muted hover:text-text'}`}
+                  className={`w-10 h-10 rounded-xl border border-white/5 flex items-center justify-center transition-all ${view === 'dashboard' ? 'bg-accent text-white' : 'bg-white/5 text-muted hover:text-text'}`}
                 >
-                  <LayoutDashboard className="w-5 h-5" />
+                  <LayoutDashboard className="w-4 h-4" />
                 </button>
                 <button
                   onClick={onLogout}
-                  className="w-10 h-10 rounded-xl border border-red-500/20 bg-red-500/5 flex items-center justify-center hover:bg-red-500/20 text-red-500/70 hover:text-red-500 transition-all"
+                  className="w-10 h-10 rounded-xl border border-red-500/10 bg-red-500/5 flex items-center justify-center hover:bg-red-500/20 text-red-500/60 hover:text-red-500 transition-all"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4 h-4" />
                 </button>
               </div>
             )}
 
             <button
-              className="md:hidden w-10 h-10 rounded-xl border border-stroke bg-panel/30 flex items-center justify-center"
+              className="md:hidden w-10 h-10 rounded-xl border border-white/5 bg-white/5 flex items-center justify-center text-muted"
               onClick={() => setIsOpen(!isOpen)}
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
       </nav>
 
+      {/* Mobile Nav */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-full left-0 right-0 mx-6 mt-4 p-6 rounded-3xl bg-panel/90 backdrop-blur-3xl border border-stroke shadow-2xl z-50"
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            className="md:hidden absolute top-full left-0 right-0 mx-6 mt-4 p-4 rounded-3xl bg-panel/60 backdrop-blur-3xl border border-white/10 shadow-2xl z-50"
           >
-            <div className="grid gap-4">
-              {view !== 'dashboard' && navItems.map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  className="text-lg font-bold text-muted hover:text-accent transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item}
-                </a>
-              ))}
+            <div className="grid gap-2">
+              {view !== 'dashboard' && navItems.map((item) => {
+                const isActive = view === 'portfolio' && activeSection === item.id;
+                return (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    className={`px-6 py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${isActive ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-white/5'
+                      }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.name}
+                  </a>
+                );
+              })}
             </div>
           </motion.div>
         )}
