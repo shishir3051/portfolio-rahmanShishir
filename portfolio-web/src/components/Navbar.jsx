@@ -26,36 +26,38 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}
     >
       <nav className="container mx-auto px-6">
-        <div className={`mx-auto max-w-5xl transition-all duration-500 rounded-[2rem] border ${scrolled
+        <div className={`mx-auto max-w-6xl transition-all duration-500 rounded-[2rem] border ${scrolled
           ? 'bg-panel/40 backdrop-blur-3xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
           : 'bg-transparent border-transparent'
-          } px-4 py-2 flex items-center justify-between`}>
+          } px-4 py-2 grid grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] gap-2 items-center`}>
 
-          {/* Logo Section */}
-          <div
-            className="flex items-center gap-3 group cursor-pointer pl-2"
-            onClick={onLogoClick || (() => window.location.hash = '')}
-          >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform duration-300">
-              <Terminal className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col -gap-1">
-              <span className="font-black tracking-tight text-lg leading-none">
-                RAHMAN <span className="text-accent">SHISHIR</span>
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-muted2">Portfolio</span>
+          {/* Logo Section - Column 1 */}
+          <div className="flex justify-start">
+            <div
+              className="flex items-center gap-3 group cursor-pointer flex-none"
+              onClick={onLogoClick || (() => window.location.hash = '')}
+            >
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                <Terminal className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex flex-col flex-none">
+                <span className="font-extrabold tracking-tighter text-lg leading-tight whitespace-nowrap uppercase">
+                  RAHMAN <span className="text-accent">SHISHIR</span>
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.4em] font-black text-muted2 leading-tight -mt-0.5">Portfolio</span>
+              </div>
             </div>
           </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
+          {/* Desktop Nav - Column 2 (Perfectly Centered) */}
+          <div className="hidden xl:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5 backdrop-blur-md">
             {view !== 'dashboard' && navItems.map((item) => {
               const isActive = view === 'portfolio' && activeSection === item.id;
               return (
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className={`relative px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${isActive
+                  className={`relative px-4 h-10 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center ${isActive
                     ? (theme === 'dark' ? 'text-white' : 'text-accent')
                     : 'text-muted hover:text-text'
                     }`}
@@ -73,8 +75,8 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
             })}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
+          {/* Actions - Column 3 */}
+          <div className="flex items-center justify-end gap-2">
             <button
               onClick={toggleTheme}
               className="w-10 h-10 rounded-xl border border-white/5 bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all text-muted hover:text-text group"
@@ -90,17 +92,19 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
                 >
                   <LayoutDashboard className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={onLogout}
-                  className="w-10 h-10 rounded-xl border border-red-500/10 bg-red-500/5 flex items-center justify-center hover:bg-red-500/20 text-red-500/60 hover:text-red-500 transition-all"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+                {view === 'dashboard' && (
+                  <button
+                    onClick={onLogout}
+                    className="w-10 h-10 rounded-xl border border-red-500/10 bg-red-500/5 flex items-center justify-center hover:bg-red-500/20 text-red-500/60 hover:text-red-500 transition-all"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             )}
 
             <button
-              className="md:hidden w-10 h-10 rounded-xl border border-white/5 bg-white/5 flex items-center justify-center text-muted"
+              className="xl:hidden w-10 h-10 rounded-xl border border-white/5 bg-white/5 flex items-center justify-center text-muted"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

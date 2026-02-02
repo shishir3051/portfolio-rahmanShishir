@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-const Dashboard = () => {
+const Dashboard = ({ tokenProp }) => {
   const [activeTab, setActiveTab] = useState('messages');
   const [messages, setMessages] = useState([]);
   const [projects, setProjects] = useState([]);
   const [blogs, setBlogs] = useState([]);
-  const [adminKey, setAdminKey] = useState(localStorage.getItem("ADMIN_KEY") || "");
+  const [adminToken, setAdminToken] = useState(tokenProp || localStorage.getItem("adminToken") || "");
   const [status, setStatus] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editingBlogId, setEditingBlogId] = useState(null);
@@ -36,11 +36,12 @@ const Dashboard = () => {
 
   const [projectForm, setProjectForm] = useState(initialProjectState);
   const [blogForm, setBlogForm] = useState(initialBlogState);
+  const [profileForm, setProfileForm] = useState({ username: "", password: "", confirmPassword: "" });
 
   const fetchMessages = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/messages`, {
-        headers: { 'x-admin-key': adminKey }
+        headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       const data = await res.json();
       if (res.ok) setMessages(data.messages || []);
@@ -52,7 +53,7 @@ const Dashboard = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/public/projects`);
+      const res = await fetch(`${API_BASE}/api/projects`);
       const data = await res.json();
       if (data.ok) setProjects(data.projects || []);
       else setStatus("Error fetching projects");
@@ -64,7 +65,7 @@ const Dashboard = () => {
   const fetchBlogs = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/blogs`, {
-        headers: { 'x-admin-key': adminKey }
+        headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       const data = await res.json();
       if (res.ok) setBlogs(data.blogs || []);
@@ -75,27 +76,23 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (adminKey) {
+    const token = tokenProp || localStorage.getItem("adminToken");
+    console.log("[Dashboard] Initializing with token:", token ? "Exists" : "Missing");
+    if (token) {
+      setAdminToken(token);
       fetchMessages();
       fetchProjects();
       fetchBlogs();
     }
-  }, [adminKey]);
+  }, [adminToken, tokenProp]);
 
-  const saveKey = () => {
-    localStorage.setItem("ADMIN_KEY", adminKey);
-    setStatus("Admin Key Saved");
-    setTimeout(() => setStatus(""), 2000);
-    fetchMessages();
-    fetchBlogs();
-  };
 
   const deleteProject = async (id) => {
     if (!window.confirm("Delete this project?")) return;
     try {
       const res = await fetch(`${API_BASE}/api/projects/${id}`, {
         method: "DELETE",
-        headers: { 'x-admin-key': adminKey }
+        headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       if (res.ok) {
         setStatus("Project Deleted");
@@ -111,7 +108,7 @@ const Dashboard = () => {
     try {
       const res = await fetch(`${API_BASE}/api/blogs/${id}`, {
         method: "DELETE",
-        headers: { 'x-admin-key': adminKey }
+        headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       if (res.ok) {
         setStatus("Blog Deleted");
@@ -152,6 +149,37 @@ const Dashboard = () => {
     setActiveTab('add-blog');
   };
 
+  const updateProfile = async (e) => {
+    e.preventDefault();
+    if (profileForm.password && profileForm.password !== profileForm.confirmPassword) {
+      setStatus("Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/update-profile`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          username: profileForm.username,
+          password: profileForm.password
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setStatus("Profile Updated Successfully");
+        setProfileForm({ username: "", password: "", confirmPassword: "" });
+      } else {
+        setStatus("Update Error: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      setStatus("Update failed: connection error");
+    }
+  };
+
   const saveProject = async (e) => {
     e.preventDefault();
     const isEdit = !!editingId;
@@ -165,7 +193,7 @@ const Dashboard = () => {
         method: method,
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': adminKey
+          'Authorization': `Bearer ${adminToken}`
         },
         body: JSON.stringify({
           ...projectForm,
@@ -202,7 +230,7 @@ const Dashboard = () => {
         method: method,
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': adminKey
+          'Authorization': `Bearer ${adminToken}`
         },
         body: JSON.stringify(blogForm)
       });
@@ -280,47 +308,31 @@ const Dashboard = () => {
     }, 0);
   };
 
-  const handleBackToSite = () => {
-    localStorage.removeItem("ADMIN_KEY");
-    localStorage.removeItem("isAdmin");
-    window.history.pushState({}, "", "/");
-    window.location.reload();
-  };
 
   return (
     <div className="min-h-screen bg-bg text-text pt-36 md:pt-40 pb-20 px-6 md:px-12">
-      <header className="mb-12 flex justify-between items-end border-b border-stroke pb-6">
+      <header className="mb-12 border-b border-stroke pb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tighter">Admin Dashboard</h1>
           <p className="text-muted text-sm mt-1">Manage your portfolio messages, projects, and blog</p>
         </div>
-        <button
-          onClick={handleBackToSite}
-          className="px-4 py-2 rounded-xl bg-panel border border-stroke hover:bg-panel2 transition-all text-sm font-bold"
-        >
-          Back to Site
-        </button>
       </header>
 
       <div className="grid md:grid-cols-[1fr_2.5fr] gap-8">
         <aside className="space-y-6">
           <div className="p-6 bg-panel border border-stroke rounded-2xl backdrop-blur-xl">
-            <h3 className="font-bold mb-4">Settings</h3>
+            <h3 className="font-bold mb-4">Account</h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-2">Admin Key</label>
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    value={adminKey}
-                    onChange={(e) => setAdminKey(e.target.value)}
-                    className="flex-1 bg-panel border border-stroke rounded-lg px-3 py-2 text-sm focus:border-accent outline-none"
-                    placeholder="Enter Key..."
-                  />
-                  <button onClick={saveKey} className="bg-accent px-3 py-2 rounded-lg text-sm font-bold">Save</button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </div>
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest">Admin</div>
+                  <div className="text-[10px] text-muted2 font-bold uppercase tracking-tighter">Session Active</div>
                 </div>
               </div>
-              {status && <p className="text-accent2 text-xs font-bold">{status}</p>}
+              {status && <p className="text-accent2 text-[10px] font-bold uppercase tracking-widest">{status}</p>}
             </div>
           </div>
 
@@ -342,6 +354,12 @@ const Dashboard = () => {
               className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'blogs' ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
             >
               Blogs ({blogs.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'settings' ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
+            >
+              System Settings
             </button>
             <div className="pt-4 space-y-2">
               <button
@@ -581,7 +599,7 @@ const Dashboard = () => {
                 </button>
               </form>
             </div>
-          ) : (
+          ) : activeTab === 'add-blog' ? (
             <div className="p-8">
               <h2 className="text-xl font-bold mb-6">{editingBlogId ? 'Edit Blog Post' : 'Create New Blog Post'}</h2>
               <form onSubmit={saveBlog} className="grid md:grid-cols-2 gap-6">
@@ -773,6 +791,66 @@ const Dashboard = () => {
                   {editingBlogId ? 'Update Blog Post' : 'Post Blog'}
                 </button>
               </form>
+            </div>
+          ) : activeTab === 'settings' ? (
+            <div className="p-8">
+              <h2 className="text-xl font-bold mb-6">Account & Security</h2>
+              <div className="max-w-md">
+                <form onSubmit={updateProfile} className="space-y-6">
+                  <div className="grid gap-2">
+                    <label className="text-xs font-bold text-muted uppercase">Change Username</label>
+                    <input
+                      type="text"
+                      value={profileForm.username}
+                      onChange={e => setProfileForm({ ...profileForm, username: e.target.value })}
+                      className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
+                      placeholder="New Username (leave blank to keep current)"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-xs font-bold text-muted uppercase">New Password</label>
+                    <input
+                      type="password"
+                      value={profileForm.password}
+                      onChange={e => setProfileForm({ ...profileForm, password: e.target.value })}
+                      className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-xs font-bold text-muted uppercase">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={profileForm.confirmPassword}
+                      onChange={e => setProfileForm({ ...profileForm, confirmPassword: e.target.value })}
+                      className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <button type="submit" className="w-full bg-accent hover:bg-accent/80 transition-all py-4 rounded-xl font-bold shadow-lg shadow-accent/20">
+                    Save Security Changes
+                  </button>
+                </form>
+
+                <div className="mt-12 p-6 border border-red-500/20 bg-red-500/5 rounded-2xl">
+                  <h3 className="text-red-500 font-bold mb-2">Emergency Recovery</h3>
+                  <p className="text-xs text-muted leading-relaxed mb-4">
+                    If you forget your password, you must use the recovery key defined in your server's <code className="text-accent2">.env</code> file. Unauthorized users cannot bypass this.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-red-500/70">Recovery Protocol Active</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-8 text-center bg-panel border-stroke border rounded-3xl">
+              <div className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">System Initialized</h2>
+              <p className="text-muted text-sm max-w-xs mx-auto">Select a module from the sidebar to begin system administration.</p>
             </div>
           )}
         </main>

@@ -6,7 +6,11 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { query } = require("./db");
+
+const JWT_SECRET = process.env.JWT_SECRET || "rahman_secure_secret_2026";
 
 const app = express();
 
@@ -55,12 +59,20 @@ app.use((req, res, next) => {
 app.use("/public", express.static(path.join(__dirname, "public.bak")));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-// Admin Auth Middleware
+// Admin Auth Middleware (JWT Based)
 function requireAdmin(req, res, next) {
-  const key = req.headers["x-admin-key"];
-  if (!process.env.ADMIN_KEY) return res.status(500).json({ ok: false, error: "ADMIN_KEY not configured" });
-  if (!key || key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false, error: "Unauthorized" });
-  next();
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+
+  if (!token) return res.status(401).json({ ok: false, error: "Access denied. No token provided." });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ ok: false, error: "Invalid or expired token." });
+  }
 }
 
 // Helpers
@@ -74,6 +86,111 @@ const safeJsonArray = (v) => {
 
 // Health Check
 app.get("/health", (req, res) => res.json({ ok: true }));
+
+// =======================
+// AUTH ROUTES
+// =======================
+
+// Register Initial Admin (One-time or protected)
+app.post("/api/auth/setup", async (req, res) => {
+  try {
+    const { username, password, setupKey } = req.body;
+    // Simple protection: only allow if it's the first admin or with a setup key
+    if (setupKey !== process.env.ADMIN_KEY) {
+      return res.status(403).json({ ok: false, error: "Invalid setup key" });
+    }
+
+    const check = await query("SELECT Id FROM Admins LIMIT 1");
+    if (check.rows.length > 0) return res.status(400).json({ ok: false, error: "Admin already exists" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+
+    await query("INSERT INTO Admins (Username, PasswordHash) VALUES ($1, $2)", [username, hash]);
+    res.json({ ok: true, message: "Admin account created successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+// Login
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const result = await query("SELECT * FROM Admins WHERE Username = $1", [username]);
+    const admin = result.rows[0];
+
+    if (!admin) return res.status(401).json({ ok: false, error: "Invalid credentials" });
+
+    const validPass = await bcrypt.compare(password, admin.passwordhash);
+    if (!validPass) return res.status(401).json({ ok: false, error: "Invalid credentials" });
+
+    const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: "24h" });
+    res.json({ ok: true, token, user: { username: admin.username } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+// Verify Session
+app.get("/api/auth/verify", requireAdmin, (req, res) => {
+  res.json({ ok: true, user: req.admin });
+});
+
+// Update Profile
+app.post("/api/auth/update-profile", requireAdmin, async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const adminId = req.admin.id;
+
+    if (!username && !password) {
+      return res.status(400).json({ ok: false, error: "Nothing to update" });
+    }
+
+    if (username) {
+      await query("UPDATE Admins SET Username = $1 WHERE Id = $2", [username, adminId]);
+    }
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(password, salt);
+      await query("UPDATE Admins SET PasswordHash = $1 WHERE Id = $2", [hash, adminId]);
+    }
+
+    res.json({ ok: true, message: "Profile updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+// Reset Password (Forgot Password)
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { recoveryKey, newPassword } = req.body;
+
+    if (recoveryKey !== process.env.ADMIN_KEY) {
+      return res.status(403).json({ ok: false, error: "Invalid recovery key" });
+    }
+
+    if (!newPassword) {
+      return res.status(400).json({ ok: false, error: "New password is required" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(newPassword, salt);
+
+    // Assuming there is only one admin for now, or updating all if multiple (usually single)
+    await query("UPDATE Admins SET PasswordHash = $1", [hash]);
+
+    res.json({ ok: true, message: "Password reset successful" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
 
 // CONTACT FORM
 const contactLimiter = rateLimit({ windowMs: 5 * 60 * 1000, max: 20 });

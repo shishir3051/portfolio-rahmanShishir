@@ -15,13 +15,16 @@ import Legal from './pages/Legal';
 import Terms from './pages/Terms';
 import Scene3D from './components/Scene3D';
 import Timeline from './components/Timeline';
+import Login from './components/Login';
+import Cursor from './components/Cursor';
 
 function App() {
   const [view, setView] = useState('portfolio');
   const [page, setPage] = useState('home'); // For Blog, Uses, Privacy, Terms
   const [projects, setProjects] = useState([]);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-  const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true');
+  const [adminToken, setAdminToken] = useState(localStorage.getItem('adminToken') || '');
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true' && !!localStorage.getItem('adminToken'));
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
 
@@ -48,7 +51,31 @@ function App() {
       }
     };
 
+
+    const verifySession = async () => {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
+          const res = await fetch(`${apiUrl}/api/auth/verify`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data.ok) {
+            setIsAdmin(true);
+            setAdminToken(token);
+            localStorage.setItem('isAdmin', 'true');
+          } else {
+            handleLogout();
+          }
+        } catch (err) {
+          console.error("Session verification failed");
+        }
+      }
+    };
+
     handleHashChange();
+    verifySession();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
@@ -206,8 +233,10 @@ function App() {
 
   const handleLogout = () => {
     setIsAdmin(false);
+    setAdminToken('');
     localStorage.removeItem('isAdmin');
-    localStorage.removeItem('ADMIN_KEY');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('ADMIN_KEY'); // Clear legacy key if exists
     setView('portfolio');
   };
 
@@ -221,6 +250,7 @@ function App() {
   if (view === 'page') {
     return (
       <div className="min-h-screen relative overflow-hidden">
+        <Cursor />
         <Scene3D />
         <div className="bg-glow"></div>
         <Navbar
@@ -249,8 +279,34 @@ function App() {
   }
 
   if (view === 'dashboard') {
+    if (!isAdmin) {
+      return (
+        <div className="min-h-screen relative overflow-hidden">
+          <Cursor />
+          <Scene3D />
+          <div className="bg-glow"></div>
+          <Navbar
+            onDashboardClick={() => setView('dashboard')}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            isAdmin={false}
+            view={view}
+          />
+          <Login onLoginSuccess={(user) => {
+            const token = localStorage.getItem('adminToken');
+            setAdminToken(token);
+            setIsAdmin(true);
+            setView('dashboard');
+          }} />
+        </div>
+      );
+    }
+
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen relative overflow-hidden">
+        <Cursor />
+        <Scene3D />
+        <div className="bg-glow"></div>
         <Navbar
           onDashboardClick={() => setView('portfolio')}
           theme={theme}
@@ -258,14 +314,16 @@ function App() {
           isAdmin={isAdmin}
           onLogout={handleLogout}
           view={view}
+          onLogoClick={navigateToHome}
         />
-        <Dashboard />
+        <Dashboard tokenProp={adminToken} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <Cursor />
       <Scene3D />
       <div className="bg-glow"></div>
       <Navbar
