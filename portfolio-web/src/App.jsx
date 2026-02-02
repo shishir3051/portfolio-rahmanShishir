@@ -18,6 +18,8 @@ import Timeline from './components/Timeline';
 import Login from './components/Login';
 import Cursor from './components/Cursor';
 
+import { API_BASE } from './config';
+
 function App() {
   const [view, setView] = useState('portfolio');
   const [page, setPage] = useState('home'); // For Blog, Uses, Privacy, Terms
@@ -56,8 +58,7 @@ function App() {
       const token = localStorage.getItem('adminToken');
       if (token) {
         try {
-          const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
-          const res = await fetch(`${apiUrl}/api/auth/verify`, {
+          const res = await fetch(`${API_BASE}/api/auth/verify`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
@@ -160,8 +161,7 @@ function App() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/api/projects`);
+        const res = await fetch(`${API_BASE}/api/projects`);
         const data = await res.json();
         if (data.ok) setProjects(data.projects);
       } catch (err) {

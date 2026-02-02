@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, Globe } from 'lucide-react';
 
+import { API_BASE } from '../config';
+
 const ContactForm = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('idle'); // idle, submitting, success, error
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("Sending...");
+    setStatus('submitting');
     // Mocking success for demo, but keeping fetch logic
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
     try {
-      const res = await fetch(`${apiUrl}/api/contact`, {
+      const res = await fetch(`${API_BASE}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

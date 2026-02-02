@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, User, ShieldCheck, AlertCircle, ArrowRight } from 'lucide-react';
+import { API_BASE } from '../config';
 
 const Login = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
@@ -11,8 +12,6 @@ const Login = ({ onLoginSuccess }) => {
     const [recoveryKey, setRecoveryKey] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [message, setMessage] = useState('');
-
-    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
     const handleSubmit = async (e) => {
         e.preventDefault();

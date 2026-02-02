@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, ChevronRight, Terminal, Filter, MessageSquare } from 'lucide-react';
 import BlogPostModal from '../components/BlogPostModal';
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE } from '../config';
 
 const Blog = () => {
   const [selectedPost, setSelectedPost] = useState(null);
