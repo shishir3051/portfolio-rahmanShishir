@@ -65,10 +65,12 @@ function App() {
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        // If we're at the very bottom, force 'contact' to avoid flickering
-        const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+        const scrollPos = window.scrollY;
+        const isAtBottom = window.innerHeight + scrollPos >= document.documentElement.scrollHeight - 100;
 
-        if (isAtBottom) {
+        if (scrollPos < 100) {
+          setActiveSection('home');
+        } else if (isAtBottom) {
           setActiveSection('contact');
         } else if (entry.isIntersecting && entry.intersectionRatio >= 0.1) {
           setActiveSection(entry.target.id);
@@ -76,10 +78,15 @@ function App() {
       });
     }, options);
 
-    // Also add a scroll listener for extra stability at the bottom
+    // Also add a scroll listener for extra stability at extremes
     const handleScroll = () => {
-      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
-      if (isAtBottom) setActiveSection('contact');
+      const scrollPos = window.scrollY;
+      const isAtBottom = window.innerHeight + scrollPos >= document.documentElement.scrollHeight - 100;
+      if (scrollPos < 100) {
+        setActiveSection('home');
+      } else if (isAtBottom) {
+        setActiveSection('contact');
+      }
     };
     window.addEventListener('scroll', handleScroll);
 
