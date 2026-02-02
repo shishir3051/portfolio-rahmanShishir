@@ -11,7 +11,7 @@ const Dashboard = () => {
   const [status, setStatus] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editingBlogId, setEditingBlogId] = useState(null);
-  
+
   const initialProjectState = {
     title: "",
     tag: "",
@@ -156,16 +156,16 @@ const Dashboard = () => {
     e.preventDefault();
     const isEdit = !!editingId;
     setStatus(isEdit ? "Updating project..." : "Adding project...");
-    
+
     try {
       const url = isEdit ? `${API_BASE}/api/projects/${editingId}` : `${API_BASE}/api/projects`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method: method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': adminKey 
+          'x-admin-key': adminKey
         },
         body: JSON.stringify({
           ...projectForm,
@@ -173,7 +173,7 @@ const Dashboard = () => {
           details: projectForm.details.split("\n").map(s => s.trim()).filter(Boolean)
         })
       });
-      
+
       const data = await res.json();
       if (data.ok) {
         setStatus(isEdit ? "Project Updated!" : "Project Added!");
@@ -193,20 +193,20 @@ const Dashboard = () => {
     e.preventDefault();
     const isEdit = !!editingBlogId;
     setStatus(isEdit ? "Updating blog..." : "Adding blog...");
-    
+
     try {
       const url = isEdit ? `${API_BASE}/api/blogs/${editingBlogId}` : `${API_BASE}/api/blogs`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method: method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': adminKey 
+          'x-admin-key': adminKey
         },
         body: JSON.stringify(blogForm)
       });
-      
+
       const data = await res.json();
       if (data.ok) {
         setStatus(isEdit ? "Blog Updated!" : "Blog Added!");
@@ -230,7 +230,7 @@ const Dashboard = () => {
     const end = el.selectionEnd;
     const text = el.value;
     const selectedText = text.substring(start, end);
-    
+
     const newText = text.substring(0, start) + before + selectedText + after + text.substring(end);
     setBlogForm(prev => ({ ...prev, content: newText }));
 
@@ -250,17 +250,17 @@ const Dashboard = () => {
     const end = el.selectionEnd;
     const text = el.value;
     const selectedText = text.substring(start, end);
-    
+
     const lines = selectedText.split('\n');
     const formattedLines = lines.map((line, i) => {
       let prefix = '';
-      switch(type) {
+      switch (type) {
         case 'number': prefix = `${i + 1}. `; break;
         case 'number-paren': prefix = `${i + 1}) `; break;
         case 'alpha': prefix = `${String.fromCharCode(97 + (i % 26))}. `; break;
         case 'roman': {
           const romans = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
-          prefix = `${romans[i % 10]}. `; 
+          prefix = `${romans[i % 10]}. `;
           break;
         }
         case 'bullet-square': prefix = '■ '; break;
@@ -270,7 +270,7 @@ const Dashboard = () => {
       }
       return prefix + line;
     });
-    
+
     const newText = text.substring(0, start) + formattedLines.join('\n') + text.substring(end);
     setBlogForm(prev => ({ ...prev, content: newText }));
 
@@ -288,13 +288,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text p-6 md:p-12">
+    <div className="min-h-screen bg-bg text-text pt-36 md:pt-40 pb-20 px-6 md:px-12">
       <header className="mb-12 flex justify-between items-end border-b border-stroke pb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tighter">Admin Dashboard</h1>
           <p className="text-muted text-sm mt-1">Manage your portfolio messages, projects, and blog</p>
         </div>
-        <button 
+        <button
           onClick={handleBackToSite}
           className="px-4 py-2 rounded-xl bg-panel border border-stroke hover:bg-panel2 transition-all text-sm font-bold"
         >
@@ -310,7 +310,7 @@ const Dashboard = () => {
               <div>
                 <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-2">Admin Key</label>
                 <div className="flex gap-2">
-                  <input 
+                  <input
                     type="password"
                     value={adminKey}
                     onChange={(e) => setAdminKey(e.target.value)}
@@ -325,26 +325,26 @@ const Dashboard = () => {
           </div>
 
           <nav className="flex flex-col gap-2">
-            <button 
+            <button
               onClick={() => setActiveTab('messages')}
               className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'messages' ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
             >
               Messages ({messages.length})
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('projects')}
               className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'projects' ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
             >
               Projects ({projects.length})
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('blogs')}
               className={`text-left px-6 py-4 rounded-xl font-bold transition-all ${activeTab === 'blogs' ? 'bg-accent/20 border border-accent/40 text-text' : 'text-muted hover:bg-panel'}`}
             >
               Blogs ({blogs.length})
             </button>
             <div className="pt-4 space-y-2">
-              <button 
+              <button
                 onClick={() => {
                   setEditingId(null);
                   setProjectForm(initialProjectState);
@@ -354,7 +354,7 @@ const Dashboard = () => {
               >
                 + Add Project
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setEditingBlogId(null);
                   setBlogForm(initialBlogState);
@@ -420,13 +420,13 @@ const Dashboard = () => {
                         <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold">{p.tag}</span></td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <button 
+                            <button
                               onClick={() => startEdit(p)}
                               className="bg-accent/20 text-accent hover:bg-accent/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
                             >
                               Edit
                             </button>
-                            <button 
+                            <button
                               onClick={() => deleteProject(p.id)}
                               className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
                             >
@@ -465,13 +465,13 @@ const Dashboard = () => {
                         <td className="px-6 py-4 text-xs">{b.isactive !== false ? '✅ Active' : '❌ Hidden'}</td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <button 
+                            <button
                               onClick={() => startEditBlog(b)}
                               className="bg-accent/20 text-accent hover:bg-accent/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
                             >
                               Edit
                             </button>
-                            <button 
+                            <button
                               onClick={() => deleteBlog(b.id)}
                               className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
                             >
@@ -491,87 +491,87 @@ const Dashboard = () => {
               <form onSubmit={saveProject} className="grid md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Project Title</label>
-                  <input 
+                  <input
                     type="text" required
                     value={projectForm.title}
-                    onChange={e => setProjectForm({...projectForm, title: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, title: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="E.g. AI Portfolio"
                   />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Tag / Category</label>
-                  <input 
+                  <input
                     type="text"
                     value={projectForm.tag}
-                    onChange={e => setProjectForm({...projectForm, tag: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, tag: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="E.g. Full-stack / AI"
                   />
                 </div>
                 <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Description</label>
-                  <textarea 
+                  <textarea
                     value={projectForm.desc}
-                    onChange={e => setProjectForm({...projectForm, desc: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, desc: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent min-h-[80px] resize-none"
                     placeholder="Short description..."
                   />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Year</label>
-                  <input 
+                  <input
                     type="text"
                     value={projectForm.year}
-                    onChange={e => setProjectForm({...projectForm, year: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, year: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                   />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Role</label>
-                  <input 
+                  <input
                     type="text"
                     value={projectForm.role}
-                    onChange={e => setProjectForm({...projectForm, role: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, role: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="E.g. Lead Developer"
                   />
                 </div>
                 <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Tech Stack (comma separated)</label>
-                  <input 
+                  <input
                     type="text"
                     value={projectForm.tech}
-                    onChange={e => setProjectForm({...projectForm, tech: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, tech: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="React, Node.js, SQL"
                   />
                 </div>
                 <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Key Points (one per line)</label>
-                  <textarea 
+                  <textarea
                     value={projectForm.details}
-                    onChange={e => setProjectForm({...projectForm, details: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, details: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent min-h-[100px] resize-none"
                     placeholder="Implemented ISO 20022 migration tools...&#10;Handled high-volume transactions..."
                   />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Live URL</label>
-                  <input 
+                  <input
                     type="url"
                     value={projectForm.live}
-                    onChange={e => setProjectForm({...projectForm, live: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, live: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="https://..."
                   />
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Repo URL</label>
-                  <input 
+                  <input
                     type="url"
                     value={projectForm.repo}
-                    onChange={e => setProjectForm({...projectForm, repo: e.target.value})}
+                    onChange={e => setProjectForm({ ...projectForm, repo: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="https://github.com/..."
                   />
@@ -587,20 +587,20 @@ const Dashboard = () => {
               <form onSubmit={saveBlog} className="grid md:grid-cols-2 gap-6">
                 <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Blog Title</label>
-                  <input 
+                  <input
                     type="text" required
                     value={blogForm.title}
-                    onChange={e => setBlogForm({...blogForm, title: e.target.value})}
+                    onChange={e => setBlogForm({ ...blogForm, title: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="E.g. Implementing ISO 20022"
                   />
                 </div>
                 <div className="grid gap-2 md:col-span-2">
                   <label className="text-xs font-bold text-muted uppercase">Excerpt</label>
-                  <textarea 
+                  <textarea
                     required
                     value={blogForm.excerpt}
-                    onChange={e => setBlogForm({...blogForm, excerpt: e.target.value})}
+                    onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })}
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent min-h-[80px] resize-none"
                     placeholder="Short summary for the card..."
                   />
@@ -610,128 +610,125 @@ const Dashboard = () => {
                     <label className="text-xs font-bold text-muted uppercase tracking-wider">Editor Ribbon</label>
                     <span className="text-[10px] text-accent/50 font-black uppercase tracking-widest">Full Suite 1.0</span>
                   </div>
-                  
+
                   {/* Refined Microsoft Word Style Ribbon */}
-                  <div className="bg-[#f8f9fa] dark:bg-[#1a1a1f] border border-stroke rounded-t-2xl p-2 flex flex-wrap items-stretch gap-1.5 shadow-inner min-h-[100px]">
-                    
+                  <div className="bg-panel2 border border-stroke rounded-t-2xl p-2 md:p-3 flex flex-wrap items-center md:items-stretch gap-2 md:gap-1.5 shadow-inner min-h-[80px] md:min-h-[100px]">
+
                     {/* Clipboard Group */}
-                    <div className="flex flex-col border-r border-stroke pr-3 mr-1">
+                    <div className="flex flex-col border-r border-stroke pr-2 md:pr-3 mr-0.5 md:mr-1">
                       <div className="flex-1 flex items-center gap-1">
                         <div className="flex flex-col items-center px-1">
-                          <button type="button" onClick={() => insertFormat('clipboard')} className="p-2.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl text-muted hover:text-accent transition-all group" title="Paste">
-                            <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                          <button type="button" onClick={() => insertFormat('clipboard')} className="p-2.5 hover:bg-accent/10 rounded-xl text-muted hover:text-accent transition-all group" title="Paste">
+                            <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                           </button>
                         </div>
                         <div className="flex flex-col gap-0.5">
-                          <button type="button" onClick={() => {}} className="px-2 py-1 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[10px] text-muted flex items-center gap-2 font-bold uppercase tracking-tighter">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2" /></svg>
-                            Copy
+                          <button type="button" onClick={() => { }} className="px-2 py-1 hover:bg-accent/10 rounded text-[9px] md:text-[10px] text-muted flex items-center gap-1.5 md:gap-2 font-bold uppercase tracking-tighter">
+                            <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2" /></svg>
+                            <span className="hidden xs:inline">Copy</span>
                           </button>
-                          <button type="button" onClick={() => {}} className="px-2 py-1 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[10px] text-muted flex items-center gap-2 font-bold uppercase tracking-tighter">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758L5 19m0-14l4.121 4.121" /></svg>
-                            Cut
+                          <button type="button" onClick={() => { }} className="px-2 py-1 hover:bg-accent/10 rounded text-[9px] md:text-[10px] text-muted flex items-center gap-1.5 md:gap-2 font-bold uppercase tracking-tighter">
+                            <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758L5 19m0-14l4.121 4.121" /></svg>
+                            <span className="hidden xs:inline">Cut</span>
                           </button>
                         </div>
                       </div>
-                      <span className="text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Clipboard</span>
+                      <span className="text-[7px] md:text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Clip</span>
                     </div>
 
                     {/* Font Group */}
-                    <div className="flex flex-col border-r border-stroke pr-3 mr-1">
-                      <div className="flex-1 grid grid-cols-4 items-center gap-0.5">
-                        <button type="button" onClick={() => insertFormat('**', '**')} className="w-8 h-8 font-serif font-black hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-sm group relative flex items-center justify-center" title="Bold">B</button>
-                        <button type="button" onClick={() => insertFormat('*', '*')} className="w-8 h-8 font-serif italic hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-sm flex items-center justify-center" title="Italic">I</button>
-                        <button type="button" onClick={() => insertFormat('<u>', '</u>')} className="w-8 h-8 underline hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-sm decoration-2 flex items-center justify-center" title="Underline">U</button>
-                        <button type="button" onClick={() => insertFormat('~~', '~~')} className="w-8 h-8 line-through hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-xs flex items-center justify-center opacity-70" title="Strikethrough">abc</button>
-                        
-                        <button type="button" onClick={() => insertFormat('<sub>', '</sub>')} className="w-8 h-8 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-[10px] flex items-end justify-center pb-1.5" title="Subscript">x<sub className="mb-0.5 scale-75">2</sub></button>
-                        <button type="button" onClick={() => insertFormat('<sup>', '</sup>')} className="w-8 h-8 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-[10px] flex items-start justify-center pt-1.5" title="Superscript">x<sup className="mt-0.5 scale-75">2</sup></button>
-                        <button type="button" onClick={() => insertFormat('<mark>', '</mark>')} className="w-8 h-8 hover:bg-black/5 dark:hover:bg-white/5 rounded-md flex flex-col items-center justify-center gap-0" title="Highlight">
-                          <span className="text-[10px] font-black leading-none">ab</span>
-                          <div className="w-4 h-1.5 bg-yellow-400 mt-0.5"></div>
+                    <div className="flex flex-col border-r border-stroke pr-2 md:pr-3 mr-0.5 md:mr-1">
+                      <div className="flex-1 grid grid-cols-4 items-center gap-0.5 md:gap-0.5">
+                        <button type="button" onClick={() => insertFormat('**', '**')} className="w-7 h-7 md:w-8 md:h-8 font-serif font-black hover:bg-accent/10 rounded-md text-xs md:text-sm group relative flex items-center justify-center" title="Bold">B</button>
+                        <button type="button" onClick={() => insertFormat('*', '*')} className="w-7 h-7 md:w-8 md:h-8 font-serif italic hover:bg-accent/10 rounded-md text-xs md:text-sm flex items-center justify-center" title="Italic">I</button>
+                        <button type="button" onClick={() => insertFormat('<u>', '</u>')} className="w-7 h-7 md:w-8 md:h-8 underline hover:bg-accent/10 rounded-md text-xs md:text-sm decoration-2 flex items-center justify-center" title="Underline">U</button>
+                        <button type="button" onClick={() => insertFormat('~~', '~~')} className="w-7 h-7 md:w-8 md:h-8 line-through hover:bg-accent/10 rounded-md text-[10px] md:text-xs flex items-center justify-center opacity-70" title="Strikethrough">abc</button>
+
+                        <button type="button" onClick={() => insertFormat('<sub>', '</sub>')} className="w-7 h-7 md:w-8 md:h-8 hover:bg-accent/10 rounded-md text-[9px] md:text-[10px] flex items-end justify-center pb-1 md:pb-1.5" title="Subscript">x<sub className="mb-0.5 scale-75">2</sub></button>
+                        <button type="button" onClick={() => insertFormat('<sup>', '</sup>')} className="w-7 h-7 md:w-8 md:h-8 hover:bg-accent/10 rounded-md text-[9px] md:text-[10px] flex items-start justify-center pt-1 md:pt-1.5" title="Superscript">x<sup className="mt-0.5 scale-75">2</sup></button>
+                        <button type="button" onClick={() => insertFormat('<mark>', '</mark>')} className="w-7 h-7 md:w-8 md:h-8 hover:bg-accent/10 rounded-md flex flex-col items-center justify-center gap-0" title="Highlight">
+                          <span className="text-[9px] md:text-[10px] font-black leading-none">ab</span>
+                          <div className="w-3 md:w-4 h-1 md:h-1.5 bg-yellow-400 mt-0.5"></div>
                         </button>
-                        <button type="button" onClick={() => insertFormat('<span style="color:var(--accent)">', '</span>')} className="w-8 h-8 hover:bg-black/5 dark:hover:bg-white/5 rounded-md flex flex-col items-center justify-center gap-0" title="Font Color">
-                          <span className="text-sm font-black text-accent leading-none">A</span>
-                          <div className="w-4 h-1 bg-accent mt-0.5"></div>
+                        <button type="button" onClick={() => insertFormat('<span style="color:var(--accent)">', '</span>')} className="w-7 h-7 md:w-8 md:h-8 hover:bg-accent/10 rounded-md flex flex-col items-center justify-center gap-0" title="Font Color">
+                          <span className="text-xs md:text-sm font-black text-accent leading-none">A</span>
+                          <div className="w-3 md:w-4 h-0.5 md:h-1 bg-accent mt-0.5"></div>
                         </button>
                       </div>
-                      <span className="text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Font</span>
+                      <span className="text-[7px] md:text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Font</span>
                     </div>
 
                     {/* Paragraph Group with List Library */}
-                    <div className="flex flex-col border-r border-stroke pr-3 mr-1">
-                      <div className="flex-1 flex flex-col justify-center gap-1.5">
-                        <div className="flex items-center gap-1">
+                    <div className="flex flex-col border-r border-stroke pr-2 md:pr-3 mr-0.5 md:mr-1">
+                      <div className="flex-1 flex flex-col justify-center gap-1 md:gap-1.5">
+                        <div className="flex items-center gap-0.5 md:gap-1">
                           {/* List Library Dropdown Button */}
                           <div className="relative group">
-                            <button type="button" className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-muted hover:text-accent transition-all flex items-center gap-0.5" title="List Library">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                              <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                            <button type="button" className="p-1 md:p-1.5 hover:bg-accent/10 rounded-md text-muted hover:text-accent transition-all flex items-center gap-0.5" title="List Library">
+                              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                              <svg className="w-1.5 h-1.5 md:w-2 md:h-2" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
                             </button>
-                            
+
                             {/* Library Menu */}
-                            <div className="absolute top-full left-0 mt-1 w-[220px] bg-panel border border-stroke rounded-xl p-3 shadow-2xl z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all">
-                              <h4 className="text-[10px] font-black uppercase text-accent mb-2 tracking-widest">Numbering Library</h4>
-                              <div className="grid grid-cols-3 gap-2 mb-3">
-                                <button type="button" onClick={() => toggleList('number')} className="p-2 border border-stroke rounded-lg hover:border-accent bg-bg/50 text-[10px] text-left leading-tight">1.<br/>2.<br/>3.</button>
-                                <button type="button" onClick={() => toggleList('number-paren')} className="p-2 border border-stroke rounded-lg hover:border-accent bg-bg/50 text-[10px] text-left leading-tight">1)<br/>2)<br/>3)</button>
-                                <button type="button" onClick={() => toggleList('roman')} className="p-2 border border-stroke rounded-lg hover:border-accent bg-bg/50 text-[10px] text-left leading-tight">i.<br/>ii.<br/>iii.</button>
+                            <div className="absolute top-full left-0 mt-1 w-[180px] md:w-[220px] bg-bg border border-stroke rounded-xl p-2 md:p-3 shadow-2xl z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all">
+                              <h4 className="text-[9px] md:text-[10px] font-black uppercase text-accent mb-2 tracking-widest">Numbering Library</h4>
+                              <div className="grid grid-cols-3 gap-1.5 md:gap-2 mb-3">
+                                <button type="button" onClick={() => toggleList('number')} className="p-1.5 md:p-2 border border-stroke rounded-lg hover:border-accent bg-panel text-[9px] md:text-[10px] text-left leading-tight">1.<br />2.<br />3.</button>
+                                <button type="button" onClick={() => toggleList('number-paren')} className="p-1.5 md:p-2 border border-stroke rounded-lg hover:border-accent bg-panel text-[9px] md:text-[10px] text-left leading-tight">1)<br />2)<br />3)</button>
+                                <button type="button" onClick={() => toggleList('roman')} className="p-1.5 md:p-2 border border-stroke rounded-lg hover:border-accent bg-panel text-[9px] md:text-[10px] text-left leading-tight">i.<br />ii.<br />iii.</button>
                               </div>
-                              <h4 className="text-[10px] font-black uppercase text-accent mb-2 tracking-widest">Bullet & Others</h4>
-                              <div className="grid grid-cols-3 gap-2">
-                                <button type="button" onClick={() => toggleList('bullet')} className="p-2 border border-stroke rounded-lg hover:border-accent bg-bg/50 text-[10px] text-left leading-tight">•<br/>•<br/>•</button>
-                                <button type="button" onClick={() => toggleList('bullet-square')} className="p-2 border border-stroke rounded-lg hover:border-accent bg-bg/50 text-[10px] text-left leading-tight">■<br/>■<br/>■</button>
-                                <button type="button" onClick={() => toggleList('none')} className="p-2 border border-stroke rounded-lg border-dashed hover:border-accent bg-bg/50 text-[10px] text-center flex flex-col justify-center gap-1 font-bold">
+                              <h4 className="text-[9px] md:text-[10px] font-black uppercase text-accent mb-2 tracking-widest">Bullet & Others</h4>
+                              <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                                <button type="button" onClick={() => toggleList('bullet')} className="p-1.5 md:p-2 border border-stroke rounded-lg hover:border-accent bg-panel text-[9px] md:text-[10px] text-left leading-tight">•<br />•<br />•</button>
+                                <button type="button" onClick={() => toggleList('bullet-square')} className="p-1.5 md:p-2 border border-stroke rounded-lg hover:border-accent bg-panel text-[9px] md:text-[10px] text-left leading-tight">■<br />■<br />■</button>
+                                <button type="button" onClick={() => toggleList('none')} className="p-1.5 md:p-2 border border-stroke rounded-lg border-dashed hover:border-accent bg-panel text-[9px] md:text-[10px] text-center flex flex-col justify-center gap-1 font-bold">
                                   <span>None</span>
                                   <div className="w-full border-t border-stroke h-1"></div>
                                 </button>
                               </div>
                             </div>
                           </div>
-                          
-                          <button type="button" onClick={() => insertFormat('<div align="left">\n', '\n</div>')} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-accent" title="Align Left">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h16M4 18h10" /></svg>
+
+                          <button type="button" onClick={() => insertFormat('<div align="left">\n', '\n</div>')} className="p-1 md:p-1.5 hover:bg-accent/10 rounded-md text-accent" title="Align Left">
+                            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h16M4 18h10" /></svg>
                           </button>
-                          <button type="button" onClick={() => insertFormat('<div align="center">\n', '\n</div>')} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-muted hover:text-accent transition-all" title="Center">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 10h10M4 14h16M7 18h10" /></svg>
+                          <button type="button" onClick={() => insertFormat('<div align="center">\n', '\n</div>')} className="p-1 md:p-1.5 hover:bg-accent/10 rounded-md text-muted hover:text-accent transition-all" title="Center">
+                            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 10h10M4 14h16M7 18h10" /></svg>
                           </button>
-                          <button type="button" onClick={() => insertFormat('<div align="right">\n', '\n</div>')} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-muted hover:text-accent transition-all" title="Align Right">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 10h10M4 14h16M10 18h10" /></svg>
-                          </button>
-                          <button type="button" onClick={() => insertFormat('<div align="justify">\n', '\n</div>')} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md text-muted hover:text-accent transition-all" title="Justify">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                          <button type="button" onClick={() => insertFormat('<div align="right">\n', '\n</div>')} className="p-1 md:p-1.5 hover:bg-accent/10 rounded-md text-muted hover:text-accent transition-all" title="Align Right">
+                            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 10h10M4 14h16M10 18h10" /></svg>
                           </button>
                         </div>
                       </div>
-                      <span className="text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Paragraph</span>
+                      <span className="text-[7px] md:text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Para</span>
                     </div>
 
                     {/* Styles Group */}
-                    <div className="flex flex-col pl-2">
-                       <div className="flex-1 flex items-center gap-1.5">
-                         <button type="button" onClick={() => insertFormat('# ', '')} className="px-4 h-[60px] bg-white dark:bg-bg border border-stroke rounded-xl flex flex-col justify-center items-center hover:border-accent transition-all group shadow-sm">
-                           <span className="text-xl font-black text-text leading-none group-hover:text-accent transition-colors italic">AaBb</span>
-                           <span className="text-[8px] font-bold text-muted uppercase mt-1 tracking-tighter">Heading 1</span>
-                         </button>
-                         <button type="button" onClick={() => insertFormat('## ', '')} className="px-4 h-[60px] bg-white dark:bg-bg border border-stroke rounded-xl flex flex-col justify-center items-center hover:border-accent transition-all group shadow-sm">
-                           <span className="text-lg font-bold text-muted leading-none group-hover:text-accent transition-colors italic">AaBb</span>
-                           <span className="text-[8px] font-bold text-muted uppercase mt-1 tracking-tighter">Heading 2</span>
-                         </button>
-                         <button type="button" onClick={() => insertFormat('### ', '')} className="px-4 h-[60px] bg-white dark:bg-bg border border-stroke rounded-xl flex flex-col justify-center items-center hover:border-accent transition-all group shadow-sm">
-                           <span className="text-base font-medium text-muted2 leading-none group-hover:text-accent transition-colors italic">AaBb</span>
-                           <span className="text-[8px] font-bold text-muted uppercase mt-1 tracking-tighter">Heading 3</span>
-                         </button>
-                       </div>
-                       <span className="text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Styles</span>
+                    <div className="flex flex-col pl-1 md:pl-2">
+                      <div className="flex-1 flex items-center gap-1 md:gap-1.5">
+                        <button type="button" onClick={() => insertFormat('# ', '')} className="px-2 md:px-4 h-[45px] md:h-[60px] bg-panel border border-stroke rounded-xl flex flex-col justify-center items-center hover:border-accent hover:bg-accent/5 transition-all group shadow-sm">
+                          <span className="text-xs md:text-xl font-black text-text leading-none group-hover:text-accent transition-colors italic">H1</span>
+                          <span className="text-[7px] md:text-[8px] font-bold text-muted uppercase mt-1 tracking-tighter hidden sm:block">Heading 1</span>
+                        </button>
+                        <button type="button" onClick={() => insertFormat('## ', '')} className="px-2 md:px-4 h-[45px] md:h-[60px] bg-panel border border-stroke rounded-xl flex flex-col justify-center items-center hover:border-accent hover:bg-accent/5 transition-all group shadow-sm">
+                          <span className="text-xs md:text-lg font-bold text-muted leading-none group-hover:text-accent transition-colors italic">H2</span>
+                          <span className="text-[7px] md:text-[8px] font-bold text-muted uppercase mt-1 tracking-tighter hidden sm:block">Heading 2</span>
+                        </button>
+                        <button type="button" onClick={() => insertFormat('### ', '')} className="px-2 md:px-4 h-[45px] md:h-[60px] bg-panel border border-stroke rounded-xl flex flex-col justify-center items-center hover:border-accent hover:bg-accent/5 transition-all group shadow-sm">
+                          <span className="text-xs md:text-base font-medium text-muted2 leading-none group-hover:text-accent transition-colors italic">H3</span>
+                          <span className="text-[7px] md:text-[8px] font-bold text-muted uppercase mt-1 tracking-tighter hidden sm:block">Heading 3</span>
+                        </button>
+                      </div>
+                      <span className="text-[7px] md:text-[9px] font-black text-muted2 uppercase tracking-widest text-center mt-auto pt-1">Styles</span>
                     </div>
 
                   </div>
 
-                  <textarea 
+                  <textarea
                     id="blog-content-area"
                     required
                     value={blogForm.content}
-                    onChange={e => setBlogForm({...blogForm, content: e.target.value})}
+                    onChange={e => setBlogForm({ ...blogForm, content: e.target.value })}
                     className="bg-panel border-x border-b border-stroke rounded-b-2xl px-6 py-8 outline-none focus:border-accent min-h-[450px] resize-none font-mono text-[0.95rem] leading-relaxed block w-full"
                     placeholder="Describe your breakthrough..."
                   />
@@ -742,35 +739,35 @@ const Dashboard = () => {
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Category</label>
-                  <select 
+                  <select
                     value={blogForm.category}
-                    onChange={e => setBlogForm({...blogForm, category: e.target.value})}
-                    className="bg-[#1c1c2b] border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent text-text w-full appearance-none cursor-pointer"
+                    onChange={e => setBlogForm({ ...blogForm, category: e.target.value })}
+                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent text-text w-full appearance-none cursor-pointer hover:border-accent/50 transition-colors"
                   >
                     {["FinTech", "Cybersecurity", "Web Development", "Backend", "Database", "Career", "Technology"].map(c => (
-                      <option key={c} value={c} className="bg-[#1c1c2b] text-text">{c}</option>
+                      <option key={c} value={c} className="bg-panel text-text font-bold">{c}</option>
                     ))}
                   </select>
                 </div>
                 <div className="grid gap-2">
                   <label className="text-xs font-bold text-muted uppercase">Read Time</label>
-                  <input 
+                  <input
                     type="text"
                     value={blogForm.readTime}
-                    onChange={e => setBlogForm({...blogForm, readTime: e.target.value})}
-                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
+                    onChange={e => setBlogForm({ ...blogForm, readTime: e.target.value })}
+                    className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent placeholder:text-muted/50"
                     placeholder="E.g. 5 min read"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <input 
+                  <input
                     type="checkbox"
                     id="featured"
                     checked={blogForm.featured}
-                    onChange={e => setBlogForm({...blogForm, featured: e.target.checked})}
-                    className="w-5 h-5 accent-accent"
+                    onChange={e => setBlogForm({ ...blogForm, featured: e.target.checked })}
+                    className="w-5 h-5 accent-accent cursor-pointer"
                   />
-                  <label htmlFor="featured" className="text-sm font-bold text-text cursor-pointer">Mark as Featured</label>
+                  <label htmlFor="featured" className="text-sm font-bold text-text cursor-pointer select-none">Mark as Featured</label>
                 </div>
                 <button type="submit" className="md:col-span-2 bg-accent hover:bg-accent/80 transition-all py-4 rounded-xl font-bold shadow-lg shadow-accent/20">
                   {editingBlogId ? 'Update Blog Post' : 'Post Blog'}

@@ -1,72 +1,137 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { Shield, Code, Database, Bug, Briefcase, GraduationCap, Globe } from 'lucide-react';
 
 const Hero = ({ name, headline }) => {
-  return (
-    <section id="home" className="min-h-[calc(100vh-80px)] flex items-center py-20">
-      <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-        <div className="relative z-10">
-          <div className="mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-stroke bg-panel text-muted hover:scale-105 transition-transform origin-left">
-              <span className="w-2 h-2 rounded-full bg-accent2 animate-pulse"></span>
-              Available for <b className="text-text">Partnership</b>
-            </div>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.05] mb-6">
-            I'm <span className="bg-gradient-to-r from-accent to-accent2 bg-clip-text text-transparent">{name || "Rahman Shishir"}</span><br />
-            Software Engineer
-          </h1>
-          
-          <p className="text-muted text-lg max-w-[60ch] mb-8 leading-relaxed">
-            B.Sc in SWE (Major in Cybersecurity) | Ethical Hacker Essential (E|HE) | Java Full-Stack Developer. Specialize in secure, high-performance engineering.
-          </p>
-          
-          <div className="flex flex-wrap gap-4 items-center">
-            <a href="#projects" className="px-8 py-4 bg-gradient-to-br from-accent to-accent2 rounded-xl font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center">
-              View Projects
-            </a>
-            <a href="#contact" className="px-8 py-4 border border-accent/40 rounded-xl font-bold hover:bg-accent/10 hover:border-accent transition-all">
-              Connect Now
-            </a>
-          </div>
-        </div>
+  const containerVars = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
 
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-accent to-accent2 rounded-[32px] blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500 -z-10"></div>
-          <div className="bg-panel border border-stroke rounded-[32px] p-8 shadow-2xl backdrop-blur-xl relative z-10 hover:translate-y-[-5px] transition-transform duration-300">
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent"></span>
-              Professional Snapshot
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl border border-stroke bg-panel/50 hover:bg-panel transition-all text-center group/card">
-                <b className="text-2xl font-bold text-accent group-hover/card:scale-110 block transition-transform">1.5+</b>
-                <span className="block text-xs text-muted2 mt-1 uppercase font-bold tracking-wider">Years Exp.</span>
-              </div>
-              <div className="p-5 rounded-2xl border border-stroke bg-panel/50 hover:bg-panel transition-all text-center group/card">
-                <b className="text-2xl font-bold text-accent2 group-hover/card:scale-110 block transition-transform">10+</b>
-                <span className="block text-xs text-muted2 mt-1 uppercase font-bold tracking-wider">Projects</span>
-              </div>
-              <div className="p-5 rounded-2xl border border-stroke bg-panel/50 hover:bg-panel transition-all text-center group/card">
-                <b className="text-2xl font-bold text-text group-hover/card:scale-110 block transition-transform">B.Sc</b>
-                <span className="block text-xs text-muted2 mt-1 uppercase font-bold tracking-wider">SWE Degree</span>
-              </div>
-              <div className="p-5 rounded-2xl border border-stroke bg-panel/50 hover:bg-panel transition-all text-center group/card">
-                <a
-                  href="https://naztech.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-2xl font-bold text-text hover:underline group-hover/card:scale-110 block transition-transform"
-                >
-                  naztech
-                </a>
-                <span className="block text-xs text-muted2 mt-1 uppercase font-bold tracking-wider">
-                  Company
-                </span>
-              </div>
+  const itemVars = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+    },
+  };
+
+  const snapshotItems = [
+    { label: "Experience", value: "1.5+ Years", icon: <Briefcase className="w-5 h-5" />, color: "text-accent" },
+    { label: "Projects", value: "10+ Total", icon: <Code className="w-5 h-5" />, color: "text-accent2" },
+    { label: "Education", value: "B.Sc SWE", icon: <GraduationCap className="w-5 h-5" />, color: "text-white" },
+    { label: "Company", value: "naztech Inc", icon: <Globe className="w-5 h-5" />, color: "text-accent", link: "https://naztech.io/" },
+  ];
+
+  return (
+    <section id="home" className="min-h-screen flex items-center py-20 relative pt-32">
+      <div className="container mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center">
+        <motion.div
+          className="lg:col-span-7 relative z-10"
+          variants={containerVars}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ margin: "-100px" }}
+        >
+          <motion.div className="mb-8" variants={itemVars}>
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl border border-stroke bg-panel/30 backdrop-blur-md text-sm text-muted">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent2 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent2"></span>
+              </span>
+              Available for <b className="text-text">Professional Partnership</b>
             </div>
+          </motion.div>
+
+          <motion.h1
+            className="text-6xl md:text-8xl font-black tracking-tight leading-[0.9] mb-8"
+            variants={itemVars}
+          >
+            <span className="text-muted2">I'm</span> <span className="bg-gradient-to-r from-accent via-accent2 to-accent bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-flow">{name || "Rahman Shishir"}</span><br />
+            <span className="opacity-80">Software Engineer</span>
+          </motion.h1>
+
+          <motion.p
+            className="text-muted text-xl max-w-[50ch] mb-10 leading-relaxed font-medium"
+            variants={itemVars}
+          >
+            {headline || "Enterprise-grade engineering with a security-first mindset. Specializing in Java Full-Stack development and Cybersecurity auditing."}
+          </motion.p>
+
+          <motion.div className="flex flex-wrap gap-5 items-center" variants={itemVars}>
+            <a href="#projects" className="group relative px-10 py-5 bg-text text-bg rounded-2xl font-black transition-all hover:scale-[1.02] active:scale-95 overflow-hidden">
+              <span className="relative z-10 flex items-center gap-2">
+                VIEW PROJECTS
+                <Code className="w-5 h-5" />
+              </span>
+            </a>
+            <a href="#contact" className="px-10 py-5 border border-stroke bg-panel/30 hover:bg-panel rounded-2xl font-black backdrop-blur-sm transition-all flex items-center gap-2 text-sm uppercase tracking-widest">
+              Connect
+              <Shield className="w-5 h-5 text-accent" />
+            </a>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="lg:col-span-5 relative mt-20 lg:mt-0"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ margin: "-100px" }}
+          transition={{ duration: 1, delay: 0.5 }}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            {snapshotItems.map((item, i) => {
+              const CardContent = (
+                <>
+                  <div className="w-12 h-12 rounded-2xl bg-panel border border-stroke flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
+                    {React.cloneElement(item.icon, { className: "w-6 h-6 group-hover:text-white transition-colors" })}
+                  </div>
+                  <div>
+                    <span className="block text-xs text-muted2 uppercase font-black tracking-[0.2em] mb-1">{item.label}</span>
+                    <b className={`text-2xl font-black ${item.color}`}>{item.value}</b>
+                  </div>
+                </>
+              );
+
+              const cardClasses = `glass p-6 sm:p-8 flex flex-col justify-between aspect-square group ${i === 1 ? 'md:mt-8' : i === 2 ? 'md:-mt-8' : ''}`;
+
+              if (item.link) {
+                return (
+                  <motion.a
+                    key={i}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    className={cardClasses}
+                  >
+                    {CardContent}
+                  </motion.a>
+                );
+              }
+
+              return (
+                <motion.div
+                  key={i}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className={cardClasses}
+                >
+                  {CardContent}
+                </motion.div>
+              );
+            })}
           </div>
-        </div>
+
+          {/* Decorative Elements */}
+          <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-accent/20 blur-[120px] rounded-full"></div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,30 +1,39 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { ExternalLink, Calendar, User } from 'lucide-react';
 
 const ProjectCard = ({ title, description, tag, date, role, onClick }) => {
   return (
-    <div 
+    <motion.div
+      whileHover={{ y: -10, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300 }}
+      className="glass p-8 flex flex-col h-full group relative overflow-hidden cursor-pointer"
       onClick={onClick}
-      className="group cursor-pointer min-h-[200px] bg-panel border border-stroke rounded-[24px] p-8 backdrop-blur-xl hover:bg-panel2 hover:-translate-y-1.5 transition-all flex flex-col"
     >
-      <div className="flex justify-start mb-6">
-        <span className="px-5 py-2 rounded-full bg-accent/15 border border-accent/20 text-xs font-bold text-accent/90">
+      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <ExternalLink className="w-5 h-5 text-accent" />
+      </div>
+
+      <div className="flex items-center gap-2 mb-4">
+        <span className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-wider">
           {tag}
         </span>
       </div>
-      
-      <h4 className="text-2xl font-bold tracking-tight mb-4 group-hover:text-accent transition-colors">
-        {title}
-      </h4>
-      
-      <p className="text-muted text-[1.05rem] leading-relaxed line-clamp-3 mb-8">
-        {description}
-      </p>
-      
-      <div className="mt-auto flex justify-between items-center text-sm font-bold">
-        <span className="text-muted2">{date}</span>
-        <span className="text-muted2">{role || "Lead Developer"}</span>
+
+      <h4 className="text-xl font-bold mb-3 group-hover:text-accent transition-colors">{title}</h4>
+      <p className="text-muted text-sm line-clamp-3 mb-6 flex-grow">{description}</p>
+
+      <div className="flex flex-wrap items-center gap-4 text-xs text-muted2 border-t border-stroke pt-4">
+        <div className="flex items-center gap-1">
+          <Calendar className="w-3 h-3" />
+          <span>{date}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <User className="w-3 h-3" />
+          <span>{role}</span>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

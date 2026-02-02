@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+portfolio-web/node_modules/
+portfolio-web/dist/
+portfolio-backend/node_modules/
+portfolio-backend/dist/
+portfolio-backend/.env
+index.html.bak

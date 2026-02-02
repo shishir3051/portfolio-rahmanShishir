@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, Code, Database, Bug, Cpu, Cloud, Lock, Globe, Layers, Server } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Section from './components/Section';
@@ -11,6 +13,8 @@ import Blog from './pages/Blog';
 import Uses from './pages/Uses';
 import Legal from './pages/Legal';
 import Terms from './pages/Terms';
+import Scene3D from './components/Scene3D';
+import Timeline from './components/Timeline';
 
 function App() {
   const [view, setView] = useState('portfolio');
@@ -21,79 +25,62 @@ function App() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
 
-  // Hash-based routing
+  // Handle hash changes and routing
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1); // Remove #
-      
-      // Check if it's a page route (/blog, /uses, etc.)
+      const hash = window.location.hash.slice(1);
+
       if (hash.startsWith('/')) {
-        const route = hash.slice(1); // Remove /
-        if(['blog', 'uses', 'privacy', 'terms'].includes(route)) {
+        const route = hash.slice(1);
+        if (['blog', 'uses', 'privacy', 'terms'].includes(route)) {
           setPage(route);
           setView('page');
+          window.scrollTo(0, 0); // Always scroll to top on new page
         } else {
           setPage('home');
           setView('portfolio');
         }
-      } 
-      // Check for admin route
-      else if (hash === 'admin' || window.location.pathname === '/admin') {
+      } else if (hash === 'admin' || window.location.pathname === '/admin') {
         setView('dashboard');
-      }
-      // Regular section hash or home
-      else {
+      } else {
         setPage('home');
         setView('portfolio');
       }
     };
 
-    handleHashChange(); // Handle initial load
+    handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Professional scroll-to-section effect
   useEffect(() => {
-    if (window.location.pathname === '/admin') {
-      setView('dashboard');
+    if (view === 'portfolio' && page === 'home') {
+      const hash = window.location.hash.slice(1);
+      if (hash && !hash.startsWith('/')) {
+        // Delay slightly to ensure the portfolio view is rendered
+        const timer = setTimeout(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          } else if (hash === 'home') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 200);
+        return () => clearTimeout(timer);
+      }
     }
-  }, []);
+  }, [view, page]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  useEffect(() => {
-    // Reveal Animations Observer
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
-      });
-    }, { threshold: 0.1 });
-
-    const reveals = document.querySelectorAll('.reveal');
-    reveals.forEach(el => revealObserver.observe(el));
-
-    // Scroll Spy Observer
-    const spyObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    }, { threshold: 0.5 });
-
-    const sections = document.querySelectorAll('section[id]');
-    sections.forEach(el => spyObserver.observe(el));
-
-    return () => {
-      reveals.forEach(el => revealObserver.unobserve(el));
-      sections.forEach(el => spyObserver.unobserve(el));
-    };
-  }, [view, page]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -110,20 +97,21 @@ function App() {
   }, []);
 
   const skills = [
-    { name: "Next.js & React.js", level: "92%" },
-    { name: "Java & Spring Boot", level: "90%" },
-    { name: "Microsoft SQL Server", level: "88%" },
-    { name: "Cybersecurity & Ethical Hacking", level: "94%" },
-    { name: "Penetration Testing", level: "90%" },
-    { name: "Front-End Development (ExtJs)", level: "86%" },
-    { name: "Neo4j Graph Database", level: "83%" },
-    { name: "Full-stack Engineering", level: "90%" },
+    { name: "Next.js & React.js", level: "92%", icon: <Globe />, category: "Front-End" },
+    { name: "Java & Spring Boot", level: "90%", icon: <Server />, category: "Back-End" },
+    { name: "MS SQL Server", level: "88%", icon: <Database />, category: "Database" },
+    { name: "Cybersecurity", level: "94%", icon: <Shield />, category: "Security" },
+    { name: "Penetration Testing", level: "90%", icon: <Bug />, category: "Security" },
+    { name: "ExtJs Development", level: "86%", icon: <Layers />, category: "Enterprise" },
+    { name: "Neo4j Graph DB", level: "83%", icon: <Cpu />, category: "Database" },
+    { name: "Full-stack Engineering", level: "90%", icon: <Code />, category: "Engineering" },
   ];
 
-  const experience = [
+  const experienceData = [
     {
-      title: "Junior Software Engineer — naztech Inc",
-      location: "Banani, Dhaka, Bangladesh • Jan 2025 — Present",
+      title: "Junior Software Engineer",
+      location: "naztech Inc • Dhaka, Bangladesh",
+      date: "Jan 2025 — Present",
       tasks: [
         "Full-time role focused on developing and maintaining software solutions.",
         "Contributing to enterprise-grade engineering projects with Java and JavaScript.",
@@ -131,8 +119,9 @@ function App() {
       ]
     },
     {
-      title: "Software Engineer Trainee — naztech Inc",
-      location: "Banani, Dhaka, Bangladesh • Oct 2024 — Dec 2024",
+      title: "Software Engineer Trainee",
+      location: "naztech Inc • Dhaka, Bangladesh",
+      date: "Oct 2024 — Dec 2024",
       tasks: [
         "Intensive training period focused on enterprise architecture and security.",
         "Gained hands-on experience with ExtJs, Spring Boot, and SMSS.",
@@ -140,18 +129,33 @@ function App() {
       ]
     },
     {
-      title: "Software Engineer Internship — naztech Inc",
-      location: "Banani, Dhaka, Bangladesh • Sep 2024",
+      title: "Software Engineer Internship",
+      location: "naztech Inc • Dhaka, Bangladesh",
+      date: "Sep 2024",
       tasks: [
         "Initial exposure to the software development lifecycle in a professional setting.",
-        "Shadowed senior engineers and participated in code reviews.",
-        "Worked on foundational modules for internal tools."
+        "Shadowed senior engineers and participated in code reviews."
       ]
     }
   ];
 
+  const educationData = [
+    {
+      title: "Bachelor of Software Engineering",
+      location: "Daffodil International University-DIU",
+      year: "2020 — 2024",
+      desc: "Major in Cybersecurity. Focused on secure software development, network security, and cryptography."
+    },
+    {
+      title: "Secondary & Higher Secondary",
+      location: "Ispahani Public School and College",
+      year: "2016 — 2018",
+      desc: "Science background with a focus on mathematics and information technology."
+    }
+  ];
+
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  
+
   const handleLogout = () => {
     setIsAdmin(false);
     localStorage.removeItem('isAdmin');
@@ -168,11 +172,12 @@ function App() {
   // Render pages (Blog, Uses, Privacy, Terms)
   if (view === 'page') {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen relative overflow-hidden">
+        <Scene3D />
         <div className="bg-glow"></div>
-        <Navbar 
-          onDashboardClick={() => setView('dashboard')} 
-          theme={theme} 
+        <Navbar
+          onDashboardClick={() => setView('dashboard')}
+          theme={theme}
           toggleTheme={toggleTheme}
           isAdmin={isAdmin}
           onLogout={handleLogout}
@@ -180,10 +185,16 @@ function App() {
           activeSection={activeSection}
           onLogoClick={navigateToHome}
         />
-        {page === 'blog' && <Blog />}
-        {page === 'uses' && <Uses />}
-        {page === 'privacy' && <Legal />}
-        {page === 'terms' && <Terms />}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {page === 'blog' && <Blog />}
+          {page === 'uses' && <Uses />}
+          {page === 'privacy' && <Legal />}
+          {page === 'terms' && <Terms />}
+        </motion.div>
         <Footer />
       </div>
     );
@@ -192,9 +203,9 @@ function App() {
   if (view === 'dashboard') {
     return (
       <div className="min-h-screen">
-        <Navbar 
-          onDashboardClick={() => setView('portfolio')} 
-          theme={theme} 
+        <Navbar
+          onDashboardClick={() => setView('portfolio')}
+          theme={theme}
           toggleTheme={toggleTheme}
           isAdmin={isAdmin}
           onLogout={handleLogout}
@@ -206,212 +217,202 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden">
+      <Scene3D />
       <div className="bg-glow"></div>
-      <Navbar 
-        onDashboardClick={() => setView('dashboard')} 
-        theme={theme} 
+      <Navbar
+        onDashboardClick={() => setView('dashboard')}
+        theme={theme}
         toggleTheme={toggleTheme}
         isAdmin={isAdmin}
         onLogout={handleLogout}
         view={view}
         activeSection={activeSection}
       />
-      
-      <main>
+
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
         <section id="home">
-          <Hero 
-            name="Rahman Shishir" 
+          <Hero
+            name="Rahman Shishir"
             headline="B.Sc in SWE (Major in Cybersecurity) | Software Engineer | Ethical Hacker Essential (E|HE) | Java Full-Stack Developer"
           />
         </section>
 
-        <div className="reveal">
-          <Section id="about" title="About" subtitle="I'm a versatile professional skilled in both ethical hacking and front-end development. With expertise in cybersecurity and creating engaging user experiences, I deliver high-quality results prioritizing security and user satisfaction. Whether uncovering vulnerabilities or crafting intuitive interfaces, I'm dedicated to excellence in all aspects of my work.">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="glass p-8">
-                <h3 className="text-xl font-bold mb-4">What I do</h3>
-                <p className="text-muted mb-6">I design and build secure web apps with modern UI patterns, scalable architecture, and a strong focus on cybersecurity.</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Next.js', 'Spring Boot', 'Cybersecurity', 'Java'].map(chip => (
-                    <span key={chip} className="px-3 py-1 rounded-full bg-panel border border-stroke text-xs text-muted font-bold">{chip}</span>
-                  ))}
-                </div>
+        <Section id="about" title="About" subtitle="I combine technical rigour from ethical hacking with creative software engineering to build secure, scalable digital experiences. My approach prioritizes security, user satisfaction, and architectural excellence.">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div whileHover={{ y: -5 }} className="glass p-8 col-span-1 lg:col-span-2">
+              <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Code className="text-accent" /> Professional Approach
+              </h3>
+              <p className="text-muted text-lg leading-relaxed">
+                I'm a versatile professional skilled in both ethical hacking and front-end development. With expertise in cybersecurity and creating engaging user experiences, I deliver high-quality results prioritizing security and user satisfaction.
+              </p>
+            </motion.div>
+            <motion.div whileHover={{ y: -5 }} className="glass p-8">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Shield className="text-accent2" /> Core Ethics
+              </h3>
+              <p className="text-muted text-sm leading-relaxed mb-6">Dedicated to uncovering vulnerabilities and crafting intuitive, secure interfaces.</p>
+              <div className="flex flex-wrap gap-2">
+                {['Security-first', 'E|HE Certified', 'Full-stack'].map(chip => (
+                  <span key={chip} className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-bold uppercase">{chip}</span>
+                ))}
               </div>
-              <div className="glass p-8">
-                <h3 className="text-xl font-bold mb-4">How I work</h3>
-                <p className="text-muted mb-6">Combining technical rigour from ethical hacking with creative front-end execution. I'm dedicated to uncovering vulnerabilities and crafting intuitive, secure interfaces.</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Security-first', 'E|HE Certified', 'Full-stack', 'Graph DB'].map(chip => (
-                    <span key={chip} className="px-3 py-1 rounded-full bg-panel border border-stroke text-xs text-muted font-bold">{chip}</span>
-                  ))}
+            </motion.div>
+          </div>
+        </Section>
+
+        <Section id="skills" title="Skills" subtitle="A multi-disciplinary toolkit focused on enterprise reliability and robust security protocols.">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {skills.map((skill, i) => (
+              <motion.div
+                key={skill.name}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="glass p-6 group flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-panel border border-stroke flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-all duration-300">
+                  {React.cloneElement(skill.icon, { className: "w-6 h-6" })}
                 </div>
-              </div>
-            </div>
-          </Section>
-        </div>
-
-        <div className="reveal">
-          <Section 
-            id="skills" 
-            title="Skills" 
-            subtitle="Expertise spanning across Java full-stack development, modern web frameworks, and advanced cybersecurity."
-          >
-            <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
-              {skills.map(skill => (
-                <div key={skill.name} className="grid gap-2">
-                  <div className="flex justify-between font-semibold text-muted">
-                    <span>{skill.name}</span>
-                    <span>{skill.level}</span>
-                  </div>
-                  <div className="h-2 bg-panel rounded-full overflow-hidden border border-stroke">
-                    <div 
-                      className="h-full bg-gradient-to-r from-accent to-accent2 transition-all duration-1000"
-                      style={{ width: skill.level }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-        </div>
-
-        <div className="reveal">
-          <Section id="experience" title="Experience" subtitle="My professional journey at naztech Inc, transitioning from Intern to Junior Software Engineer.">
-            <div className="space-y-6">
-              {experience.map((job, idx) => (
-                <div key={idx} className="glass p-8">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h4 className="text-lg font-bold">{job.title}</h4>
-                      <p className="text-sm text-muted2">{job.location}</p>
-                    </div>
-                  </div>
-                  <ul className="list-disc list-inside space-y-2 text-muted">
-                    {job.tasks.map((task, i) => <li key={i}>{task}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </Section>
-        </div>
-
-        <div className="reveal">
-          <Section id="education" title="Education" subtitle="Academic background in Software Engineering and foundational schooling.">
-            <div className="space-y-6">
-              <div className="glass p-8">
-                <h4 className="text-lg font-bold">Daffodil International University-DIU</h4>
-                <p className="text-sm text-muted2">Bachelor of Software Engineering (Major in Cybersecurity) • 2020 — 2024</p>
-              </div>
-              <div className="glass p-8">
-                <h4 className="text-lg font-bold">Ispahani Public School and College</h4>
-                <p className="text-sm text-muted2">Secondary & Higher Secondary Education • 2016 — 2018</p>
-              </div>
-            </div>
-          </Section>
-        </div>
-
-        <div className="reveal">
-          <Section 
-            id="projects" 
-            title="Featured Projects" 
-            subtitle="Selected professional and independent work with a focus on security and efficiency."
-          >
-            <div className="grid md:grid-cols-3 gap-6">
-              {projects.length > 0 ? (
-                projects.map((p, i) => (
-                  <ProjectCard 
-                    key={i} 
-                    title={p.title}
-                    description={p.desc}
-                    tag={p.tag}
-                    date={p.year}
-                    role={p.role}
-                    onClick={() => setSelectedProject(p)}
+                <h4 className="font-bold text-lg mb-1">{skill.name}</h4>
+                <span className="text-xs text-accent font-mono mb-4 uppercase tracking-widest">{skill.category}</span>
+                <div className="w-full h-1.5 bg-panel rounded-full overflow-hidden border border-stroke">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: skill.level }}
+                    transition={{ duration: 1, delay: i * 0.1 }}
+                    className="h-full bg-gradient-to-r from-accent to-accent2"
                   />
-                ))
-              ) : (
-                <>
-                  <ProjectCard 
-                    title="Efficient SWIFT ISO 20022 MT-MX Transition"
-                    description="A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition. Built with a focus on security and high performance."
-                    tag="FinTech / Security"
-                    date="2024"
-                    role="Junior Software Engineer"
-                    onClick={() => setSelectedProject({
-                      title: "Efficient SWIFT ISO 20022 MT-MX Transition",
-                      year: "2024",
-                      role: "Junior Software Engineer",
-                      desc: "A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition.",
-                      details: [
-                        "Implemented ISO 20022 migration tools.",
-                        "Handled high-volume transaction logging with SQL Server.",
-                        "Built complex grid interfaces with ExtJS."
-                      ],
-                      tech: ["Java", "ExtJS", "Spring Boot", "MSSQL"]
-                    })}
-                  />
-                  <ProjectCard 
-                    title="Cybersecurity Dashboard"
-                    description="Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications. Features automated scanning and graph visualization."
-                    tag="Cybersecurity / Neo4j"
-                    date="2024"
-                    role="Lead Developer"
-                    onClick={() => setSelectedProject({
-                      title: "Cybersecurity Dashboard",
-                      year: "2024",
-                      role: "Lead Developer",
-                      desc: "Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications.",
-                      details: [
-                        "Visualized network threats using Neo4j.",
-                        "Automated vulnerability scanning.",
-                        "Created dark-mode security analysis UI."
-                      ],
-                      tech: ["React", "Node.js", "Neo4j", "Tailwind"]
-                    })}
-                  />
-                </>
-              )}
-            </div>
-          </Section>
-        </div>
+                </div>
+                <span className="text-xs text-muted mt-2 font-bold">{skill.level}</span>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
 
-        <div className="reveal">
-          <Section id="services" title="Services" subtitle="Leveraging my expertise to build secure and scalable digital solutions.">
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="glass p-6">
-                <h4 className="font-bold mb-2">Secure Web Dev</h4>
-                <p className="text-sm text-muted">Building robust and secure web applications using Next.js, React, and Spring Boot.</p>
-              </div>
-              <div className="glass p-6">
-                <h4 className="font-bold mb-2">Penetration Testing</h4>
-                <p className="text-sm text-muted">Identifying system vulnerabilities through ethical hacking and advanced testing techniques.</p>
-              </div>
-              <div className="glass p-6">
-                <h4 className="font-bold mb-2">Database Optimization</h4>
-                <p className="text-sm text-muted">Designing and managing complex data structures with Neo4j and Microsoft SQL Server.</p>
-              </div>
-            </div>
-          </Section>
-        </div>
+        <Section id="experience" title="Professional Experience" subtitle="Building enterprise fintech solutions and contributing to critical banking infrastructure at naztech Inc.">
+          <Timeline items={experienceData} type="experience" />
+        </Section>
 
-        <div className="reveal">
-          <Section 
-            id="contact" 
-            title="Contact" 
-            subtitle="Ready to build something secure and extraordinary? Let's connect."
-          >
-            <ContactForm />
-          </Section>
-        </div>
-      </main>
-      
+        <Section id="education" title="Education" subtitle="Fundamental academic training in Software Engineering and foundational schooling.">
+          <Timeline items={educationData} type="education" />
+        </Section>
+
+        <Section
+          id="projects"
+          title="Featured Projects"
+          subtitle="Selected professional and independent work with a focus on security and efficiency."
+        >
+          <div className="grid md:grid-cols-3 gap-6">
+            {projects.length > 0 ? (
+              projects.map((p, i) => (
+                <ProjectCard
+                  key={i}
+                  title={p.title}
+                  description={p.desc}
+                  tag={p.tag}
+                  date={p.year}
+                  role={p.role}
+                  onClick={() => setSelectedProject(p)}
+                />
+              ))
+            ) : (
+              <>
+                <ProjectCard
+                  title="Efficient SWIFT ISO 20022 MT-MX Transition"
+                  description="A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition. Built with a focus on security and high performance."
+                  tag="FinTech / Security"
+                  date="2024"
+                  role="Junior Software Engineer"
+                  onClick={() => setSelectedProject({
+                    title: "Efficient SWIFT ISO 20022 MT-MX Transition",
+                    year: "2024",
+                    role: "Junior Software Engineer",
+                    desc: "A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition.",
+                    details: [
+                      "Implemented ISO 20022 migration tools.",
+                      "Handled high-volume transaction logging with SQL Server.",
+                      "Built complex grid interfaces with ExtJS."
+                    ],
+                    tech: ["Java", "ExtJS", "Spring Boot", "MSSQL"]
+                  })}
+                />
+                <ProjectCard
+                  title="Cybersecurity Dashboard"
+                  description="Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications. Features automated scanning and graph visualization."
+                  tag="Cybersecurity / Neo4j"
+                  date="2024"
+                  role="Lead Developer"
+                  onClick={() => setSelectedProject({
+                    title: "Cybersecurity Dashboard",
+                    year: "2024",
+                    role: "Lead Developer",
+                    desc: "Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications.",
+                    details: [
+                      "Visualized network threats using Neo4j.",
+                      "Automated vulnerability scanning.",
+                      "Created dark-mode security analysis UI."
+                    ],
+                    tech: ["React", "Node.js", "Neo4j", "Tailwind"]
+                  })}
+                />
+              </>
+            )}
+          </div>
+        </Section>
+
+        <Section id="services" title="Services" subtitle="Strategizing and delivering high-performance digital solutions with a security-first philosophy.">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Secure Web Engineering",
+                desc: "Enterprise-grade web applications built with Next.js and Spring Boot, hardened against modern threats.",
+                icon: <Code className="text-accent" />
+              },
+              {
+                title: "Cybersecurity Auditing",
+                desc: "Comprehensive penetration testing and vulnerability assessments to secure your digital infrastructure.",
+                icon: <Shield className="text-accent2" />
+              },
+              {
+                title: "Architectural Consulting",
+                desc: "Designing scalable, efficient data structures using SQL Server and Neo4j for complex business needs.",
+                icon: <Database className="text-white" />
+              }
+            ].map((service, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -5 }}
+                className="glass p-8 group hover:border-accent/30 transition-all"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-panel border border-stroke flex items-center justify-center mb-6 group-hover:bg-accent transition-all duration-500">
+                  {React.cloneElement(service.icon, { className: "w-7 h-7 group-hover:text-white transition-colors" })}
+                </div>
+                <h4 className="text-xl font-bold mb-3">{service.title}</h4>
+                <p className="text-sm text-muted leading-relaxed">{service.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
+        <Section
+          id="contact"
+          title="Contact"
+          subtitle="Ready to build something secure and extraordinary? Let's connect."
+        >
+          <ContactForm />
+        </Section>
+      </motion.main>
+
       <Footer />
 
       {selectedProject && (
-        <ProjectModal 
-          project={selectedProject} 
-          onClose={() => setSelectedProject(null)} 
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
         />
       )}
     </div>
