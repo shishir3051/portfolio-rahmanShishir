@@ -2,14 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Briefcase, GraduationCap } from 'lucide-react';
 
-const TimelineItem = ({ item, index, isEducation }) => {
+const TimelineItem = ({ item, index, isEducation, isLast }) => {
     return (
         <motion.div
             initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ margin: "-50px" }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="relative pl-8 md:pl-0 md:grid md:grid-cols-9 gap-4 mb-12"
+            className={`relative pl-16 md:pl-0 md:grid md:grid-cols-9 gap-4 ${isLast ? 'pb-0' : 'pb-12'}`}
         >
             {/* Date for Desktop (Left) */}
             <div className="hidden md:flex md:col-span-4 justify-end items-start text-right">
@@ -19,11 +19,11 @@ const TimelineItem = ({ item, index, isEducation }) => {
             </div>
 
             {/* Center Line and Icon */}
-            <div className="absolute left-0 md:relative md:left-auto md:col-span-1 flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-panel border-2 border-stroke flex items-center justify-center z-10 shadow-xl group-hover:border-accent transition-colors">
+            <div className="absolute left-0 md:relative md:left-auto md:col-span-1 flex flex-col items-center h-full">
+                <div className="w-10 h-10 rounded-full bg-panel border-2 border-stroke flex items-center justify-center z-10 shadow-xl group-hover:border-accent transition-colors shrink-0">
                     {isEducation ? <GraduationCap className="w-5 h-5 text-accent2" /> : <Briefcase className="w-5 h-5 text-accent" />}
                 </div>
-                <div className="w-px h-full bg-gradient-to-b from-stroke via-stroke/50 to-transparent absolute top-10"></div>
+                {!isLast && <div className="w-px h-full bg-gradient-to-b from-stroke via-stroke/50 to-transparent absolute top-10 transform translate-y-0"></div>}
             </div>
 
             {/* Content (Right) */}
@@ -69,6 +69,7 @@ const Timeline = ({ items, type = "experience" }) => {
                     item={item}
                     index={index}
                     isEducation={type === "education"}
+                    isLast={index === items.length - 1}
                 />
             ))}
         </div>
