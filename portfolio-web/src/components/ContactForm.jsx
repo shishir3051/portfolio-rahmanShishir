@@ -89,58 +89,58 @@ const ContactForm = () => {
         viewport={{ margin: "-50px" }}
         className="space-y-6"
       >
-        <div className="bg-panel/40 backdrop-blur-3xl border border-white/10 -mx-6 rounded-none sm:mx-0 sm:rounded-[2.5rem] p-8 sm:p-12 relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 blur-[80px] -z-10 rounded-full"></div>
+        <div className="bg-panel/40 backdrop-blur-3xl border border-white/10 -mx-6 rounded-none sm:mx-0 sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 blur-[60px] -z-10 rounded-full"></div>
 
-          <h4 className="font-black text-[10px] uppercase tracking-[0.3em] mb-12 text-muted2 border-b border-white/5 pb-4">Access Points</h4>
+          <h4 className="font-black text-[10px] uppercase tracking-[0.3em] mb-8 text-muted2 border-b border-white/5 pb-3">Access Points</h4>
 
-          <div className="space-y-10">
-            <div className="flex gap-6 items-start group">
-              <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                <Mail className="w-6 h-6 text-accent" />
+          <div className="space-y-6">
+            <div className="flex gap-4 items-start group">
+              <div className="w-11 h-11 rounded-[1rem] bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <Mail className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <span className="block text-[10px] font-black text-muted2 uppercase tracking-widest mb-1">Direct Email</span>
-                <a href="mailto:gaziur.rahman4311@gmail.com" className="text-lg font-bold hover:text-accent transition-colors block">gaziur.rahman4311@gmail.com</a>
+                <span className="block text-[9px] font-black text-muted2 uppercase tracking-widest mb-0.5">Direct Email</span>
+                <a href="mailto:gaziur.rahman4311@gmail.com" className="text-base font-bold hover:text-accent transition-colors block">gaziur.rahman4311@gmail.com</a>
               </div>
             </div>
 
-            <div className="flex gap-6 items-start group">
-              <div className="w-14 h-14 rounded-2xl bg-accent2/10 border border-accent2/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                <Phone className="w-6 h-6 text-accent2" />
+            <div className="flex gap-4 items-start group">
+              <div className="w-11 h-11 rounded-[1rem] bg-accent2/10 border border-accent2/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <Phone className="w-5 h-5 text-accent2" />
               </div>
               <div>
-                <span className="block text-[10px] font-black text-muted2 uppercase tracking-widest mb-1">Mobile</span>
-                <a href="tel:01609277790" className="text-lg font-bold hover:text-accent2 transition-colors block">+880 1609 277790</a>
+                <span className="block text-[9px] font-black text-muted2 uppercase tracking-widest mb-0.5">Mobile</span>
+                <a href="tel:01609277790" className="text-base font-bold hover:text-accent2 transition-colors block">+880 1609 277790</a>
               </div>
             </div>
 
-            <div className="flex gap-6 items-start group">
-              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                <MapPin className="w-6 h-6 text-accent" />
+            <div className="flex gap-4 items-start group">
+              <div className="w-11 h-11 rounded-[1rem] bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <span className="block text-[10px] font-black text-muted2 uppercase tracking-widest mb-1">Headquarters</span>
-                <span className="text-lg font-bold text-text block">Dhaka, Bangladesh</span>
+                <span className="block text-[9px] font-black text-muted2 uppercase tracking-widest mb-0.5">Headquarters</span>
+                <span className="text-base font-bold text-text block">Dhaka, Bangladesh</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-14 pt-12 border-t border-white/10">
-            <h5 className="text-[10px] font-black text-muted2 uppercase tracking-widest mb-8">Network Connections</h5>
-            <div className="flex flex-wrap gap-4">
+          <div className="mt-10 pt-8 border-t border-white/10">
+            <h5 className="text-[10px] font-black text-muted2 uppercase tracking-widest mb-6">Network Connections</h5>
+            <div className="flex flex-wrap gap-3">
               {[
-                { icon: <Github className="w-5 h-5" />, label: "GitHub", href: "https://github.com/shishir3051" },
-                { icon: <Linkedin className="w-5 h-5" />, label: "LinkedIn", href: "https://www.linkedin.com/in/rahman-shishir-442867266/" },
-                { icon: <Twitter className="w-5 h-5" />, label: "Twitter", href: "#" },
-                { icon: <Globe className="w-5 h-5" />, label: "Website", href: "#" }
+                { icon: <Github className="w-4 h-4" />, label: "GitHub", href: "https://github.com/shishir3051" },
+                { icon: <Linkedin className="w-4 h-4" />, label: "LinkedIn", href: "https://www.linkedin.com/in/rahman-shishir-442867266/" },
+                { icon: <Twitter className="w-4 h-4" />, label: "Twitter", href: "#" },
+                { icon: <Globe className="w-4 h-4" />, label: "Website", href: "#" }
               ].map((link, i) => (
                 <a
                   key={i}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-6 py-3.5 rounded-2xl border border-white/10 bg-white/5 text-xs font-black uppercase tracking-widest hover:bg-accent/10 hover:border-accent/40 hover:text-accent transition-all duration-300"
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-[1rem] border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-accent/10 hover:border-accent/40 hover:text-accent transition-all duration-300"
                 >
                   {link.icon}
                   {link.label}
