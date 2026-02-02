@@ -39,37 +39,37 @@ const ContactForm = () => {
         onSubmit={handleSubmit}
       >
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-muted font-black text-[10px] uppercase tracking-[0.3em] ml-2">Identity</label>
+          <div className="space-y-3">
+            <label className="text-muted font-black text-[10px] uppercase tracking-[0.4em] ml-2 opacity-80">Identity</label>
             <input
               type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Your full name"
-              className="w-full px-6 py-5 rounded-2xl bg-panel/40 border border-white/10 text-text focus:bg-panel2 focus:border-accent/50 outline-none transition-all placeholder:text-muted2 font-bold shadow-sm"
+              className="w-full px-7 py-5 rounded-[1.25rem] bg-panel border border-white/10 text-text focus:bg-panel2 focus:border-accent/50 outline-none transition-all placeholder:text-muted2 font-bold shadow-sm"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-muted font-black text-[10px] uppercase tracking-[0.3em] ml-2">Electronic Mail</label>
+          <div className="space-y-3">
+            <label className="text-muted font-black text-[10px] uppercase tracking-[0.4em] ml-2 opacity-80">Electronic Mail</label>
             <input
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="email@example.com"
-              className="w-full px-6 py-5 rounded-2xl bg-panel/40 border border-white/10 text-text focus:bg-panel2 focus:border-accent/50 outline-none transition-all placeholder:text-muted2 font-bold shadow-sm"
+              className="w-full px-7 py-5 rounded-[1.25rem] bg-panel border border-white/10 text-text focus:bg-panel2 focus:border-accent/50 outline-none transition-all placeholder:text-muted2 font-bold shadow-sm"
             />
           </div>
         </div>
-        <div className="space-y-2">
-          <label className="text-muted font-black text-[10px] uppercase tracking-[0.3em] ml-2">Narrative</label>
+        <div className="space-y-3">
+          <label className="text-muted font-black text-[10px] uppercase tracking-[0.4em] ml-2 opacity-80">Narrative</label>
           <textarea
             required
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             placeholder="How can I assist with your next project?"
-            className="w-full px-6 py-5 rounded-2xl bg-panel/40 border border-white/10 text-text min-h-[180px] focus:bg-panel2 focus:border-accent/50 outline-none transition-all resize-none placeholder:text-muted2 font-bold shadow-sm"
+            className="w-full px-7 py-5 rounded-[1.25rem] bg-panel border border-white/10 text-text min-h-[180px] focus:bg-panel2 focus:border-accent/50 outline-none transition-all resize-none placeholder:text-muted2 font-bold shadow-sm"
           ></textarea>
         </div>
         <button
