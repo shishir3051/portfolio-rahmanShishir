@@ -1,7 +1,4 @@
 {
-    "env": {
-        "VITE_API_URL": "https://portfolio-rahmanshishir.onrender.com"
-    },
     "rewrites": [
         {
             "source": "/(.*)",
