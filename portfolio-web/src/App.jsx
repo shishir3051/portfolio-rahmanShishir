@@ -59,17 +59,29 @@ function App() {
 
     const options = {
       root: null,
-      rootMargin: '-40% 0px -40% 0px', // Trigger when section is in middle of viewport
-      threshold: 0
+      rootMargin: '-20% 0px -20% 0px', // More generous margin for stability
+      threshold: [0, 0.1, 0.5] // Multiple thresholds for smoother detection
     };
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
+        // If we're at the very bottom, force 'contact' to avoid flickering
+        const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+
+        if (isAtBottom) {
+          setActiveSection('contact');
+        } else if (entry.isIntersecting && entry.intersectionRatio >= 0.1) {
           setActiveSection(entry.target.id);
         }
       });
     }, options);
+
+    // Also add a scroll listener for extra stability at the bottom
+    const handleScroll = () => {
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+      if (isAtBottom) setActiveSection('contact');
+    };
+    window.addEventListener('scroll', handleScroll);
 
     const sections = ['home', 'about', 'skills', 'experience', 'education', 'projects', 'services', 'contact'];
     sections.forEach(id => {
@@ -77,7 +89,10 @@ function App() {
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [view, page]);
 
   // Professional scroll-to-section effect
