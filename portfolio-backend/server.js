@@ -13,17 +13,32 @@ const app = express();
 // Required for express-rate-limit on Render
 app.set("trust proxy", 1);
 
-// Global Request Logger
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+// 1. CORS - MUST BE FIRST
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"]
+}));
 
-// CSP Middleware
+// 2. Body Parser
+app.use(express.json({ limit: "1mb" }));
+
+// 3. Security (Helmet) - Adjusted for API compatibility
 app.use((req, res, next) => {
+  // Disable strict CSP for API routes to avoid fetch issues
+  if (req.path.startsWith('/api/')) {
+    return helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" }
+    })(req, res, next);
+  }
+
+  // Standard Helmet for non-API routes (admin, public, etc)
   if (req.path.startsWith('/admin') || req.path.startsWith('/public') || req.path === '/') {
     return helmet({ contentSecurityPolicy: false })(req, res, next);
   }
+
   helmet({
     contentSecurityPolicy: {
       directives: {
@@ -35,9 +50,6 @@ app.use((req, res, next) => {
     },
   })(req, res, next);
 });
-
-app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: "1mb" }));
 
 // Static Files
 app.use("/public", express.static(path.join(__dirname, "public.bak")));
@@ -88,11 +100,13 @@ app.get("/api/public/projects", async (req, res) => {
 app.get("/api/projects", async (req, res) => {
   try {
     const result = await query("SELECT Id, Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder FROM Projects WHERE IsActive = true ORDER BY SortOrder ASC, ProjectYear DESC");
-    res.json({ ok: true, projects: result.rows.map(r => ({
-      ...r, id: r.id, title: r.title, tag: r.tag, desc: r.description, year: r.projectyear, role: r.role,
-      tech: (r.techcsv || "").split(",").map(x => x.trim()).filter(Boolean), details: safeJsonArray(r.detailsjson),
-      live: r.liveurl, repo: r.repourl
-    }))});
+    res.json({
+      ok: true, projects: result.rows.map(r => ({
+        ...r, id: r.id, title: r.title, tag: r.tag, desc: r.description, year: r.projectyear, role: r.role,
+        tech: (r.techcsv || "").split(",").map(x => x.trim()).filter(Boolean), details: safeJsonArray(r.detailsjson),
+        live: r.liveurl, repo: r.repourl
+      }))
+    });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
 
@@ -100,8 +114,8 @@ app.get("/api/projects", async (req, res) => {
 app.post("/api/projects", requireAdmin, async (req, res) => {
   try {
     const { title, tag, desc, year, role, tech, details, live, repo, sortOrder } = req.body;
-    const result = await query("INSERT INTO Projects (Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING Id", 
-      [title, tag, desc, year, role, Array.isArray(tech)?tech.join(','):tech, JSON.stringify(details), live, repo, sortOrder || 0]);
+    const result = await query("INSERT INTO Projects (Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING Id",
+      [title, tag, desc, year, role, Array.isArray(tech) ? tech.join(',') : tech, JSON.stringify(details), live, repo, sortOrder || 0]);
     res.json({ ok: true, id: result.rows[0].id });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
@@ -110,7 +124,7 @@ app.put("/api/projects/:id", requireAdmin, async (req, res) => {
   try {
     const { title, tag, desc, year, role, tech, details, live, repo, sortOrder } = req.body;
     await query("UPDATE Projects SET Title=$1, Tag=$2, Description=$3, ProjectYear=$4, Role=$5, TechCsv=$6, DetailsJson=$7, LiveUrl=$8, RepoUrl=$9, SortOrder=$10 WHERE Id=$11",
-      [title, tag, desc, year, role, Array.isArray(tech)?tech.join(','):tech, JSON.stringify(details), live, repo, sortOrder || 0, req.params.id]);
+      [title, tag, desc, year, role, Array.isArray(tech) ? tech.join(',') : tech, JSON.stringify(details), live, repo, sortOrder || 0, req.params.id]);
     res.json({ ok: true });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
@@ -177,7 +191,18 @@ app.get("/admin", (req, res) => {
 app.get("/", (req, res) => {
   const p = path.join(__dirname, "public.bak", "index.html");
   if (fs.existsSync(p)) return res.sendFile(p);
-  res.json({ ok: true, note: "API Active" });
+  res.json({ ok: true, note: "API Active", time: new Date().toISOString() });
+});
+
+// Diagnostic API Route
+app.get("/api/test", (req, res) => {
+  res.json({ ok: true, message: "API connection successful", headers: req.headers });
+});
+
+// Generic 404 Logger (Must be last)
+app.use((req, res) => {
+  console.log(`[404] ${req.method} ${req.url} - Not Found`);
+  res.status(404).json({ ok: false, error: "Route not found", path: req.url });
 });
 
 // START SERVER
