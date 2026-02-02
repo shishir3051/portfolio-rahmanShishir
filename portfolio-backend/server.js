@@ -19,7 +19,11 @@ app.set("trust proxy", 1);
 
 // 1. CORS - MUST BE FIRST
 app.use(cors({
-  origin: true,
+  origin: [
+    "https://portfolio-rahman-shishir.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"]
