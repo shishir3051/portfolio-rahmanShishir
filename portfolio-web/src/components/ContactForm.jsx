@@ -13,6 +13,7 @@ const ContactForm = () => {
     setStatus('submitting');
     // Mocking success for demo, but keeping fetch logic
     try {
+
       const res = await fetch(`${API_BASE}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

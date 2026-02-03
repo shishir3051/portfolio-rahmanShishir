@@ -1,6 +1,37 @@
 import React, { useState, useEffect } from 'react';
 
 import { API_BASE } from '../config';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PaginationControls = ({ pagination, onPageChange }) => {
+  if (!pagination || pagination.totalPages <= 1) return null;
+  return (
+    <div className="flex justify-between items-center mt-6 px-2">
+      <div className="text-xs font-bold text-muted uppercase tracking-wider">
+        Showing {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => onPageChange(pagination.page - 1)}
+          disabled={pagination.page === 1}
+          className="p-2 rounded-lg border border-stroke hover:bg-panel2 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <span className="flex items-center px-4 rounded-lg bg-panel2 border border-stroke text-sm font-bold">
+          {pagination.page} / {pagination.totalPages}
+        </span>
+        <button
+          onClick={() => onPageChange(pagination.page + 1)}
+          disabled={pagination.page >= pagination.totalPages}
+          className="p-2 rounded-lg border border-stroke hover:bg-panel2 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = ({ tokenProp }) => {
   const [activeTab, setActiveTab] = useState('messages');
@@ -11,6 +42,10 @@ const Dashboard = ({ tokenProp }) => {
   const [status, setStatus] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editingBlogId, setEditingBlogId] = useState(null);
+
+  const [messagesPagination, setMessagesPagination] = useState(null);
+  const [projectsPagination, setProjectsPagination] = useState(null);
+  const [blogsPagination, setBlogsPagination] = useState(null);
 
   const initialProjectState = {
     title: "",
@@ -38,37 +73,46 @@ const Dashboard = ({ tokenProp }) => {
   const [blogForm, setBlogForm] = useState(initialBlogState);
   const [profileForm, setProfileForm] = useState({ username: "", password: "", confirmPassword: "" });
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (page = 1) => {
     try {
-      const res = await fetch(`${API_BASE}/api/messages`, {
+      const res = await fetch(`${API_BASE}/api/messages?page=${page}&limit=10`, {
         headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       const data = await res.json();
-      if (res.ok) setMessages(data.messages || []);
+      if (res.ok) {
+        setMessages(data.messages || []);
+        setMessagesPagination(data.pagination);
+      }
       else setStatus("Error fetching messages: " + (data.error || "Unauthorized"));
     } catch (err) {
       setStatus("Failed to connect to backend");
     }
   };
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (page = 1) => {
     try {
-      const res = await fetch(`${API_BASE}/api/projects`);
+      const res = await fetch(`${API_BASE}/api/projects?page=${page}&limit=10`);
       const data = await res.json();
-      if (data.ok) setProjects(data.projects || []);
+      if (data.ok) {
+        setProjects(data.projects || []);
+        setProjectsPagination(data.pagination);
+      }
       else setStatus("Error fetching projects");
     } catch (err) {
       setStatus("Failed to connect to backend");
     }
   };
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (page = 1) => {
     try {
-      const res = await fetch(`${API_BASE}/api/blogs`, {
+      const res = await fetch(`${API_BASE}/api/blogs?page=${page}&limit=10`, {
         headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       const data = await res.json();
-      if (res.ok) setBlogs(data.blogs || []);
+      if (res.ok) {
+        setBlogs(data.blogs || []);
+        setBlogsPagination(data.pagination);
+      }
       else setStatus("Error fetching blogs");
     } catch (err) {
       setStatus("Failed to connect to backend");
@@ -96,7 +140,7 @@ const Dashboard = ({ tokenProp }) => {
       });
       if (res.ok) {
         setStatus("Project Deleted");
-        fetchProjects();
+        fetchProjects(projectsPagination?.page || 1);
       }
     } catch (err) {
       setStatus("Delete failed");
@@ -112,7 +156,7 @@ const Dashboard = ({ tokenProp }) => {
       });
       if (res.ok) {
         setStatus("Blog Deleted");
-        fetchBlogs();
+        fetchBlogs(blogsPagination?.page || 1);
       }
     } catch (err) {
       setStatus("Delete failed");
@@ -208,7 +252,7 @@ const Dashboard = ({ tokenProp }) => {
         setProjectForm(initialProjectState);
         setEditingId(null);
         setActiveTab('projects');
-        fetchProjects();
+        fetchProjects(projectsPagination?.page || 1);
       } else {
         setStatus("Error: " + (data.error || "Failed to save project"));
       }
@@ -241,7 +285,7 @@ const Dashboard = ({ tokenProp }) => {
         setBlogForm(initialBlogState);
         setEditingBlogId(null);
         setActiveTab('blogs');
-        fetchBlogs();
+        fetchBlogs(blogsPagination?.page || 1);
       } else {
         setStatus("Error: " + (data.error || "Failed to save blog"));
       }
@@ -388,7 +432,7 @@ const Dashboard = ({ tokenProp }) => {
 
         <main className="bg-panel border border-stroke rounded-2xl backdrop-blur-xl overflow-hidden min-h-[600px]">
           {activeTab === 'messages' ? (
-            <div className="overflow-x-auto">
+            <><div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-stroke bg-panel">
@@ -415,8 +459,10 @@ const Dashboard = ({ tokenProp }) => {
                 </tbody>
               </table>
             </div>
+              <PaginationControls pagination={messagesPagination} onPageChange={fetchMessages} />
+            </>
           ) : activeTab === 'projects' ? (
-            <div className="overflow-x-auto">
+            <><div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-stroke bg-panel">
@@ -458,8 +504,10 @@ const Dashboard = ({ tokenProp }) => {
                 </tbody>
               </table>
             </div>
+              <PaginationControls pagination={projectsPagination} onPageChange={fetchProjects} />
+            </>
           ) : activeTab === 'blogs' ? (
-            <div className="overflow-x-auto">
+            <><div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-stroke bg-panel">
@@ -503,6 +551,8 @@ const Dashboard = ({ tokenProp }) => {
                 </tbody>
               </table>
             </div>
+              <PaginationControls pagination={blogsPagination} onPageChange={fetchBlogs} />
+            </>
           ) : activeTab === 'add-project' ? (
             <div className="p-8">
               <h2 className="text-xl font-bold mb-6">{editingId ? 'Edit Project' : 'Create New Project'}</h2>
@@ -852,10 +902,11 @@ const Dashboard = ({ tokenProp }) => {
               <h2 className="text-2xl font-bold mb-2">System Initialized</h2>
               <p className="text-muted text-sm max-w-xs mx-auto">Select a module from the sidebar to begin system administration.</p>
             </div>
-          )}
-        </main>
-      </div>
-    </div>
+          )
+          }
+        </main >
+      </div >
+    </div >
   );
 };
 

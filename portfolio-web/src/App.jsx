@@ -237,7 +237,12 @@ function App() {
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('adminToken');
     localStorage.removeItem('ADMIN_KEY'); // Clear legacy key if exists
+
+
     setView('portfolio');
+    setPage('home');
+    window.history.pushState({}, '', '/');
+    window.location.hash = '';
   };
 
   const navigateToHome = () => {

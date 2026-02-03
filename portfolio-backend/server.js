@@ -8,9 +8,20 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { Resend } = require("resend");
 const { query } = require("./db");
 
 const JWT_SECRET = process.env.JWT_SECRET || "rahman_secure_secret_2026";
+
+// Configure Resend email service
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Verify Resend is configured
+if (process.env.RESEND_API_KEY) {
+  console.log('\x1b[32m[EMAIL]\x1b[0m Resend email service configured');
+} else {
+  console.warn('\x1b[33m[EMAIL]\x1b[0m Warning: RESEND_API_KEY not set. Email notifications disabled.');
+}
 
 const app = express();
 
@@ -200,7 +211,79 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     if (!name || !email || !message) return res.status(400).json({ ok: false, error: "All fields required" });
     const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString().slice(0, 64);
     const ua = (req.headers["user-agent"] || "").toString().slice(0, 512);
+
+    // Save to database
     await query("INSERT INTO ContactMessages (FullName, Email, Message, IpAddress, UserAgent) VALUES ($1, $2, $3, $4, $5)", [name, email, message, ip, ua]);
+
+    // Send email notification with Resend
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const result = await resend.emails.send({
+          from: 'Portfolio Contact <onboarding@resend.dev>', // Resend verified domain
+          to: 'gaziur.rahman4311@gmail.com', // Your email
+          replyTo: email, // Sender's email for easy reply
+          subject: `🔔 New Contact Form Message from ${name}`,
+          html: `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2px; border-radius: 12px;">
+            <div style="background: white; border-radius: 10px; padding: 30px;">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #667eea; margin: 0; font-size: 28px; font-weight: 800;">📬 New Contact Message</h1>
+                <p style="color: #6b7280; margin: 10px 0 0 0; font-size: 14px;">Someone reached out through your portfolio!</p>
+              </div>
+              
+              <div style="background: #f9fafb; border-left: 4px solid #667eea; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="margin-bottom: 15px;">
+                  <p style="color: #9ca3af; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0;">Sender Name</p>
+                  <p style="color: #1f2937; font-size: 16px; font-weight: 600; margin: 0;">${name}</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                  <p style="color: #9ca3af; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0;">Email Address</p>
+                  <p style="color: #667eea; font-size: 16px; font-weight: 600; margin: 0;">
+                    <a href="mailto:${email}" style="color: #667eea; text-decoration: none;">${email}</a>
+                  </p>
+                </div>
+              </div>
+              
+              <div style="background: #fffbeb; border: 1px solid #fde047; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="color: #92400e; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0;">📝 Message</p>
+                <p style="color: #1f2937; font-size: 15px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${message}</p>
+              </div>
+              
+              <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                <p style="color: #6b7280; font-size: 12px; margin: 0; line-height: 1.5;">
+                  <strong>💡 Quick Reply:</strong> Just hit "Reply" to respond directly to ${name}.
+                </p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+                  Sent via Portfolio Contact Form • ${new Date().toLocaleString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+                </p>
+              </div>
+            </div>
+          </div>
+        `
+        });
+
+        console.log(`\x1b[32m[EMAIL SUCCESS]\x1b[0m Email sent! ID: ${result.data?.id || 'unknown'}`);
+        console.log(`\x1b[32m[EMAIL]\x1b[0m Message sent to gaziur.rahman4311@gmail.com from ${name}`);
+      } catch (emailError) {
+        console.error('\x1b[31m[EMAIL ERROR]\x1b[0m Failed to send email:', emailError);
+        console.error('\x1b[31m[EMAIL ERROR]\x1b[0m Error details:', JSON.stringify(emailError, null, 2));
+      }
+    } else {
+      console.warn('\x1b[33m[EMAIL]\x1b[0m RESEND_API_KEY not configured - email NOT sent');
+    }
+
+
     res.json({ ok: true });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
@@ -214,15 +297,36 @@ app.get("/api/public/projects", async (req, res) => {
 });
 
 // Alias for public projects (compatibility)
+// Alias for public projects (compatibility) - Updated with Conditional Pagination
 app.get("/api/projects", async (req, res) => {
   try {
-    const result = await query("SELECT Id, Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder FROM Projects WHERE IsActive = true ORDER BY SortOrder ASC, ProjectYear DESC");
+    const page = req.query.page ? parseInt(req.query.page) : null;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+    let queryText = "SELECT Id, Title, Tag, Description, ProjectYear, Role, TechCsv, DetailsJson, LiveUrl, RepoUrl, SortOrder FROM Projects WHERE IsActive = true ORDER BY SortOrder ASC, ProjectYear DESC";
+    let params = [];
+
+    if (page) {
+      const offset = (page - 1) * limit;
+      queryText += " LIMIT $1 OFFSET $2";
+      params = [limit, offset];
+    }
+
+    const countResult = await query("SELECT COUNT(*) FROM Projects WHERE IsActive = true");
+    const total = parseInt(countResult.rows[0].count);
+
+    const result = await query(queryText, params);
+
+    const mappedProjects = result.rows.map(r => ({
+      ...r, id: r.id, title: r.title, tag: r.tag, desc: r.description, year: r.projectyear, role: r.role,
+      tech: (r.techcsv || "").split(",").map(x => x.trim()).filter(Boolean), details: safeJsonArray(r.detailsjson),
+      live: r.liveurl, repo: r.repourl
+    }));
+
     res.json({
-      ok: true, projects: result.rows.map(r => ({
-        ...r, id: r.id, title: r.title, tag: r.tag, desc: r.description, year: r.projectyear, role: r.role,
-        tech: (r.techcsv || "").split(",").map(x => x.trim()).filter(Boolean), details: safeJsonArray(r.detailsjson),
-        live: r.liveurl, repo: r.repourl
-      }))
+      ok: true,
+      projects: mappedProjects,
+      pagination: page ? { total, page, limit, totalPages: Math.ceil(total / limit) } : null
     });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
@@ -260,10 +364,23 @@ app.get("/api/public/blogs", async (req, res) => {
 });
 
 // BLOGS (ADMIN)
+// BLOGS (ADMIN)
 app.get("/api/blogs", requireAdmin, async (req, res) => {
   try {
-    const result = await query("SELECT Id, Title, Excerpt, Content, Category, ReadTime, Featured, IsActive, CreatedAt FROM BlogPosts ORDER BY CreatedAt DESC");
-    res.json({ ok: true, blogs: result.rows });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const countResult = await query("SELECT COUNT(*) FROM BlogPosts");
+    const total = parseInt(countResult.rows[0].count);
+
+    const result = await query("SELECT Id, Title, Excerpt, Content, Category, ReadTime, Featured, IsActive, CreatedAt FROM BlogPosts ORDER BY CreatedAt DESC LIMIT $1 OFFSET $2", [limit, offset]);
+
+    res.json({
+      ok: true,
+      blogs: result.rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+    });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
 
@@ -291,10 +408,23 @@ app.delete("/api/blogs/:id", requireAdmin, async (req, res) => {
 });
 
 // MESSAGES (ADMIN)
+// MESSAGES (ADMIN)
 app.get("/api/messages", requireAdmin, async (req, res) => {
   try {
-    const result = await query("SELECT Id, FullName, Email, Message, CreatedAt FROM ContactMessages ORDER BY CreatedAt DESC LIMIT 100");
-    res.json({ ok: true, messages: result.rows });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const countResult = await query("SELECT COUNT(*) FROM ContactMessages");
+    const total = parseInt(countResult.rows[0].count);
+
+    const result = await query("SELECT Id, FullName, Email, Message, CreatedAt FROM ContactMessages ORDER BY CreatedAt DESC LIMIT $1 OFFSET $2", [limit, offset]);
+
+    res.json({
+      ok: true,
+      messages: result.rows,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+    });
   } catch (err) { console.error(err); res.status(500).json({ ok: false, error: "Server error" }); }
 });
 

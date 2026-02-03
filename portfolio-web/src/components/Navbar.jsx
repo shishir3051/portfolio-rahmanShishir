@@ -37,11 +37,9 @@ const Navbar = ({ onDashboardClick, theme, toggleTheme, isAdmin, onLogout, view,
               className="flex items-center gap-3 group cursor-pointer flex-none"
               onClick={onLogoClick || (() => window.location.hash = '')}
             >
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <Terminal className="w-5 h-5 text-white" />
-              </div>
+
               <div className="flex flex-col flex-none">
-                <span className="font-extrabold tracking-tighter text-lg leading-tight whitespace-nowrap uppercase">
+                <span className="font-extrabold tracking-tighter text-lg leading-tight whitespace-nowrap uppercase text-text">
                   RAHMAN <span className="text-accent">SHISHIR</span>
                 </span>
                 <span className="text-[10px] uppercase tracking-[0.4em] font-black text-muted2 leading-tight -mt-0.5">Portfolio</span>

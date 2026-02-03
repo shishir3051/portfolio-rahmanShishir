@@ -14,7 +14,7 @@ const BlogPostModal = ({ post, onClose }) => {
 
   const handleBookmark = () => {
     const bookmarked = JSON.parse(localStorage.getItem('bookmarked-posts') || '[]');
-    
+
     if (isBookmarked) {
       const filtered = bookmarked.filter(p => p.id !== post.id);
       localStorage.setItem('bookmarked-posts', JSON.stringify(filtered));
@@ -65,11 +65,11 @@ const BlogPostModal = ({ post, onClose }) => {
   if (!post) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-bg border border-stroke rounded-[32px] max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] relative"
         onClick={(e) => e.stopPropagation()}
       >
@@ -85,7 +85,7 @@ const BlogPostModal = ({ post, onClose }) => {
               {post.category}
             </span>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="w-11 h-11 rounded-2xl border border-stroke hover:border-red-500/50 hover:bg-red-500/5 hover:text-red-500 transition-all grid place-items-center group shadow-sm bg-panel"
             aria-label="Close"
@@ -137,11 +137,11 @@ const BlogPostModal = ({ post, onClose }) => {
                 } else if (trimmed.includes('align="justify"')) {
                   alignmentClass = "text-justify";
                 }
-                
+
                 if (alignmentClass !== "") {
-                   processedLine = trimmed.replace(/<div align="(.*?)">/g, '').replace(/<\/div>/g, '');
+                  processedLine = trimmed.replace(/<div align="(.*?)">/g, '').replace(/<\/div>/g, '');
                 }
-                
+
                 // H1 Heading
                 if (processedLine.startsWith('# ')) {
                   return <h2 key={i} className={`text-text font-black text-2xl md:text-3xl mt-10 mb-4 border-b border-stroke pb-2 ${alignmentClass}`}>{processedLine.replace('# ', '')}</h2>;
@@ -156,7 +156,7 @@ const BlogPostModal = ({ post, onClose }) => {
                 }
                 // Universal List Detection Logic
                 const listMatch = processedLine.match(/^(\s*)([ivxIVX]+[\.\)]|\d+[\.\)]|[a-zA-Z][\.\)]|[\-■‣•\*]| {4})(.*)/);
-                
+
                 if (listMatch) {
                   const indent = listMatch[1];
                   const marker = listMatch[2].trim();
@@ -179,8 +179,8 @@ const BlogPostModal = ({ post, onClose }) => {
                 }
 
                 return (
-                  <p 
-                    key={i} 
+                  <p
+                    key={i}
                     className={`transition-colors hover:text-text cursor-default leading-relaxed ${alignmentClass} text-muted text-base md:text-lg`}
                     dangerouslySetInnerHTML={{ __html: parseFormatting(processedLine) }}
                   />
@@ -190,9 +190,9 @@ const BlogPostModal = ({ post, onClose }) => {
           </div>
 
           {/* Footer Actions */}
-          <div className="mt-16 pt-10 border-t border-stroke flex items-center justify-between">
+          <div className="mt-16 pt-10 border-t border-stroke flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={handleShare}
                 className="relative h-12 px-6 rounded-2xl border border-stroke hover:border-accent hover:text-accent transition-all text-xs font-black uppercase tracking-widest flex items-center gap-3 bg-panel shadow-sm"
               >
@@ -206,13 +206,12 @@ const BlogPostModal = ({ post, onClose }) => {
                   </span>
                 )}
               </button>
-              <button 
+              <button
                 onClick={handleBookmark}
-                className={`h-12 px-6 rounded-2xl border transition-all text-xs font-black uppercase tracking-widest flex items-center gap-3 shadow-sm ${
-                  isBookmarked 
-                    ? 'border-accent text-accent bg-accent/10' 
+                className={`h-12 px-6 rounded-2xl border transition-all text-xs font-black uppercase tracking-widest flex items-center gap-3 shadow-sm ${isBookmarked
+                    ? 'border-accent text-accent bg-accent/10'
                     : 'border-stroke text-muted hover:border-accent hover:text-accent bg-panel'
-                }`}
+                  }`}
               >
                 <svg className="w-4 h-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -220,9 +219,9 @@ const BlogPostModal = ({ post, onClose }) => {
                 {isBookmarked ? 'Saved' : 'Save'}
               </button>
             </div>
-            <button 
+            <button
               onClick={onClose}
-              className="h-12 px-10 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(127,90,240,0.4)] hover:-translate-y-1 transition-all"
+              className="h-12 px-10 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(127,90,240,0.4)] hover:-translate-y-1 transition-all w-full sm:w-auto"
             >
               Close Post
             </button>

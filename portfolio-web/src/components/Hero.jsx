@@ -87,7 +87,7 @@ const Hero = ({ name, headline }) => {
             variants={itemVars}
           >
             <span className="block text-stroke-light text-transparent mb-[-0.2em]">I AM</span>
-            <span className="block bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
+            <span className="block text-text">
               {name ? name.split(' ')[0].toUpperCase() : "RAHMAN"}
             </span>
             <span className="block text-accent">
@@ -112,7 +112,7 @@ const Hero = ({ name, headline }) => {
                 <Code className="w-4 h-4" />
               </span>
             </a>
-            <a href="#contact" className="px-10 py-5 border border-white/20 hover:border-white hover:bg-white/5 rounded-full font-bold transition-all flex items-center gap-3 text-white uppercase tracking-widest text-xs">
+            <a href="#contact" className="px-10 py-5 border-2 border-stroke hover:border-text/30 hover:bg-white/5 rounded-full font-bold transition-all flex items-center gap-3 text-text uppercase tracking-widest text-xs">
               Contact Me
             </a>
           </motion.div>
@@ -126,7 +126,7 @@ const Hero = ({ name, headline }) => {
               const Content = (
                 <div className="flex flex-col gap-1 cursor-pointer group/stat">
                   <span className="text-xs text-muted uppercase tracking-widest group-hover/stat:text-accent transition-colors">{item.label}</span>
-                  <div className="flex items-center gap-2 text-xl font-bold text-white">
+                  <div className="flex items-center gap-2 text-xl font-bold text-text">
                     {item.value}
                     {React.cloneElement(item.icon, { className: `w-4 h-4 ${item.color} opacity-80 group-hover/stat:scale-110 transition-transform` })}
                   </div>
@@ -195,7 +195,7 @@ const Hero = ({ name, headline }) => {
               </div>
               <div>
                 <div className="text-xs text-muted font-bold uppercase tracking-wider">Software</div>
-                <div className="text-sm font-bold text-white">Engineer</div>
+                <div className="text-sm font-bold text-text">Engineer</div>
               </div>
             </motion.div>
           </div>
