@@ -25,7 +25,10 @@ if (!JWT_SECRET) {
 }
 
 // Configure Resend email service
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Replace top-level resend line
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY) 
+  : null;
 
 const app = express();
 
