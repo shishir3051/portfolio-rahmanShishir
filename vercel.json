@@ -1,9 +1,11 @@
 {
   "version": 2,
+  "buildCommand": "npm run build --prefix portfolio-web && cp -r portfolio-web/dist ./dist",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api"
+      "destination": "/api/[...slug]"
     },
     {
       "source": "/(.*)",
