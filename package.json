@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "install": "npm install --prefix portfolio-web && npm install --prefix portfolio-backend",
-    "build": "npm run build --prefix portfolio-web"
+    "build": "npm run build --prefix portfolio-web && rm -rf dist && cp -R portfolio-web/dist ./dist"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
