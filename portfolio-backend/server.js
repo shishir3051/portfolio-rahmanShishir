@@ -19,13 +19,13 @@ import ContactMessage from './models/ContactMessage.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const JWT_SECRET = process.env.JWT_SECRET || "rahman_secure_secret_2026";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.warn("\x1b[33m[WARN]\x1b[0m JWT_SECRET is not set in environment variables!");
+}
 
 // Configure Resend email service
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Connect to Database
-connectDB();
 
 const app = express();
 
@@ -43,7 +43,7 @@ app.use(cors({
 // 2. Body Parser
 app.use(express.json({ limit: "1mb" }));
 
-// 3. Security (Helmet)
+// 3. Security (Helmet) - API routes only
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return helmet({
@@ -54,7 +54,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Admin Auth Middleware
+// 4. DB Connection Middleware — ensures MongoDB is connected on every cold start
+//    This is critical for Vercel serverless: top-level connectDB() is not reliable.
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("\x1b[31m[DB ERROR]\x1b[0m Failed to connect to MongoDB:", err.message);
+    res.status(500).json({ ok: false, error: "Database connection failed" });
+  }
+});
+
+// =======================
+// ADMIN AUTH MIDDLEWARE
+// =======================
+
 function requireAdmin(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -107,7 +122,11 @@ app.post("/api/auth/login", async (req, res) => {
     const validPass = await bcrypt.compare(password, admin.passwordHash);
     if (!validPass) return res.status(401).json({ ok: false, error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: admin._id, username: admin.username }, JWT_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign(
+      { id: admin._id, username: admin.username },
+      JWT_SECRET,
+      { expiresIn: "24h" }
+    );
     res.json({ ok: true, token, user: { username: admin.username } });
   } catch (err) {
     console.error(err);
@@ -143,13 +162,19 @@ app.post("/api/auth/update-profile", requireAdmin, async (req, res) => {
   }
 });
 
+// =======================
 // CONTACT FORM
+// =======================
+
 const contactLimiter = rateLimit({ windowMs: 5 * 60 * 1000, max: 20 });
+
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
     const { name, email, message } = req.body;
-    if (!name || !email || !message) return res.status(400).json({ ok: false, error: "All fields required" });
-    
+    if (!name || !email || !message) {
+      return res.status(400).json({ ok: false, error: "All fields required" });
+    }
+
     const ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString().slice(0, 64);
     const ua = (req.headers["user-agent"] || "").toString().slice(0, 512);
 
@@ -174,7 +199,6 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
                   Someone reached out through your portfolio!
                 </p>
                 
-                <!-- Sender Info Box -->
                 <div style="background-color: #27272a; padding: 20px; border-radius: 8px; border-left: 4px solid #818cf8; margin-bottom: 20px;">
                   <p style="font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 5px 0; font-weight: 600;">Sender Name</p>
                   <p style="color: #ffffff; font-size: 16px; margin: 0 0 15px 0; font-weight: 500;">${name}</p>
@@ -183,7 +207,6 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
                   <a href="mailto:${email}" style="color: #818cf8; font-size: 16px; margin: 0; text-decoration: none; font-weight: 500;">${email}</a>
                 </div>
                 
-                <!-- Message Box -->
                 <div style="background-color: #292524; border: 1px solid #d97706; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                   <p style="font-size: 11px; color: #fcd34d; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 10px 0; font-weight: bold;">
                     📝 Message
@@ -191,14 +214,12 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
                   <p style="color: #e5e5e5; font-size: 15px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${message}</p>
                 </div>
 
-                <!-- Footer Box -->
                 <div style="background-color: #27272a; padding: 16px; border-radius: 8px; margin-bottom: 30px;">
                   <p style="color: #a1a1aa; font-size: 13px; margin: 0;">
                     <span style="color: #fbbf24; font-weight: bold;">💡 Quick Reply:</span> Just hit "Reply" to respond directly to ${name}.
                   </p>
                 </div>
 
-                <!-- Timestamp -->
                 <hr style="border: none; border-top: 1px solid #3f3f46; margin-bottom: 20px;" />
                 <p style="text-align: center; color: #71717a; font-size: 11px; margin: 0;">
                   Sent via Portfolio Contact Form • ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
@@ -220,7 +241,10 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
   }
 });
 
+// =======================
 // PROJECTS
+// =======================
+
 app.get("/api/projects", async (req, res) => {
   try {
     const page = req.query.page ? parseInt(req.query.page) : null;
@@ -304,7 +328,10 @@ app.delete("/api/projects/:id", requireAdmin, async (req, res) => {
   }
 });
 
+// =======================
 // BLOGS
+// =======================
+
 app.get("/api/blogs", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -345,7 +372,9 @@ app.put("/api/blogs/:id", requireAdmin, async (req, res) => {
   try {
     const { title, excerpt, content, category, readTime, featured, isActive } = req.body;
     await BlogPost.findByIdAndUpdate(req.params.id, {
-      title, excerpt, content, category, readTime, featured: !!featured, isActive: isActive !== false
+      title, excerpt, content, category, readTime,
+      featured: !!featured,
+      isActive: isActive !== false
     });
     res.json({ ok: true });
   } catch (err) {
@@ -364,7 +393,10 @@ app.delete("/api/blogs/:id", requireAdmin, async (req, res) => {
   }
 });
 
+// =======================
 // MESSAGES (ADMIN)
+// =======================
+
 app.get("/api/messages", requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -389,13 +421,19 @@ app.get("/api/messages", requireAdmin, async (req, res) => {
   }
 });
 
-// Health & Test
+// =======================
+// HEALTH CHECK
+// =======================
+
 app.get("/api/health", (req, res) => res.json({ ok: true, db: "mongodb" }));
 
-// API Export for Vercel Serverless Functions
+// =======================
+// EXPORT (Vercel Serverless)
+// =======================
+
 export default app;
 
-// Listen on port 4000 for local development when run directly via Node
+// Local development only
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
