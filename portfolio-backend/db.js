@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://gaziurrahman4311_db_user:A/e43117278@dbarzar.fmnyt79.mongodb.net/?appName=dBarzar";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const connectDB = async () => {
   try {
@@ -12,6 +12,7 @@ const connectDB = async () => {
     console.log("\x1b[32m[DB]\x1b[0m MongoDB connected successfully");
   } catch (err) {
     console.error("\x1b[31m[DB ERROR]\x1b[0m MongoDB connection failed:", err.message);
+    throw err;
   }
 };
 
