@@ -1,11 +1,12 @@
 {
+  "name": "portfolio-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js",
-    "build": "echo 'No build step required' && exit 0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "start": "node server.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -16,7 +17,7 @@
     "fs-extra": "^11.3.3",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.17.2",
+    "mongoose": "^8.11.0",
     "resend": "^6.9.1"
   },
   "devDependencies": {

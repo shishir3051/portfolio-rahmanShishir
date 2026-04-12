@@ -1,14 +1,18 @@
 export const getApiUrl = () => {
-  // Hardcoded production URL as primary fallback to ensure it works on Vercel
-  const PRODUCTION_URL = "https://portfolio-rahmanshishir.onrender.com";
-  
-  // If we are in development (localhost), use localhost
+  // Use VITE_API_URL if defined (standard for development)
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // Fallback for local development
+  // Removing the trailing /api because components add /api/ themselves
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-     return import.meta.env.VITE_API_URL || "http://localhost:4000";
+    return "http://localhost:4000";
   }
   
-  // Otherwise use the hardcoded production URL
-  return PRODUCTION_URL;
+  // Standard relative path for Vercel deployment
+  // Returning empty string so the URL starts with /api/...
+  return "";
 };
 
 export const API_BASE = getApiUrl();

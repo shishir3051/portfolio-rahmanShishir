@@ -181,7 +181,7 @@ const Dashboard = ({ tokenProp }) => {
   };
 
   const startEditBlog = (b) => {
-    setEditingBlogId(b.id);
+    setEditingBlogId(b._id || b.id);
     setBlogForm({
       title: b.title || "",
       excerpt: b.excerpt || "",
@@ -452,7 +452,7 @@ const Dashboard = ({ tokenProp }) => {
                           <div className="text-xs text-muted2">{m.email}</div>
                         </td>
                         <td className="px-6 py-4 text-sm text-muted line-clamp-2 max-w-xs">{m.message}</td>
-                        <td className="px-6 py-4 text-xs text-muted2 whitespace-nowrap">{new Date(m.createdat || m.CreatedAt).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 text-xs text-muted2 whitespace-nowrap">{new Date(m.createdAt || m.createdat || m.CreatedAt).toLocaleDateString()}</td>
                       </tr>
                     ))
                   )}
@@ -525,7 +525,7 @@ const Dashboard = ({ tokenProp }) => {
                       <tr key={i} className="hover:bg-panel transition-all">
                         <td className="px-6 py-4">
                           <div className="font-bold">{b.title}</div>
-                          <div className="text-xs text-muted2">{new Date(b.createdat || b.CreatedAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-muted2">{new Date(b.createdAt || b.createdat || b.CreatedAt).toLocaleDateString()}</div>
                         </td>
                         <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold">{b.category}</span></td>
                         <td className="px-6 py-4 text-xs">{b.isactive !== false ? '✅ Active' : '❌ Hidden'}</td>
@@ -538,7 +538,7 @@ const Dashboard = ({ tokenProp }) => {
                               Edit
                             </button>
                             <button
-                              onClick={() => deleteBlog(b.id)}
+                              onClick={() => deleteBlog(b._id || b.id)}
                               className="bg-red-500/20 text-red-400 hover:bg-red-500/40 px-3 py-1 rounded-lg text-xs font-bold transition-all"
                             >
                               Delete
@@ -813,7 +813,9 @@ const Dashboard = ({ tokenProp }) => {
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent text-text w-full appearance-none cursor-pointer hover:border-accent/50 transition-colors"
                   >
                     {["FinTech", "Cybersecurity", "Web Development", "Backend", "Database", "Career", "Technology"].map(c => (
-                      <option key={c} value={c} className="bg-panel text-text font-bold">{c}</option>
+                      <option key={c} value={c} className="font-bold" style={{ backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+                        {c}
+                      </option>
                     ))}
                   </select>
                 </div>

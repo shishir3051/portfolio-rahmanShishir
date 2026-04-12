@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, ChevronRight, Terminal, Filter, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, ChevronRight, Terminal, Filter, MessageSquare } from 'lucide-react';
 import BlogPostModal from '../components/BlogPostModal';
 
 import { API_BASE } from '../config';
@@ -13,7 +13,7 @@ const Blog = () => {
 
   const fetchBlogs = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/public/blogs`);
+      const res = await fetch(`${API_BASE}/api/blogs`);
       const data = await res.json();
       if (data.ok) {
         setBlogPosts(data.blogs || []);
@@ -121,7 +121,7 @@ const Blog = () => {
                   <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted2 mb-6">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3 h-3" />
-                      {new Date(post.createdat || post.CreatedAt).toLocaleDateString()}
+                      {new Date(post.createdAt || post.createdat || post.CreatedAt).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3 h-3" />
@@ -150,7 +150,7 @@ const Blog = () => {
           {/* Pagination */}
           <div className="flex justify-center gap-3 mt-20">
             <button className="w-12 h-12 rounded-2xl border border-stroke flex items-center justify-center hover:border-accent hover:bg-accent/5 transition-all text-muted">
-              <chevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button className="w-12 h-12 rounded-2xl bg-accent text-white font-black shadow-lg shadow-accent/20">1</button>
             <button className="w-12 h-12 rounded-2xl border border-stroke hover:border-accent hover:bg-accent/5 transition-all font-black text-muted">2</button>
