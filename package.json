@@ -2,6 +2,10 @@
   "name": "portfolio-root",
   "private": true,
   "type": "module",
+  "scripts": {
+    "install": "npm install --prefix portfolio-web && npm install --prefix portfolio-backend",
+    "build": "npm run build --prefix portfolio-web"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",

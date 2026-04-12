@@ -7,7 +7,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/portfolio-web/dist/index.html"
+      "destination": "/index.html"
     }
   ]
 }
