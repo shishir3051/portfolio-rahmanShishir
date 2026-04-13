@@ -13,12 +13,6 @@
 {
   "version": 2,
   "outputDirectory": "dist",
-  "builds": [
-    {
-      "src": "api/[...slug].js",
-      "use": "@vercel/node"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
