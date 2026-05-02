@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "concurrently \"npm run dev --prefix portfolio-backend\" \"npm run dev --prefix portfolio-web\"",
     "install": "npm install --prefix portfolio-web && npm install --prefix portfolio-backend",
     "build": "npm run build --prefix portfolio-web && rm -rf dist && cp -R portfolio-web/dist ./dist"
   },
@@ -17,5 +18,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.11.0",
     "resend": "^6.9.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Code, Database, Bug, Cpu, Cloud, Lock, Globe, Layers, Server } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -328,6 +329,10 @@ function App() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <Helmet>
+        <title>Rahman Shishir | Full Stack Developer</title>
+        <meta name="description" content="Portfolio of Rahman Shishir, a passionate Full Stack Developer specializing in React, Node.js, and modern web applications." />
+      </Helmet>
       <Cursor />
       <Scene3D />
       <div className="bg-glow"></div>

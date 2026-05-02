@@ -1,10 +1,15 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, FileText, Mail, Terminal } from 'lucide-react';
 
 const Legal = () => {
   return (
     <div className="min-h-screen pt-32 pb-20">
+      <Helmet>
+        <title>Privacy Policy | Rahman Shishir</title>
+        <meta name="description" content="Privacy Protocol and Information Collection details for Rahman Shishir's portfolio." />
+      </Helmet>
       {/* Hero Section */}
       <section className="mb-20">
         <div className="container mx-auto px-6">

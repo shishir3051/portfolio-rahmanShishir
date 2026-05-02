@@ -1,10 +1,15 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { FileText, ShieldAlert, Scale, Handshake, Mail, Terminal } from 'lucide-react';
 
 const Terms = () => {
   return (
     <div className="min-h-screen pt-32 pb-20">
+      <Helmet>
+        <title>Terms of Service | Rahman Shishir</title>
+        <meta name="description" content="Operational Framework and Terms of Service for using Rahman Shishir's portfolio." />
+      </Helmet>
       {/* Hero Section */}
       <section className="mb-20">
         <div className="container mx-auto px-6">

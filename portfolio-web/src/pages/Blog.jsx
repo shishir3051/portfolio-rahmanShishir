@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, ChevronLeft, ChevronRight, Terminal, Filter, MessageSquare } from 'lucide-react';
 import BlogPostModal from '../components/BlogPostModal';
@@ -37,6 +38,10 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20">
+      <Helmet>
+        <title>Technical Blog | Rahman Shishir</title>
+        <meta name="description" content="Technical post-mortems, security advisories, and architectural deep-dives from the front lines of software engineering." />
+      </Helmet>
       {/* Hero Section */}
       <section className="mb-20">
         <div className="container mx-auto px-6">

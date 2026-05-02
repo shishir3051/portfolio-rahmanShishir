@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Terminal, Code, Cpu, Shield, Layout, Settings } from 'lucide-react';
 
@@ -54,6 +55,10 @@ const Uses = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20">
+      <Helmet>
+        <title>Uses & Tech Stack | Rahman Shishir</title>
+        <meta name="description" content="A curated inventory of the hardware, software, and development protocols I leverage to engineer secure digital environments." />
+      </Helmet>
       {/* Hero Section */}
       <section className="mb-20">
         <div className="container mx-auto px-6">
