@@ -196,14 +196,14 @@ const Hero = ({ name, headline }) => {
         </div>
 
         {/* ── RIGHT: Profile photo inside tech orbit ──────────── */}
-        <div className="relative hidden lg:flex items-center justify-center" style={{ zIndex: 2 }}>
-          <div className="tech-orbit" style={{ position: 'relative', width: '100%', height: '520px' }}>
+        <div className="relative flex items-center justify-center mt-12 lg:mt-0 w-full" style={{ zIndex: 2 }}>
+          <div className="tech-orbit" style={{ position: 'relative', width: '100%', height: 'min(520px, 100vw)' }}>
 
             {/* Glow behind photo */}
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '340px', height: '340px', borderRadius: '50%',
+              width: 'min(340px, 65vw)', height: 'min(340px, 65vw)', borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(177,74,255,0.14) 50%, transparent 70%)',
               filter: 'blur(28px)',
             }} />
@@ -212,7 +212,7 @@ const Hero = ({ name, headline }) => {
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '380px', height: '380px', borderRadius: '50%',
+              width: 'min(380px, 73vw)', height: 'min(380px, 73vw)', borderRadius: '50%',
               border: '1px dashed rgba(0,240,255,0.22)',
             }} />
 
@@ -220,7 +220,7 @@ const Hero = ({ name, headline }) => {
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '490px', height: '490px', borderRadius: '50%',
+              width: 'min(490px, 94vw)', height: 'min(490px, 94vw)', borderRadius: '50%',
               border: '1px dashed rgba(177,74,255,0.15)',
             }} />
 
@@ -228,7 +228,7 @@ const Hero = ({ name, headline }) => {
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '300px', height: '300px', borderRadius: '50%',
+              width: 'min(300px, 58vw)', height: 'min(300px, 58vw)', borderRadius: '50%',
               overflow: 'hidden',
               border: '2.5px solid rgba(0,240,255,0.4)',
               boxShadow: '0 0 40px rgba(0,240,255,0.25), 0 0 80px rgba(177,74,255,0.15)',
