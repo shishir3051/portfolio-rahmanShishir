@@ -18,6 +18,8 @@ import Scene3D from './components/Scene3D';
 import Timeline from './components/Timeline';
 import Login from './components/Login';
 import Cursor from './components/Cursor';
+import Loader from './components/Loader';
+import AboutCanvas3D from './components/AboutCanvas3D';
 
 import { API_BASE } from './config';
 
@@ -333,6 +335,8 @@ function App() {
         <title>Rahman Shishir | Full Stack Developer</title>
         <meta name="description" content="Portfolio of Rahman Shishir, a passionate Full Stack Developer specializing in React, Node.js, and modern web applications." />
       </Helmet>
+      {/* Loader renders above everything — auto-fades after 1.8 s */}
+      <Loader />
       <Cursor />
       <Scene3D />
       <div className="bg-glow"></div>
@@ -358,27 +362,38 @@ function App() {
           />
         </section>
 
-        <Section id="about" title="About" subtitle="I combine technical rigour from ethical hacking with creative software engineering to build secure, scalable digital experiences. My approach prioritizes security, user satisfaction, and architectural excellence.">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <motion.div whileHover={{ y: -5 }} className="glass p-8 col-span-1 lg:col-span-2">
-              <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <Code className="text-accent" /> Professional Approach
-              </h3>
-              <p className="text-muted text-lg leading-relaxed">
-                I'm a versatile professional skilled in both ethical hacking and front-end development. With expertise in cybersecurity and creating engaging user experiences, I deliver high-quality results prioritizing security and user satisfaction.
-              </p>
-            </motion.div>
-            <motion.div whileHover={{ y: -5 }} className="glass p-8">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Shield className="text-accent2" /> Core Ethics
-              </h3>
-              <p className="text-muted text-sm leading-relaxed mb-6">Dedicated to uncovering vulnerabilities and crafting intuitive, secure interfaces.</p>
-              <div className="flex flex-wrap gap-2">
-                {['Security-first', 'E|HE Certified', 'Full-stack'].map(chip => (
-                  <span key={chip} className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-bold uppercase">{chip}</span>
-                ))}
-              </div>
-            </motion.div>
+        <Section id="about" title="About" subtitle="I combine technical rigour from ethical hacking with creative software engineering to build secure, scalable digital experiences.">
+          {/* Two-column grid: 3D canvas left, text content right */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-10">
+
+            {/* Left — spinning icosahedron 3D canvas */}
+            <div className="flex items-center justify-center">
+              <AboutCanvas3D />
+            </div>
+
+            {/* Right — about text */}
+            <div className="flex flex-col gap-6">
+              <motion.div whileHover={{ y: -5 }} className="glass p-8">
+                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <Code className="text-accent" /> Professional Approach
+                </h3>
+                <p className="text-muted text-lg leading-relaxed">
+                  I'm a versatile professional skilled in both ethical hacking and front-end development. With expertise in cybersecurity and creating engaging user experiences, I deliver high-quality results prioritizing security and user satisfaction.
+                </p>
+              </motion.div>
+
+              <motion.div whileHover={{ y: -5 }} className="glass p-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Shield className="text-accent2" /> Core Ethics
+                </h3>
+                <p className="text-muted text-sm leading-relaxed mb-6">Dedicated to uncovering vulnerabilities and crafting intuitive, secure interfaces.</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Security-first', 'E|HE Certified', 'Full-stack', 'B.Sc SWE'].map(chip => (
+                    <span key={chip} className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-bold uppercase">{chip}</span>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
           </div>
         </Section>
 

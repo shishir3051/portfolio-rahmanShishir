@@ -1,63 +1,73 @@
-import React, { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
 
+/**
+ * Cursor — dot + lagging ring cursor.
+ * - Dot follows mouse instantly.
+ * - Ring lerps toward mouse with a 0.18 lag factor.
+ * - Ring expands when hovering interactive elements.
+ * Hidden on touch/mobile via CSS.
+ */
 const Cursor = () => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [isClicked, setIsClicked] = useState(false);
+  const dotRef  = useRef(null);
+  const ringRef = useRef(null);
 
-    // Mouse position state (raw coordinates)
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
+  useEffect(() => {
+    const dot  = dotRef.current;
+    const ring = ringRef.current;
+    if (!dot || !ring) return;
 
-    // Smooth spring animation for the outer ring
-    // Lower stiffness/damping creates a "looser" feel
-    const springConfig = { damping: 25, stiffness: 400 };
-    const ringX = useSpring(mouseX, springConfig);
-    const ringY = useSpring(mouseY, springConfig);
+    let mx = 0, my = 0; // mouse
+    let rx = 0, ry = 0; // ring position (lerped)
+    let rafId;
 
-    useEffect(() => {
-        const moveCursor = (e) => {
-            mouseX.set(e.clientX);
-            mouseY.set(e.clientY);
-            if (!isVisible) setIsVisible(true);
-        };
+    // Move dot instantly
+    const onMouseMove = (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+    };
 
-        const handleMouseDown = () => setIsClicked(true);
-        const handleMouseUp = () => setIsClicked(false);
+    // Animate ring with lag
+    const animateRing = () => {
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+      rafId = requestAnimationFrame(animateRing);
+    };
+    animateRing();
 
-        window.addEventListener('mousemove', moveCursor);
-        window.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mouseup', handleMouseUp);
+    // Hover expansion on interactive elements
+    const SELECTORS = 'a, button, .btn, .glass, .tilt-card, [role="button"], label[for]';
+    const addActive    = () => ring.classList.add('active');
+    const removeActive = () => ring.classList.remove('active');
 
-        return () => {
-            window.removeEventListener('mousemove', moveCursor);
-            window.removeEventListener('mousedown', handleMouseDown);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [mouseX, mouseY, isVisible]);
+    const attachHover = () => {
+      document.querySelectorAll(SELECTORS).forEach((el) => {
+        el.addEventListener('mouseenter', addActive);
+        el.addEventListener('mouseleave', removeActive);
+      });
+    };
 
-    return (
-        <>
-            {/* Outer Ring Cursor (Spring follow) */}
-            <motion.div
-                className="fixed top-0 left-0 w-8 h-8 border border-white rounded-full pointer-events-none z-[9998] mix-blend-difference"
-                style={{
-                    x: ringX,
-                    y: ringY,
-                    translateX: "-50%",
-                    translateY: "-50%",
-                }}
-                animate={{
-                    scale: isClicked ? 0.8 : 1,
-                    opacity: isClicked ? 0.5 : 1
-                }}
-                transition={{
-                    scale: { duration: 0.1 },
-                    opacity: { duration: 0.2 }
-                }}
-            />
-        </>
-    );
+    // Attach immediately + re-attach when DOM mutates (e.g. modals open)
+    attachHover();
+    const observer = new MutationObserver(attachHover);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('mousemove', onMouseMove);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove', onMouseMove);
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={dotRef}  className="cursor-dot"  aria-hidden="true" />
+      <div ref={ringRef} className="cursor-ring" aria-hidden="true" />
+    </>
+  );
 };
 
 export default Cursor;

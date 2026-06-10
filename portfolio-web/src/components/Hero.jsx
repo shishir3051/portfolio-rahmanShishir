@@ -1,208 +1,281 @@
-import React from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Shield, Code, Database, Bug, Briefcase, GraduationCap, Globe } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Code, Briefcase, GraduationCap, Globe } from 'lucide-react';
+import { gsap } from 'gsap';
 
+// ── Tech orbit badge data ─────────────────────────────────────────────────────
+const TECH_BADGES = [
+  { label: 'React',  style: { top: '8%',  left: '48%' } },
+  { label: 'Java',   style: { top: '28%', left: '82%' } },
+  { label: 'Spring', style: { top: '58%', left: '88%' } },
+  { label: 'Neo4j',  style: { top: '82%', left: '52%' } },
+  { label: 'Sec',    style: { top: '60%', left: '8%'  } },
+  { label: 'AWS',    style: { top: '22%', left: '12%' } },
+];
+
+// ── Snapshot stat items ───────────────────────────────────────────────────────
+const SNAPSHOT_ITEMS = [
+  { label: 'Experience', value: '1.5+ Years', icon: <Briefcase className="w-4 h-4" />, color: 'text-accent' },
+  { label: 'Projects',   value: '10+ Total',  icon: <Code className="w-4 h-4" />,      color: 'text-accent2' },
+  { label: 'Education',  value: 'B.Sc SWE',   icon: <GraduationCap className="w-4 h-4" />, color: 'text-white' },
+  {
+    label: 'Company', value: 'naztech Inc',
+    icon: <Globe className="w-4 h-4" />, color: 'text-accent',
+    link: 'https://naztech.io/',
+  },
+];
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
 const Hero = ({ name, headline }) => {
-  // Mouse Parallax Logic
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+  const containerRef = useRef(null);
 
-  React.useEffect(() => {
-    const handleMouseMove = (e) => {
-      // Calculate mouse position relative to center of screen
-      const { innerWidth, innerHeight } = window;
-      const x = e.clientX - innerWidth / 2;
-      const y = e.clientY - innerHeight / 2;
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-      mouseX.set(x);
-      mouseY.set(y);
-    };
+    // Targets inside the hero
+    const greet   = el.querySelector('.hero-greet');
+    const title   = el.querySelector('.hero-title');
+    const sub     = el.querySelector('.hero-sub');
+    const tag     = el.querySelector('.hero-tag');
+    const cta     = el.querySelector('.hero-cta');
+    const stats   = el.querySelector('.hero-stats');
+    const orbit   = el.querySelector('.tech-orbit');
+    const scrollI = el.querySelector('.scroll-ind');
+    const bubbles = el.querySelectorAll('.tech-bubble');
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
+    // Hide everything immediately (before loader fades)
+    gsap.set([greet, title, sub, tag, cta, stats, orbit, scrollI], { opacity: 0, y: 30 });
+    gsap.set(bubbles, { opacity: 0, scale: 0 });
 
-  const springConfig = { stiffness: 100, damping: 30 };
-  const x = useSpring(mouseX, springConfig);
-  const y = useSpring(mouseY, springConfig);
+    // Staggered entrance after loader (1.8 s)
+    const tl = gsap.timeline({ delay: 1.9 });
 
-  // Transform values for different layers (parallax effect)
-  const bgX = useTransform(x, (val) => val / 40); // Background moves slightly opposite
-  const bgY = useTransform(y, (val) => val / 40);
+    tl.to(greet,   { opacity: 1, y: 0, duration: 0.9 })
+      .to(title,   { opacity: 1, y: 0, duration: 1   }, '-=0.6')
+      .to(sub,     { opacity: 1, y: 0, duration: 0.9 }, '-=0.6')
+      .to(tag,     { opacity: 1, y: 0, duration: 0.9 }, '-=0.7')
+      .to(cta,     { opacity: 1, y: 0, duration: 0.7 }, '-=0.6')
+      .to(stats,   { opacity: 1, y: 0, duration: 0.6 }, '-=0.5')
+      .to(scrollI, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+      .to(orbit,   { opacity: 1, y: 0, duration: 0.5 }, '-=0.8')
+      .to(bubbles, {
+        opacity: 1, scale: 1, duration: 0.7,
+        stagger: 0.12, ease: 'back.out(2)',
+      }, '-=0.5');
 
-  const imgX = useTransform(x, (val) => val / -20); // Image moves slightly
-  const imgY = useTransform(y, (val) => val / -20);
+    return () => tl.kill();
+  }, []);
 
-  const badgeX = useTransform(x, (val) => val / -15); // Badge moves more
-  const badgeY = useTransform(y, (val) => val / -15);
-  const containerVars = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVars = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-    },
-  };
-
-  const snapshotItems = [
-    { label: "Experience", value: "1.5+ Years", icon: <Briefcase className="w-5 h-5" />, color: "text-accent" },
-    { label: "Projects", value: "10+ Total", icon: <Code className="w-5 h-5" />, color: "text-accent2" },
-    { label: "Education", value: "B.Sc SWE", icon: <GraduationCap className="w-5 h-5" />, color: "text-white" },
-    { label: "Company", value: "naztech Inc", icon: <Globe className="w-5 h-5" />, color: "text-accent", link: "https://naztech.io/" },
-  ];
+  const firstName = name ? name.split(' ')[0] : 'Rahman';
+  const lastName  = name ? name.split(' ').slice(1).join(' ') : 'Shishir';
 
   return (
-    <section id="home" className="min-h-screen flex items-center py-20 relative pt-32">
-      <div className="container mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center">
-        <motion.div
-          className="lg:col-span-7 relative z-10 order-2 lg:order-1 pt-10 lg:pt-0"
-          variants={containerVars}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ margin: "-100px" }}
-        >
-          <motion.div className="mb-6 lg:mb-10" variants={itemVars}>
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/10 bg-panel/20 backdrop-blur-xl text-xs md:text-sm text-text font-bold uppercase tracking-[0.2em]">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent"></span>
-              </span>
-              Available for Partnership
-            </div>
-          </motion.div>
+    <section
+      id="home"
+      ref={containerRef}
+      className="min-h-screen flex flex-col items-center justify-center relative"
+      style={{ paddingTop: '100px' }}
+    >
+      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center w-full">
 
-          <motion.h1
-            className="text-[3.5rem] leading-[1] md:text-[5.5rem] lg:text-[7rem] xl:text-[8rem] font-black tracking-tighter mb-8"
-            variants={itemVars}
-          >
-            <span className="block text-stroke-light text-transparent mb-[-0.2em]">I AM</span>
-            <span className="block text-text">
-              {name ? name.split(' ')[0].toUpperCase() : "RAHMAN"}
-            </span>
-            <span className="block text-accent">
-              {name ? name.split(' ').slice(1).join(' ').toUpperCase() : "SHISHIR"}
-            </span>
-          </motion.h1>
+        {/* ── LEFT: Text content ─────────────────────────────── */}
+        <div className="relative" style={{ zIndex: 2 }}>
 
-          <motion.div
-            className="flex flex-col md:flex-row gap-8 items-start md:items-center mb-12"
-            variants={itemVars}
-          >
-            <div className="h-px w-20 bg-accent hidden md:block"></div>
-            <p className="text-muted text-lg md:text-xl max-w-[40ch] leading-relaxed font-light">
-              {headline || "Enterprise-grade engineering with a security-first mindset. Specializing in Java Full-Stack development."}
+          {/* Greeting */}
+          <div className="hero-greet mb-6">
+            Hi there, my name is
+          </div>
+
+          {/* Name */}
+          <div className="hero-title mb-6">
+            <h1
+              className="font-black tracking-tighter leading-none"
+              style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(48px, 7vw, 100px)' }}
+            >
+              <span className="hero-name-first">{firstName}.</span>
+              <span className="hero-name-last">{lastName}.</span>
+            </h1>
+          </div>
+
+
+          {/* Sub headline */}
+          <div className="hero-sub mb-4">
+            <p style={{ fontSize: '1.25rem', color: 'var(--text-dim)', fontWeight: 300 }}>
+              I'm a{' '}
+              <b style={{ color: 'var(--cyan)', fontWeight: 600 }}>
+                Java Full-Stack Engineer.
+              </b>
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div className="flex flex-wrap gap-6" variants={itemVars}>
-            <a href="#projects" className="group relative px-10 py-5 bg-white text-black rounded-full font-bold transition-all hover:scale-105 active:scale-95 overflow-hidden flex items-center gap-3">
-              VIEW WORK
-              <span className="bg-black text-white rounded-full p-1 group-hover:rotate-45 transition-transform duration-300">
-                <Code className="w-4 h-4" />
-              </span>
+          {/* Tag line */}
+          <div className="hero-tag mb-10">
+            <p style={{ fontSize: '16px', color: 'var(--text-dim)', lineHeight: 1.75, maxWidth: '520px' }}>
+              {headline || 'Building secure, scalable systems with a security-first mindset. Specializing in FinTech, Spring Boot & modern web engineering.'}
+            </p>
+          </div>
+
+          {/* CTA buttons */}
+          <div className="hero-cta flex flex-wrap gap-4 mb-16">
+            <a
+              href="#projects"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                padding: '16px 32px', borderRadius: '999px',
+                fontWeight: 600, fontSize: '15px',
+                background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+                color: '#08081a',
+                boxShadow: '0 8px 30px rgba(0,240,255,0.35)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                textDecoration: 'none',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 14px 40px rgba(177,74,255,0.5)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,240,255,0.35)';
+              }}
+            >
+              View My Work →
             </a>
-            <a href="#contact" className="px-10 py-5 border-2 border-stroke hover:border-text/30 hover:bg-white/5 rounded-full font-bold transition-all flex items-center gap-3 text-text uppercase tracking-widest text-xs">
+            <a
+              href="#contact"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                padding: '16px 32px', borderRadius: '999px',
+                fontWeight: 600, fontSize: '15px',
+                background: 'transparent', color: 'var(--text)',
+                border: '1px solid var(--glass-border)',
+                transition: 'transform 0.3s, border-color 0.3s, color 0.3s',
+                textDecoration: 'none',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.borderColor = 'var(--cyan)';
+                e.currentTarget.style.color = 'var(--cyan)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.borderColor = 'var(--glass-border)';
+                e.currentTarget.style.color = 'var(--text)';
+              }}
+            >
               Contact Me
             </a>
-          </motion.div>
+          </div>
 
-          {/* Integrated Snapshots - Horizontal Bar on Desktop */}
-          <motion.div
-            className="hidden lg:grid grid-cols-4 gap-8 mt-24 border-t border-white/10 pt-8"
-            variants={itemVars}
+          {/* Snapshot stats */}
+          <div
+            className="hero-stats hidden lg:grid grid-cols-4 gap-8 border-t pt-8"
+            style={{ borderColor: 'var(--glass-border)' }}
           >
-            {snapshotItems.map((item, i) => {
-              const Content = (
-                <div className="flex flex-col gap-1 cursor-pointer group/stat">
-                  <span className="text-xs text-muted uppercase tracking-widest group-hover/stat:text-accent transition-colors">{item.label}</span>
-                  <div className="flex items-center gap-2 text-xl font-bold text-text">
+            {SNAPSHOT_ITEMS.map((item, i) => {
+              const content = (
+                <div className="flex flex-col gap-1">
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: '11px',
+                      color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px',
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  <div className="flex items-center gap-2 font-bold text-white text-lg">
                     {item.value}
-                    {React.cloneElement(item.icon, { className: `w-4 h-4 ${item.color} opacity-80 group-hover/stat:scale-110 transition-transform` })}
+                    {React.cloneElement(item.icon, { className: `w-4 h-4 ${item.color} opacity-80` })}
                   </div>
                 </div>
               );
-
-              if (item.link) {
-                return <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">{Content}</a>;
-              }
-              return <div key={i}>{Content}</div>;
+              return item.link
+                ? <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">{content}</a>
+                : <div key={i}>{content}</div>;
             })}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          className="lg:col-span-5 relative order-1 lg:order-2"
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          style={{ x: imgX, y: imgY }}
-        >
-          <div className="relative z-10">
-            {/* Abstract Background Elements */}
-            <motion.div
-              style={{ x: bgX, y: bgY }}
-              className="absolute -top-20 -right-20 w-[140%] h-[140%] bg-gradient-radial from-accent/20 to-transparent blur-[80px] -z-10"
-            ></motion.div>
+        {/* ── RIGHT: Profile photo inside tech orbit ──────────── */}
+        <div className="relative hidden lg:flex items-center justify-center" style={{ zIndex: 2 }}>
+          <div className="tech-orbit" style={{ position: 'relative', width: '100%', height: '520px' }}>
 
-            <div className="relative rounded-[2rem] overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm max-w-[400px] mx-auto lg:ml-auto group">
-              <motion.img
+            {/* Glow behind photo */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '340px', height: '340px', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(177,74,255,0.14) 50%, transparent 70%)',
+              filter: 'blur(28px)',
+            }} />
+
+            {/* Orbit ring 1 */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '380px', height: '380px', borderRadius: '50%',
+              border: '1px dashed rgba(0,240,255,0.22)',
+            }} />
+
+            {/* Orbit ring 2 */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '490px', height: '490px', borderRadius: '50%',
+              border: '1px dashed rgba(177,74,255,0.15)',
+            }} />
+
+            {/* Profile photo — centred in the orbit */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '300px', height: '300px', borderRadius: '50%',
+              overflow: 'hidden',
+              border: '2.5px solid rgba(0,240,255,0.4)',
+              boxShadow: '0 0 40px rgba(0,240,255,0.25), 0 0 80px rgba(177,74,255,0.15)',
+              background: 'rgba(0,0,0,0.4)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 3,
+            }}>
+              <img
                 src="/assets/profile2.png"
-                alt={name}
-                className="w-full h-auto object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
+                alt="Rahman Shishir"
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', objectPosition: 'top center',
+                  filter: 'grayscale(20%)',
+                  transition: 'filter 0.5s ease, transform 0.5s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.filter = 'grayscale(0%)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.filter = 'grayscale(20%)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
               />
-
-              {/* Mobile/Tablet Snapshot Grid Overlay */}
-              <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-6 lg:hidden">
-                <div className="grid grid-cols-2 gap-4">
-                  {snapshotItems.map((item, i) => {
-                    const Content = (
-                      <div>
-                        <span className="text-[10px] text-gray-400 uppercase tracking-wider block">{item.label}</span>
-                        <span className="text-sm font-bold text-white block">{item.value}</span>
-                      </div>
-                    );
-
-                    if (item.link) {
-                      return <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">{Content}</a>;
-                    }
-                    return <div key={i}>{Content}</div>;
-                  })}
-                </div>
-              </div>
             </div>
 
-            {/* Floating Badge */}
-            <motion.div
-              className="absolute top-10 -left-10 hidden lg:flex items-center gap-4 bg-panel border border-white/10 p-4 rounded-2xl shadow-2xl backdrop-blur-md z-20"
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              style={{ x: badgeX, y: badgeY }}
-            >
-              <div className="bg-accent/20 p-3 rounded-xl text-accent">
-                <Shield className="w-6 h-6" />
+            {/* Badge bubbles */}
+            {TECH_BADGES.map((badge, i) => (
+              <div key={i} className="tech-bubble" style={badge.style}>
+                {badge.label}
               </div>
-              <div>
-                <div className="text-xs text-muted font-bold uppercase tracking-wider">Software</div>
-                <div className="text-sm font-bold text-text">Engineer</div>
-              </div>
-            </motion.div>
+            ))}
           </div>
-        </motion.div>      </div>
+        </div>
+
+      </div>
+
+      {/* ── Scroll indicator ──────────────────────────────────── */}
+      <div
+        className="scroll-ind absolute"
+        style={{ bottom: '36px', left: '50%', transform: 'translateX(-50%)' }}
+      >
+        Scroll
+      </div>
     </section>
   );
 };
-
 
 export default Hero;

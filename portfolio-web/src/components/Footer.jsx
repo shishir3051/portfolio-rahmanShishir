@@ -103,17 +103,52 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-stroke pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+          {/* Copyright + Legal links */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-xs font-bold text-muted2 uppercase tracking-widest text-center md:text-left">
-            <p>© {new Date().getFullYear()} RAHMAN SHISHIR</p>
+            <p>© {new Date().getFullYear()} Rahman Shishir</p>
+            <span className="hidden sm:inline text-stroke">·</span>
             <div className="flex gap-6">
               <a href="#/privacy" className="hover:text-text transition-colors">Privacy</a>
               <a href="#/terms" className="hover:text-text transition-colors">Terms</a>
             </div>
           </div>
-          <div className="text-[10px] font-mono text-muted2 border border-stroke px-2 py-1 rounded bg-panel/50">
-            V2.4.12 // SECURED_CONNECTION // PRO_MODE
+
+          {/* Right side: Availability badge + tech attribution */}
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+
+            {/* Open to Work badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold"
+              style={{
+                borderColor: 'rgba(34,197,94,0.3)',
+                background: 'rgba(34,197,94,0.06)',
+                color: '#22c55e',
+              }}
+            >
+              <span
+                style={{
+                  width: '7px', height: '7px', borderRadius: '50%',
+                  background: '#22c55e',
+                  display: 'inline-block',
+                  boxShadow: '0 0 0 0 rgba(34,197,94,0.6)',
+                  animation: 'footerPulse 2s infinite',
+                }}
+              />
+              Available for Opportunities
+            </div>
+
+            {/* Tech attribution */}
+            <div
+              className="text-xs font-mono"
+              style={{ color: 'var(--text-dim)', letterSpacing: '0.05em' }}
+            >
+              Built with{' '}
+              <span style={{ color: 'var(--cyan)', fontWeight: 600 }}>React</span>
+              {' & '}
+              <span style={{ color: 'var(--purple)', fontWeight: 600 }}>Spring Boot</span>
+            </div>
           </div>
         </div>
+
       </div>
     </footer>
   );
