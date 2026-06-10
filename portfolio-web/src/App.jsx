@@ -225,10 +225,16 @@ function App() {
       desc: "Major in Cybersecurity. Focused on secure software development, network security, and cryptography."
     },
     {
-      title: "Secondary & Higher Secondary",
+      title: "Higher Secondary",
       location: "Ispahani Public School and College",
       year: "2016 — 2018",
-      desc: "Science background with a focus on mathematics and information technology."
+      desc: "Science Stream. Focused on mathematics, information technology, and core scientific disciplines, developing strong analytical and problem-solving skills."
+    },
+    {
+      title: "Secondary",
+      location: "Comilla Modern High School",
+      year: "2010 — 2016",
+      desc: "Science Stream. Completed secondary education with a concentration in mathematics, physics, chemistry, and general science, building a solid foundation in scientific principles."
     }
   ];
 
