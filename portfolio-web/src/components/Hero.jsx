@@ -4,12 +4,12 @@ import { gsap } from 'gsap';
 
 // ── Tech orbit badge data ─────────────────────────────────────────────────────
 const TECH_BADGES = [
-  { label: 'React',  style: { top: '8%',  left: '48%' } },
-  { label: 'Java',   style: { top: '28%', left: '82%' } },
-  { label: 'Spring', style: { top: '58%', left: '88%' } },
-  { label: 'Neo4j',  style: { top: '82%', left: '52%' } },
-  { label: 'Sec',    style: { top: '60%', left: '8%'  } },
-  { label: 'AWS',    style: { top: '22%', left: '12%' } },
+  { label: 'React',  style: { top: '11.2%', left: '50%' } },
+  { label: 'Java',   style: { top: '25%',   left: '93.3%' } },
+  { label: 'Spring', style: { top: '75%',   left: '93.3%' } },
+  { label: 'Neo4j',  style: { top: '88.8%', left: '50%' } },
+  { label: 'Sec',    style: { top: '75%',   left: '6.7%'  } },
+  { label: 'AWS',    style: { top: '25%',   left: '6.7%'  } },
 ];
 
 // ── Snapshot stat items ───────────────────────────────────────────────────────
@@ -199,69 +199,78 @@ const Hero = ({ name, headline }) => {
         <div className="relative flex items-center justify-center mt-12 lg:mt-0 w-full" style={{ zIndex: 2 }}>
           <div className="tech-orbit" style={{ position: 'relative', width: '100%', height: 'min(520px, 100vw)' }}>
 
-            {/* Glow behind photo */}
+            {/* Unified perfectly square orbit container */}
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 'min(340px, 65vw)', height: 'min(340px, 65vw)', borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(177,74,255,0.14) 50%, transparent 70%)',
-              filter: 'blur(28px)',
-            }} />
-
-            {/* Orbit ring 1 */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(380px, 73vw)', height: 'min(380px, 73vw)', borderRadius: '50%',
-              border: '1px dashed rgba(0,240,255,0.22)',
-            }} />
-
-            {/* Orbit ring 2 */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(490px, 94vw)', height: 'min(490px, 94vw)', borderRadius: '50%',
-              border: '1px dashed rgba(177,74,255,0.15)',
-            }} />
-
-            {/* Profile photo — centred in the orbit */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(300px, 58vw)', height: 'min(300px, 58vw)', borderRadius: '50%',
-              overflow: 'hidden',
-              border: '2.5px solid rgba(0,240,255,0.4)',
-              boxShadow: '0 0 40px rgba(0,240,255,0.25), 0 0 80px rgba(177,74,255,0.15)',
-              background: 'rgba(0,0,0,0.4)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 3,
+              width: 'min(490px, 94vw)', height: 'min(490px, 94vw)'
             }}>
-              <img
-                src="/assets/profile2.png"
-                alt="Rahman Shishir"
-                style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', objectPosition: 'top center',
-                  filter: 'grayscale(20%)',
-                  transition: 'filter 0.5s ease, transform 0.5s ease',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.filter = 'grayscale(0%)';
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.filter = 'grayscale(20%)';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              />
-            </div>
+              
+              {/* Glow behind photo */}
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '69%', height: '69%', borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(177,74,255,0.14) 50%, transparent 70%)',
+                filter: 'blur(28px)',
+              }} />
 
-            {/* Badge bubbles */}
-            {TECH_BADGES.map((badge, i) => (
-              <div key={i} className="tech-bubble" style={badge.style}>
-                {badge.label}
+              {/* Orbit ring 1 */}
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '77.5%', height: '77.5%', borderRadius: '50%',
+                border: '1px dashed rgba(0,240,255,0.22)',
+              }} />
+
+              {/* Orbit ring 2 */}
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '100%', height: '100%', borderRadius: '50%',
+                border: '1px dashed rgba(177,74,255,0.15)',
+              }} />
+
+              {/* Profile photo — centred in the orbit */}
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '61%', height: '61%', borderRadius: '50%',
+                overflow: 'hidden',
+                border: '2.5px solid rgba(0,240,255,0.4)',
+                boxShadow: '0 0 40px rgba(0,240,255,0.25), 0 0 80px rgba(177,74,255,0.15)',
+                background: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(4px)',
+                zIndex: 3,
+              }}>
+                <img
+                  src="/assets/profile2.png"
+                  alt="Rahman Shishir"
+                  style={{
+                    width: '100%', height: '100%',
+                    objectFit: 'cover', objectPosition: 'top center',
+                    filter: 'grayscale(20%)',
+                    transition: 'filter 0.5s ease, transform 0.5s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.filter = 'grayscale(0%)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.filter = 'grayscale(20%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                />
               </div>
-            ))}
+
+              {/* Badge bubbles */}
+              {TECH_BADGES.map((badge, i) => (
+                <div key={i} className="tech-bubble" style={{ ...badge.style, marginLeft: '-32px', marginTop: '-32px' }}>
+                  {badge.label}
+                </div>
+              ))}
+
+            </div>
           </div>
         </div>
 

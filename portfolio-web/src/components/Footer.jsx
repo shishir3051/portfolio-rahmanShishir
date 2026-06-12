@@ -15,7 +15,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative bg-bg pt-32 pb-12 overflow-hidden border-t border-stroke">
+    <footer className="relative z-10 bg-bg pt-32 pb-12 overflow-hidden border-t border-stroke">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
 
       <div className="container mx-auto px-6 relative z-10">
@@ -135,17 +135,8 @@ const Footer = () => {
               />
               Available for Opportunities
             </div>
+          
 
-            {/* Tech attribution */}
-            <div
-              className="text-xs font-mono"
-              style={{ color: 'var(--text-dim)', letterSpacing: '0.05em' }}
-            >
-              Built with{' '}
-              <span style={{ color: 'var(--cyan)', fontWeight: 600 }}>React</span>
-              {' & '}
-              <span style={{ color: 'var(--purple)', fontWeight: 600 }}>Spring Boot</span>
-            </div>
           </div>
         </div>
 

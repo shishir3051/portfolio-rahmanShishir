@@ -37,7 +37,7 @@ const Cursor = () => {
     animateRing();
 
     // Hover expansion on interactive elements
-    const SELECTORS = 'a, button, .btn, .glass, .tilt-card, [role="button"], label[for]';
+    const SELECTORS = 'a, button, .btn, .glass, .tilt-card, [role="button"], label[for], input, textarea, select';
     const addActive    = () => ring.classList.add('active');
     const removeActive = () => ring.classList.remove('active');
 

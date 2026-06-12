@@ -360,6 +360,7 @@ function App() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
+        className="relative z-10"
       >
         <section id="home">
           <Hero
