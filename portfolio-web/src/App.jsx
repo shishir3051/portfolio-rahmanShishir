@@ -439,16 +439,17 @@ function App() {
           <Timeline items={educationData} type="education" />
         </Section>
 
+        {/* Professional Projects */}
         <Section
           id="projects"
           title="Featured Projects"
-          subtitle="Selected professional and independent work with a focus on security and efficiency."
+          subtitle="Selected professional enterprise work with a focus on security and efficiency."
         >
           <div className="grid md:grid-cols-3 gap-6">
-            {projects.length > 0 ? (
-              projects.map((p, i) => (
+            {projects.filter(p => p.isProfessional).length > 0 ? (
+              projects.filter(p => p.isProfessional).map((p, i) => (
                 <ProjectCard
-                  key={i}
+                  key={`prof-${i}`}
                   title={p.title}
                   description={p.desc}
                   tag={p.tag}
@@ -498,6 +499,33 @@ function App() {
                   })}
                 />
               </>
+            )}
+          </div>
+        </Section>
+
+        {/* Personal Projects */}
+        <Section
+          id="personal-projects"
+          title="Personal & Open Source Projects"
+          subtitle="Independent work, experiments, and passion projects."
+        >
+          <div className="grid md:grid-cols-3 gap-6">
+            {projects.filter(p => !p.isProfessional).length > 0 ? (
+              projects.filter(p => !p.isProfessional).map((p, i) => (
+                <ProjectCard
+                  key={`pers-${i}`}
+                  title={p.title}
+                  description={p.desc}
+                  tag={p.tag}
+                  date={p.year}
+                  role={p.role}
+                  onClick={() => setSelectedProject(p)}
+                />
+              ))
+            ) : (
+              <div className="md:col-span-3 text-center py-12 text-muted italic border border-dashed border-stroke rounded-2xl">
+                More personal projects coming soon...
+              </div>
             )}
           </div>
         </Section>

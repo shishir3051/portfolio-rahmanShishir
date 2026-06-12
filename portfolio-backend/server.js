@@ -274,7 +274,8 @@ app.get("/api/projects", async (req, res) => {
       details: p.details,
       live: p.liveUrl,
       repo: p.repoUrl,
-      sortOrder: p.sortOrder
+      sortOrder: p.sortOrder,
+      isProfessional: p.isProfessional
     }));
 
     res.json({
@@ -290,12 +291,12 @@ app.get("/api/projects", async (req, res) => {
 
 app.post("/api/projects", requireAdmin, async (req, res) => {
   try {
-    const { title, tag, desc, year, role, tech, details, live, repo, sortOrder } = req.body;
+    const { title, tag, desc, year, role, tech, details, live, repo, sortOrder, isProfessional } = req.body;
     const newProject = new Project({
       title, tag, description: desc, projectYear: year, role,
       tech: Array.isArray(tech) ? tech : (tech ? tech.split(',').map(s => s.trim()) : []),
       details: Array.isArray(details) ? details : [],
-      liveUrl: live, repoUrl: repo, sortOrder: sortOrder || 0
+      liveUrl: live, repoUrl: repo, sortOrder: sortOrder || 0, isProfessional: !!isProfessional
     });
     const saved = await newProject.save();
     res.json({ ok: true, id: saved._id });
@@ -307,12 +308,12 @@ app.post("/api/projects", requireAdmin, async (req, res) => {
 
 app.put("/api/projects/:id", requireAdmin, async (req, res) => {
   try {
-    const { title, tag, desc, year, role, tech, details, live, repo, sortOrder } = req.body;
+    const { title, tag, desc, year, role, tech, details, live, repo, sortOrder, isProfessional } = req.body;
     await Project.findByIdAndUpdate(req.params.id, {
       title, tag, description: desc, projectYear: year, role,
       tech: Array.isArray(tech) ? tech : (tech ? tech.split(',').map(s => s.trim()) : []),
       details: Array.isArray(details) ? details : [],
-      liveUrl: live, repoUrl: repo, sortOrder: sortOrder || 0
+      liveUrl: live, repoUrl: repo, sortOrder: sortOrder || 0, isProfessional: !!isProfessional
     });
     res.json({ ok: true });
   } catch (err) {

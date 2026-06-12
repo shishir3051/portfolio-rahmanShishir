@@ -12,6 +12,7 @@ const projectSchema = new mongoose.Schema({
   repoUrl: { type: String },
   sortOrder: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
+  isProfessional: { type: Boolean, default: false },
 }, { timestamps: true });
 
 const Project = mongoose.models.Project || mongoose.model("Project", projectSchema);

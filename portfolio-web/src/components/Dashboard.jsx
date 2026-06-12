@@ -57,7 +57,8 @@ const Dashboard = ({ tokenProp }) => {
     details: "", // Bullet points separated by new lines
     live: "",
     repo: "",
-    sortOrder: 0
+    sortOrder: 0,
+    isProfessional: false
   };
 
   const initialBlogState = {
@@ -175,7 +176,8 @@ const Dashboard = ({ tokenProp }) => {
       details: Array.isArray(p.details) ? p.details.join("\n") : (typeof p.detailsjson === 'string' ? JSON.parse(p.detailsjson).join("\n") : ""),
       live: p.live || p.liveurl || "",
       repo: p.repo || p.repourl || "",
-      sortOrder: p.sortOrder || p.sortorder || 0
+      sortOrder: p.sortOrder || p.sortorder || 0,
+      isProfessional: !!p.isProfessional
     });
     setActiveTab('add-project');
   };
@@ -354,7 +356,7 @@ const Dashboard = ({ tokenProp }) => {
 
 
   return (
-    <div className="min-h-screen bg-bg text-text pt-36 md:pt-40 pb-20 px-6 md:px-12">
+    <div className="min-h-screen bg-bg text-text pt-36 md:pt-40 pb-20 px-6 md:px-12 relative z-10">
       <header className="mb-12 border-b border-stroke pb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tighter">Admin Dashboard</h1>
@@ -481,7 +483,14 @@ const Dashboard = ({ tokenProp }) => {
                           <div className="font-bold">{p.title}</div>
                           <div className="text-xs text-muted2">{p.year || p.projectyear}</div>
                         </td>
-                        <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold">{p.tag}</span></td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 rounded bg-panel border border-stroke text-[10px] uppercase font-bold mr-2">{p.tag}</span>
+                          {p.isProfessional ? (
+                            <span className="px-2 py-1 rounded bg-accent/20 border border-accent/40 text-accent text-[10px] uppercase font-bold">Professional</span>
+                          ) : (
+                            <span className="px-2 py-1 rounded bg-accent2/20 border border-accent2/40 text-accent2 text-[10px] uppercase font-bold">Personal</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
                             <button
@@ -643,6 +652,20 @@ const Dashboard = ({ tokenProp }) => {
                     className="bg-panel border border-stroke rounded-xl px-4 py-3 outline-none focus:border-accent"
                     placeholder="https://github.com/..."
                   />
+                </div>
+                <div className="grid gap-2 md:col-span-2 mt-2">
+                  <label className="flex items-center gap-3 cursor-pointer p-4 bg-panel border border-stroke rounded-xl hover:border-accent transition-all">
+                    <input
+                      type="checkbox"
+                      checked={projectForm.isProfessional}
+                      onChange={e => setProjectForm({ ...projectForm, isProfessional: e.target.checked })}
+                      className="w-5 h-5 accent-accent"
+                    />
+                    <div>
+                      <span className="text-sm font-bold block text-white">Mark as Professional / Featured Project</span>
+                      <span className="text-xs text-muted block mt-0.5">If unchecked, this will appear in the "Personal Projects" section.</span>
+                    </div>
+                  </label>
                 </div>
                 <button type="submit" className="md:col-span-2 bg-accent hover:bg-accent/80 transition-all py-4 rounded-xl font-bold shadow-lg shadow-accent/20">
                   {editingId ? 'Update Project' : 'Save Project'}
