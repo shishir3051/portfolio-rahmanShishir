@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Code, Database, Bug, Cpu, Cloud, Lock, Globe, Layers, Server } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Section from './components/Section';
+import { ArrowUpRight, GraduationCap, ShieldCheck } from 'lucide-react';
 import ProjectCard from './components/ProjectCard';
-import ContactForm from './components/ContactForm';
+import ContactSection from './components/ContactSection';
 import Dashboard from './components/Dashboard';
 import ProjectModal from './components/ProjectModal';
 import Footer from './components/Footer';
@@ -14,24 +13,56 @@ import Blog from './pages/Blog';
 import Uses from './pages/Uses';
 import Legal from './pages/Legal';
 import Terms from './pages/Terms';
-import Scene3D from './components/Scene3D';
 import Timeline from './components/Timeline';
 import Login from './components/Login';
-import Cursor from './components/Cursor';
-import Loader from './components/Loader';
-import AboutCanvas3D from './components/AboutCanvas3D';
+import Ribbon from './components/Ribbon';
+import AuroraBackground from './components/AuroraBackground';
+import CommandPalette from './components/CommandPalette';
+import { trackSpotlight } from './utils/spotlight';
+import { assignArtVariants, ART_TONES } from './utils/projectArt';
+import { scrollBehavior } from './utils/scroll';
 
 import { API_BASE } from './config';
+import {
+  PROFILE, SOCIAL_LINKS, NAV_SECTIONS, ABOUT, SKILL_GROUPS, EXPERIENCE, EDUCATION, CERTIFICATION, FALLBACK_PROJECTS, SERVICES,
+} from './data/profile';
+
+// Work grids: one compact row per project on phones, then 2 / 3 / 4 cards per row as the screen widens.
+// 4 columns start at 1264px, the page container's widest step (tailwind.config.js), not Tailwind's default xl (1280px).
+const PROJECT_GRID = 'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 min-[1264px]:grid-cols-4';
+
+// Shared page frame: drifting aurora light at the top, and no horizontal overflow (clip keeps `position: sticky` working)
+const Shell = ({ children }) => (
+  <div className="relative min-h-screen overflow-x-clip">
+    <AuroraBackground />
+    <div className="relative">{children}</div>
+  </div>
+);
 
 function App() {
   const [view, setView] = useState('portfolio');
   const [page, setPage] = useState('home'); // For Blog, Uses, Privacy, Terms
   const [projects, setProjects] = useState([]);
+  const [projectsLoaded, setProjectsLoaded] = useState(false); // true once the projects request has finished (ok or not)
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [adminToken, setAdminToken] = useState(localStorage.getItem('adminToken') || '');
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true' && !!localStorage.getItem('adminToken'));
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
+
+  // Declared before the effects below, which call it when a stored session is no longer valid
+  const handleLogout = () => {
+    setIsAdmin(false);
+    setAdminToken('');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('ADMIN_KEY'); // Clear legacy key if exists
+
+    setView('portfolio');
+    setPage('home');
+    window.history.pushState({}, '', '/');
+    window.location.hash = '';
+  };
 
   // Handle hash changes and routing
   useEffect(() => {
@@ -73,7 +104,7 @@ function App() {
             handleLogout();
           }
         } catch (err) {
-          console.error("Session verification failed");
+          console.error("Session verification failed:", err);
         }
       }
     };
@@ -119,9 +150,9 @@ function App() {
         setActiveSection('contact');
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
-    const sections = ['home', 'about', 'skills', 'experience', 'education', 'projects', 'services', 'contact'];
+    const sections = ['home', 'about', 'skills', 'experience', 'projects', 'services', 'contact'];
     sections.forEach(id => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -141,9 +172,9 @@ function App() {
         const timer = setTimeout(() => {
           const element = document.getElementById(hash);
           if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+            element.scrollIntoView({ behavior: scrollBehavior() });
           } else if (hash === 'home') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: scrollBehavior() });
           }
         }, 200);
         return () => clearTimeout(timer);
@@ -169,90 +200,54 @@ function App() {
         if (data.ok) setProjects(data.projects);
       } catch (err) {
         console.error("Failed to fetch projects:", err);
+      } finally {
+        setProjectsLoaded(true);
       }
     };
     fetchProjects();
   }, []);
 
-  const skills = [
-    { name: "Next.js & React.js", level: "92%", icon: <Globe />, category: "Front-End" },
-    { name: "Java & Spring Boot", level: "90%", icon: <Server />, category: "Back-End" },
-    { name: "MS SQL Server", level: "88%", icon: <Database />, category: "Database" },
-    { name: "Cybersecurity", level: "94%", icon: <Shield />, category: "Security" },
-    { name: "Penetration Testing", level: "90%", icon: <Bug />, category: "Security" },
-    { name: "ExtJs Development", level: "86%", icon: <Layers />, category: "Enterprise" },
-    { name: "Neo4j Graph DB", level: "83%", icon: <Cpu />, category: "Database" },
-    { name: "Full-stack Engineering", level: "90%", icon: <Code />, category: "Engineering" },
-  ];
-
-  const experienceData = [
-    {
-      title: "Junior Software Engineer",
-      location: "naztech Inc • Dhaka, Bangladesh",
-      date: "Jan 2025 — Present",
-      tasks: [
-        "Full-time role focused on developing and maintaining software solutions.",
-        "Contributing to enterprise-grade engineering projects with Java and JavaScript.",
-        "Collaborating with the team on SWIFT ISO 20022 MT-MX transition projects."
-      ]
-    },
-    {
-      title: "Software Engineer Trainee",
-      location: "naztech Inc • Dhaka, Bangladesh",
-      date: "Oct 2024 — Dec 2024",
-      tasks: [
-        "Intensive training period focused on enterprise architecture and security.",
-        "Gained hands-on experience with ExtJs, Spring Boot, and SMSS.",
-        "Collaborated on banking and payment system automation workflows."
-      ]
-    },
-    {
-      title: "Software Engineer Internship",
-      location: "naztech Inc • Dhaka, Bangladesh",
-      date: "Sep 2024",
-      tasks: [
-        "Initial exposure to the software development lifecycle in a professional setting.",
-        "Shadowed senior engineers and participated in code reviews."
-      ]
-    }
-  ];
-
-  const educationData = [
-    {
-      title: "Bachelor of Software Engineering",
-      location: "Daffodil International University-DIU",
-      year: "2020 — 2024",
-      desc: "Major in Cybersecurity. Focused on secure software development, network security, and cryptography."
-    },
-    {
-      title: "Higher Secondary",
-      location: "Ispahani Public School and College",
-      year: "2016 — 2018",
-      desc: "Science Stream. Focused on mathematics, information technology, and core scientific disciplines, developing strong analytical and problem-solving skills."
-    },
-    {
-      title: "Secondary",
-      location: "Comilla Modern High School",
-      year: "2010 — 2016",
-      desc: "Science Stream. Completed secondary education with a concentration in mathematics, physics, chemistry, and general science, building a solid foundation in scientific principles."
-    }
-  ];
-
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  const handleLogout = () => {
-    setIsAdmin(false);
-    setAdminToken('');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('ADMIN_KEY'); // Clear legacy key if exists
+  // Stable reference so the modal's keyboard/scroll-lock effect does not re-run on every render
+  const closeProject = useCallback(() => setSelectedProject(null), []);
 
+  // Command palette, toggled with Ctrl/⌘ + K from anywhere
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const openPalette = useCallback(() => setPaletteOpen(true), []);
+  const closePalette = useCallback(() => setPaletteOpen(false), []);
 
-    setView('portfolio');
-    setPage('home');
-    window.history.pushState({}, '', '/');
-    window.location.hash = '';
-  };
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const commands = useMemo(() => {
+    // Setting the hash also switches back to the homepage when a page (e.g. the blog) is open
+    const goToSection = (id) => () => {
+      window.location.hash = id;
+      document.getElementById(id)?.scrollIntoView({ behavior: scrollBehavior() });
+    };
+    const openExternal = (url) => () => window.open(url, '_blank', 'noopener,noreferrer');
+
+    return [
+      ...NAV_SECTIONS.map((s) => ({ id: `go-${s.id}`, label: `Go to ${s.name}`, group: `Section ${s.index}`, run: goToSection(s.id) })),
+      { id: 'page-blog', label: 'Read the blog', group: 'Page', run: () => { window.location.hash = '/blog'; } },
+      { id: 'page-uses', label: 'Tools I use', group: 'Page', run: () => { window.location.hash = '/uses'; } },
+      { id: 'theme', label: 'Toggle light / dark theme', group: 'Action', run: () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')) },
+      { id: 'copy-email', label: `Copy email address (${PROFILE.email})`, group: 'Action', run: () => navigator.clipboard?.writeText(PROFILE.email) },
+      { id: 'write-email', label: 'Write an email', group: 'Action', run: () => { window.location.href = `mailto:${PROFILE.email}`; } },
+      ...SOCIAL_LINKS.map((l) => ({ id: `link-${l.label}`, label: `Open ${l.label}`, group: 'Link', run: openExternal(l.href) })),
+    ];
+  }, []);
+
+  const palette = <CommandPalette open={paletteOpen} onClose={closePalette} commands={commands} />;
 
   const navigateToHome = () => {
     window.location.hash = '';
@@ -263,10 +258,7 @@ function App() {
   // Render pages (Blog, Uses, Privacy, Terms)
   if (view === 'page') {
     return (
-      <div className="min-h-screen relative overflow-hidden">
-        <Cursor />
-        <Scene3D />
-        <div className="bg-glow"></div>
+      <Shell>
         <Navbar
           onDashboardClick={() => setView('dashboard')}
           theme={theme}
@@ -276,51 +268,48 @@ function App() {
           view={view}
           activeSection={activeSection}
           onLogoClick={navigateToHome}
+          onOpenPalette={openPalette}
         />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <main>
           {page === 'blog' && <Blog />}
           {page === 'uses' && <Uses />}
           {page === 'privacy' && <Legal />}
           {page === 'terms' && <Terms />}
-        </motion.div>
+        </main>
         <Footer />
-      </div>
+        {palette}
+      </Shell>
     );
   }
 
   if (view === 'dashboard') {
     if (!isAdmin) {
       return (
-        <div className="min-h-screen relative overflow-hidden">
-          <Cursor />
-          <Scene3D />
-          <div className="bg-glow"></div>
+        <Shell>
           <Navbar
             onDashboardClick={() => setView('dashboard')}
             theme={theme}
             toggleTheme={toggleTheme}
             isAdmin={false}
             view={view}
+            onLogoClick={navigateToHome}
+            onOpenPalette={openPalette}
           />
-          <Login onLoginSuccess={(user) => {
-            const token = localStorage.getItem('adminToken');
-            setAdminToken(token);
-            setIsAdmin(true);
-            setView('dashboard');
-          }} />
-        </div>
+          <main>
+            <Login onLoginSuccess={() => {
+              const token = localStorage.getItem('adminToken');
+              setAdminToken(token);
+              setIsAdmin(true);
+              setView('dashboard');
+            }} />
+          </main>
+          {palette}
+        </Shell>
       );
     }
 
     return (
-      <div className="min-h-screen relative overflow-hidden">
-        <Cursor />
-        <Scene3D />
-        <div className="bg-glow"></div>
+      <Shell>
         <Navbar
           onDashboardClick={() => setView('portfolio')}
           theme={theme}
@@ -329,23 +318,30 @@ function App() {
           onLogout={handleLogout}
           view={view}
           onLogoClick={navigateToHome}
+          onOpenPalette={openPalette}
         />
         <Dashboard tokenProp={adminToken} />
-      </div>
+        {palette}
+      </Shell>
     );
   }
 
+  // Projects come from the API; fall back to built-in examples when none are available
+  const professionalProjects = projects.filter(p => p.isProfessional);
+  const featuredProjects = professionalProjects.length > 0 ? professionalProjects : FALLBACK_PROJECTS;
+  const personalProjects = projects.filter(p => !p.isProfessional);
+
+  // An illustration and colour pair per card, across both project grids (no illustration repeats within each group of 10 cards)
+  const allWorkProjects = [...featuredProjects, ...personalProjects];
+  const artVariants = assignArtVariants(allWorkProjects);
+  const cardArt = (index) => ({ art: artVariants[index], tone: ART_TONES[index % ART_TONES.length] });
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <Shell>
       <Helmet>
-        <title>Rahman Shishir | Full Stack Developer</title>
-        <meta name="description" content="Portfolio of Rahman Shishir, a passionate Full Stack Developer specializing in React, Node.js, and modern web applications." />
+        <title>Rahman Shishir | Java Full-Stack Engineer</title>
+        <meta name="description" content="Rahman Shishir is a Java full-stack engineer building secure banking software (SWIFT ISO 20022) with Java, Spring Boot and ExtJS." />
       </Helmet>
-      {/* Loader renders above everything — auto-fades after 1.8 s */}
-      <Loader />
-      <Cursor />
-      <Scene3D />
-      <div className="bg-glow"></div>
       <Navbar
         onDashboardClick={() => setView('dashboard')}
         theme={theme}
@@ -354,234 +350,185 @@ function App() {
         onLogout={handleLogout}
         view={view}
         activeSection={activeSection}
+        onOpenPalette={openPalette}
       />
 
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10"
-      >
-        <section id="home">
-          <Hero
-            name="Rahman Shishir"
-            headline="B.Sc in SWE (Major in Cybersecurity) | Software Engineer | Ethical Hacker Essential (E|HE) | Java Full-Stack Developer"
-          />
-        </section>
+      <main>
+        {/* The count waits for the API, so it never flashes the fallback projects' number first */}
+        <Hero projectCount={projectsLoaded ? allWorkProjects.length : undefined} />
+        <Ribbon />
 
-        <Section id="about" title="About" subtitle="I combine technical rigour from ethical hacking with creative software engineering to build secure, scalable digital experiences.">
-          {/* Two-column grid: 3D canvas left, text content right */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-10">
+        <Section id="about" index="01" label="About" title={ABOUT.title} split>
+          <p className="mb-5 text-[clamp(17px,1.5vw,20px)] leading-relaxed text-text/85">{ABOUT.lead}</p>
+          <p className="text-[17px] leading-relaxed text-muted">{ABOUT.body}</p>
+          <ul className="mt-9 grid gap-3 sm:grid-cols-3">
+            {ABOUT.principles.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.title} className="glass rounded-[18px] p-5">
+                  <span className="icon-box h-[34px] w-[34px] rounded-[10px]"><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+                  <p className="mt-3.5 font-heading text-base font-semibold text-text">{item.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted2">{item.text}</p>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
 
-            {/* Left — spinning icosahedron 3D canvas */}
-            <div className="flex items-center justify-center">
-              <AboutCanvas3D />
+        <Section
+          id="skills"
+          index="02"
+          label="Stack"
+          title="From banking back-ends to security tooling."
+          intro="Java and Spring Boot at the core, React and ExtJS on the front, and SQL Server, Neo4j and MongoDB underneath."
+        >
+          {/* Bento: two wide cards on top (featured Fintech + Backend), three below */}
+          <div className="grid gap-4 md:grid-cols-6">
+            {SKILL_GROUPS.map((group, i) => {
+              const Icon = group.icon;
+              return (
+                <article
+                  key={group.name}
+                  className={`glass lift relative overflow-hidden rounded-3xl p-7 ${i < 2 ? 'md:col-span-3' : 'md:col-span-2'}`}
+                  style={group.featured ? { background: 'linear-gradient(135deg, var(--accent-soft), transparent 60%), var(--glass-bg)' } : undefined}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <span className="icon-box h-[42px] w-[42px]"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+                      <h3 className="font-heading text-xl font-semibold tracking-tight text-text">{group.name}</h3>
+                    </div>
+                    {group.featured ? (
+                      <span className="brand-badge rounded-full px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.1em]">Core focus</span>
+                    ) : (
+                      <span className="font-mono text-xs text-muted2" aria-hidden="true">{String(group.items.length).padStart(2, '0')}</span>
+                    )}
+                  </div>
+                  <p className="mt-4 text-[15px] leading-relaxed text-muted">{group.desc}</p>
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {group.items.map((item) => (
+                      <li key={item} className="chip">{item}</li>
+                    ))}
+                  </ul>
+                  {group.featured && (
+                    <div aria-hidden="true" className="mt-7 flex items-center gap-3 font-mono text-xs text-text/85">
+                      <span className="rounded-lg border border-stroke-strong px-2.5 py-1.5" style={{ background: 'var(--fill-1)' }}>MT</span>
+                      <span className="h-px flex-1" style={{ background: 'repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 12px)' }} />
+                      <span className="rounded-lg border border-accent px-2.5 py-1.5 text-text" style={{ background: 'var(--accent-soft)' }}>MX · ISO 20022</span>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </Section>
+
+        <Section id="experience" index="03" label="Experience" title="Building banking software at naztech Inc.">
+          <div className="flex flex-wrap items-stretch gap-4">
+            <div className="glass min-w-0 flex-[1.5_1_560px] rounded-[28px] p-6 md:p-10">
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+                <h3 className="subhead mb-0">Work history</h3>
+                <a href={PROFILE.company.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-text/85 hover:text-text">
+                  naztech.io <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+              </div>
+              <Timeline items={EXPERIENCE} />
             </div>
 
-            {/* Right — about text */}
-            <div className="flex flex-col gap-6">
-              <motion.div whileHover={{ y: -5 }} className="glass p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Code className="text-accent" /> Professional Approach
-                </h3>
-                <p className="text-muted text-lg leading-relaxed">
-                  I'm a versatile professional skilled in both ethical hacking and front-end development. With expertise in cybersecurity and creating engaging user experiences, I deliver high-quality results prioritizing security and user satisfaction.
-                </p>
-              </motion.div>
-
-              <motion.div whileHover={{ y: -5 }} className="glass p-8">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Shield className="text-accent2" /> Core Ethics
-                </h3>
-                <p className="text-muted text-sm leading-relaxed mb-6">Dedicated to uncovering vulnerabilities and crafting intuitive, secure interfaces.</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Security-first', 'E|HE Certified', 'Full-stack', 'B.Sc SWE'].map(chip => (
-                    <span key={chip} className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-bold uppercase">{chip}</span>
+            <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
+              <div id="education" className="glass flex-1 rounded-[28px] p-6 md:p-8">
+                <div className="flex items-center gap-3">
+                  <span className="icon-box h-9 w-9 rounded-[10px]"><GraduationCap className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+                  <h3 className="subhead mb-0">Education</h3>
+                </div>
+                <ol className="mt-5">
+                  {EDUCATION.map((item) => (
+                    <li key={item.title} className="border-t border-stroke py-4 last:pb-0">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                        <h4 className="font-heading text-[17px] font-semibold tracking-tight text-text">{item.title}</h4>
+                        <span className="font-mono text-xs text-muted2">{item.period}</span>
+                      </div>
+                      <p className="mt-1 text-sm text-muted2">{item.entity}</p>
+                      {item.badge && (
+                        <p className="mt-2.5 inline-block rounded-full border border-stroke-strong px-2.5 py-1 text-xs font-medium text-text" style={{ background: 'var(--accent-soft)' }}>{item.badge}</p>
+                      )}
+                    </li>
                   ))}
+                </ol>
+              </div>
+              <div className="glass flex items-center gap-4 rounded-3xl px-6 py-5" style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.10), transparent 70%), var(--glass-bg)' }}>
+                <span aria-hidden="true" className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-[14px] border border-stroke text-accent2" style={{ background: 'rgba(52,211,153,0.14)' }}>
+                  <ShieldCheck className="h-[22px] w-[22px]" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted2">{CERTIFICATION.label}</p>
+                  <p className="mt-1 font-heading text-base font-semibold text-text">{CERTIFICATION.title}</p>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </Section>
 
-        <Section id="skills" title="Skills" subtitle="A multi-disciplinary toolkit focused on enterprise reliability and robust security protocols.">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {skills.map((skill, i) => (
-              <motion.div
-                key={skill.name}
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="glass p-6 group flex flex-col items-center text-center"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-panel border border-stroke flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-all duration-300">
-                  {React.cloneElement(skill.icon, { className: "w-6 h-6" })}
-                </div>
-                <h4 className="font-bold text-lg mb-1">{skill.name}</h4>
-                <span className="text-xs text-accent font-mono mb-4 uppercase tracking-widest">{skill.category}</span>
-                <div className="w-full h-1.5 bg-panel rounded-full overflow-hidden border border-stroke">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: skill.level }}
-                    transition={{ duration: 1, delay: i * 0.1 }}
-                    className="h-full bg-gradient-to-r from-accent to-accent2"
-                  />
-                </div>
-                <span className="text-xs text-muted mt-2 font-bold">{skill.level}</span>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
-
-        <Section id="experience" title="Professional Experience" subtitle="Building enterprise fintech solutions and contributing to critical banking infrastructure at naztech Inc.">
-          <Timeline items={experienceData} type="experience" />
-        </Section>
-
-        <Section id="education" title="Education" subtitle="Fundamental academic training in Software Engineering and foundational schooling.">
-          <Timeline items={educationData} type="education" />
-        </Section>
-
-        {/* Professional Projects */}
         <Section
           id="projects"
-          title="Featured Projects"
-          subtitle="Selected professional enterprise work with a focus on security and efficiency."
+          index="04"
+          label="Selected work"
+          title="Software that moves money, and software that finds weak spots."
+          action={
+            <a href={SOCIAL_LINKS[0].href} target="_blank" rel="noopener noreferrer" className="btn-secondary h-[46px] font-medium">
+              More on GitHub <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          }
         >
-          <div className="grid md:grid-cols-3 gap-6">
-            {projects.filter(p => p.isProfessional).length > 0 ? (
-              projects.filter(p => p.isProfessional).map((p, i) => (
-                <ProjectCard
-                  key={`prof-${i}`}
-                  title={p.title}
-                  description={p.desc}
-                  tag={p.tag}
-                  date={p.year}
-                  role={p.role}
-                  onClick={() => setSelectedProject(p)}
-                />
-              ))
-            ) : (
-              <>
-                <ProjectCard
-                  title="Efficient SWIFT ISO 20022 MT-MX Transition"
-                  description="A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition. Built with a focus on security and high performance."
-                  tag="FinTech / Security"
-                  date="2024"
-                  role="Junior Software Engineer"
-                  onClick={() => setSelectedProject({
-                    title: "Efficient SWIFT ISO 20022 MT-MX Transition",
-                    year: "2024",
-                    role: "Junior Software Engineer",
-                    desc: "A mission-critical banking solution helping banks automate workflows and ensure compliance during the MT-MX transition.",
-                    details: [
-                      "Implemented ISO 20022 migration tools.",
-                      "Handled high-volume transaction logging with SQL Server.",
-                      "Built complex grid interfaces with ExtJS."
-                    ],
-                    tech: ["Java", "ExtJS", "Spring Boot", "MSSQL"]
-                  })}
-                />
-                <ProjectCard
-                  title="Cybersecurity Dashboard"
-                  description="Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications. Features automated scanning and graph visualization."
-                  tag="Cybersecurity / Neo4j"
-                  date="2024"
-                  role="Lead Developer"
-                  onClick={() => setSelectedProject({
-                    title: "Cybersecurity Dashboard",
-                    year: "2024",
-                    role: "Lead Developer",
-                    desc: "Real-time monitoring tool for identifying and visualizing security vulnerabilities in web applications.",
-                    details: [
-                      "Visualized network threats using Neo4j.",
-                      "Automated vulnerability scanning.",
-                      "Created dark-mode security analysis UI."
-                    ],
-                    tech: ["React", "Node.js", "Neo4j", "Tailwind"]
-                  })}
-                />
-              </>
-            )}
-          </div>
-        </Section>
-
-        {/* Personal Projects */}
-        <Section
-          id="personal-projects"
-          title="Personal & Open Source Projects"
-          subtitle="Independent work, experiments, and passion projects."
-        >
-          <div className="grid md:grid-cols-3 gap-6">
-            {projects.filter(p => !p.isProfessional).length > 0 ? (
-              projects.filter(p => !p.isProfessional).map((p, i) => (
-                <ProjectCard
-                  key={`pers-${i}`}
-                  title={p.title}
-                  description={p.desc}
-                  tag={p.tag}
-                  date={p.year}
-                  role={p.role}
-                  onClick={() => setSelectedProject(p)}
-                />
-              ))
-            ) : (
-              <div className="md:col-span-3 text-center py-12 text-muted italic border border-dashed border-stroke rounded-2xl">
-                More personal projects coming soon...
-              </div>
-            )}
-          </div>
-        </Section>
-
-        <Section id="services" title="Services" subtitle="Strategizing and delivering high-performance digital solutions with a security-first philosophy.">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Secure Web Engineering",
-                desc: "Enterprise-grade web applications built with Next.js and Spring Boot, hardened against modern threats.",
-                icon: <Code className="text-accent" />
-              },
-              {
-                title: "Cybersecurity Auditing",
-                desc: "Comprehensive penetration testing and vulnerability assessments to secure your digital infrastructure.",
-                icon: <Shield className="text-accent2" />
-              },
-              {
-                title: "Architectural Consulting",
-                desc: "Designing scalable, efficient data structures using SQL Server and Neo4j for complex business needs.",
-                icon: <Database className="text-white" />
-              }
-            ].map((service, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ y: -5 }}
-                className="glass p-8 group hover:border-accent/30 transition-all"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-panel border border-stroke flex items-center justify-center mb-6 group-hover:bg-accent transition-all duration-500">
-                  {React.cloneElement(service.icon, { className: "w-7 h-7 group-hover:text-white transition-colors" })}
-                </div>
-                <h4 className="text-xl font-bold mb-3">{service.title}</h4>
-                <p className="text-sm text-muted leading-relaxed">{service.desc}</p>
-              </motion.div>
+          {/* Compact cards: 1 per row on phones, 2 on tablets, 3 on laptops, 4 on wide screens */}
+          <div className={PROJECT_GRID}>
+            {featuredProjects.map((p, i) => (
+              <ProjectCard key={p.id || p.title} project={p} code={`P/${String(i + 1).padStart(2, '0')}`} {...cardArt(i)} onClick={() => setSelectedProject(p)} />
             ))}
           </div>
+
+          <div id="personal-projects" className="mt-12">
+            <h3 className="subhead">Personal & open source</h3>
+            {personalProjects.length > 0 ? (
+              <div className={PROJECT_GRID}>
+                {personalProjects.map((p, i) => (
+                  <ProjectCard key={p.id || p.title} project={p} code={`OSS/${String(i + 1).padStart(2, '0')}`} {...cardArt(featuredProjects.length + i)} onClick={() => setSelectedProject(p)} />
+                ))}
+              </div>
+            ) : (
+              <p className="glass rounded-2xl px-6 py-5 text-sm text-muted">More personal projects coming soon.</p>
+            )}
+          </div>
         </Section>
 
-        <Section
-          id="contact"
-          title="Contact"
-          subtitle="Ready to build something secure and extraordinary? Let's connect."
-        >
-          <ContactForm />
+        <Section id="services" index="05" label="Services" title="Where I can help.">
+          <div className="grid gap-4 md:grid-cols-3">
+            {SERVICES.map((service, i) => {
+              const Icon = service.icon;
+              return (
+                <article key={service.title} className="glass lift spotlight relative overflow-hidden rounded-3xl px-7 py-8" onPointerMove={trackSpotlight}>
+                  <div aria-hidden="true" className="absolute -right-16 -top-20 h-[200px] w-[200px] rounded-full opacity-45 blur-[60px]" style={{ background: 'var(--glow)' }} />
+                  <div className="relative flex items-center justify-between gap-4">
+                    <span className="icon-box h-12 w-12 rounded-[14px]"><Icon className="h-[22px] w-[22px]" aria-hidden="true" /></span>
+                    <span className="font-mono text-xs text-muted2" aria-hidden="true">S/{String(i + 1).padStart(2, '0')}</span>
+                  </div>
+                  <h3 className="relative mt-7 font-heading text-[22px] font-semibold tracking-tight text-text">{service.title}</h3>
+                  <p className="relative mt-2.5 text-[15px] leading-relaxed text-muted">{service.desc}</p>
+                </article>
+              );
+            })}
+          </div>
         </Section>
-      </motion.main>
+
+        <ContactSection />
+      </main>
 
       <Footer />
+      {palette}
 
       {selectedProject && (
-        <ProjectModal
-          project={selectedProject}
-          onClose={() => setSelectedProject(null)}
-        />
+        <ProjectModal project={selectedProject} onClose={closeProject} />
       )}
-    </div>
+    </Shell>
   );
 }
 

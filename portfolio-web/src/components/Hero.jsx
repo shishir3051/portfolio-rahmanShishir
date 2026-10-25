@@ -1,287 +1,161 @@
-import React, { useEffect, useRef } from 'react';
-import { Code, Briefcase, GraduationCap, Globe } from 'lucide-react';
-import { gsap } from 'gsap';
+import { ArrowRight, MapPin, Building2, ShieldCheck } from 'lucide-react';
+import { PROFILE, HERO_CHIPS, HIGHLIGHTS } from '../data/profile';
 
-// ── Tech orbit badge data ─────────────────────────────────────────────────────
-const TECH_BADGES = [
-  { label: 'React',  style: { top: '11.2%', left: '50%' } },
-  { label: 'Java',   style: { top: '25%',   left: '93.3%' } },
-  { label: 'Spring', style: { top: '75%',   left: '93.3%' } },
-  { label: 'Neo4j',  style: { top: '88.8%', left: '50%' } },
-  { label: 'Sec',    style: { top: '75%',   left: '6.7%'  } },
-  { label: 'AWS',    style: { top: '25%',   left: '6.7%'  } },
+// Where each floating chip sits around the portrait (the third one hides on small phones)
+const CHIP_POSITIONS = [
+  'left-3 -top-4 sm:-left-14 sm:top-16',
+  'hidden sm:flex sm:-right-11 sm:top-[300px] [animation-delay:-2.5s]',
+  'left-3 bottom-24 sm:-left-10 [animation-delay:-5s]',
 ];
 
-// ── Snapshot stat items ───────────────────────────────────────────────────────
-const SNAPSHOT_ITEMS = [
-  { label: 'Experience', value: '1.5+ Years', icon: <Briefcase className="w-4 h-4" />, color: 'text-accent' },
-  { label: 'Projects',   value: '10+ Total',  icon: <Code className="w-4 h-4" />,      color: 'text-accent2' },
-  { label: 'Education',  value: 'B.Sc SWE',   icon: <GraduationCap className="w-4 h-4" />, color: 'text-white' },
-  {
-    label: 'Company', value: 'naztech Inc',
-    icon: <Globe className="w-4 h-4" />, color: 'text-accent',
-    link: 'https://naztech.io/',
-  },
-];
+// A frosted chip floating next to the portrait
+const FloatingChip = ({ chip, position }) => {
+  const Icon = chip.icon;
+  const success = chip.tone === 'success';
+  return (
+    <div className={`nav-glass animate-float absolute z-[3] flex items-center gap-2.5 rounded-2xl py-2.5 pl-2.5 pr-4 ${position}`}>
+      <span
+        aria-hidden="true"
+        className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px] border border-stroke ${success ? 'text-accent2' : 'text-accent'}`}
+        style={{ background: success ? 'rgba(52, 211, 153, 0.14)' : 'var(--accent-soft)' }}
+      >
+        <Icon className="h-[18px] w-[18px]" />
+      </span>
+      <span>
+        <span className="block font-heading text-sm font-semibold text-text">{chip.title}</span>
+        <span className="block text-xs text-muted">{chip.caption}</span>
+      </span>
+    </div>
+  );
+};
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
-const Hero = ({ name, headline }) => {
-  const containerRef = useRef(null);
+// Portrait inside a glass frame whose border carries a slowly rotating ring of aurora light
+const Portrait = () => (
+  <div className="relative mx-auto w-full max-w-[400px] flex-[0_1_400px]">
+    <div aria-hidden="true" className="absolute inset-x-0 -bottom-5 top-10 rounded-full blur-[30px]" style={{ background: 'radial-gradient(closest-side, var(--glow), transparent)' }} />
+    <div className="relative z-[1] isolate overflow-hidden rounded-[34px] p-[1.5px]" style={{ boxShadow: '0 50px 110px -40px rgba(0, 0, 0, 0.9)' }}>
+      <div
+        aria-hidden="true"
+        className="animate-spin-slow absolute -inset-[60%] -z-10"
+        style={{ background: 'conic-gradient(from 0deg, rgba(255,255,255,0.10) 0deg, rgba(255,255,255,0.10) 190deg, var(--aurora-1) 260deg, var(--aurora-2) 315deg, rgba(255,255,255,0.10) 360deg)' }}
+      />
+      <div className="rounded-[33px] p-3 backdrop-blur-xl" style={{ background: 'var(--card-solid)' }}>
+        <div className="relative overflow-hidden rounded-3xl bg-panel">
+          <img
+            src={PROFILE.photo}
+            alt={`Portrait of ${PROFILE.name}`}
+            width="600"
+            height="800"
+            fetchPriority="high"
+            className="block aspect-[3/4] w-full object-cover object-top"
+          />
+          <div aria-hidden="true" className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,6,15,0) 52%, rgba(5,6,15,0.94) 100%)' }} />
+          <div className="absolute inset-x-5 bottom-4 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="font-heading text-[19px] font-semibold tracking-tight text-white">{PROFILE.name}</p>
+              <p className="text-[13px] text-[#c9ccdc]">{PROFILE.location}</p>
+            </div>
+            <p className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 font-mono text-[11px] tracking-[0.08em] text-[#e6e8f5]">
+              {PROFILE.utcOffset}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {HERO_CHIPS.map((chip, i) => (
+      <FloatingChip key={chip.title} chip={chip} position={CHIP_POSITIONS[i]} />
+    ))}
+  </div>
+);
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+// Glowing glass tile for one key figure
+const StatTile = ({ item }) => (
+  <div className="glass lift relative overflow-hidden px-5 pb-6 pt-6 md:px-7">
+    <div aria-hidden="true" className="absolute inset-x-[18%] top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)' }} />
+    <div aria-hidden="true" className="absolute -bottom-[90px] left-1/2 h-[140px] w-[220px] -translate-x-1/2 rounded-full opacity-70 blur-[40px]" style={{ background: 'var(--glow)' }} />
+    <dt className="relative font-mono text-xs uppercase tracking-[0.12em] text-muted2">{item.label}</dt>
+    <dd className="relative mt-3.5 font-heading text-[clamp(30px,3.4vw,46px)] font-semibold leading-none tracking-[-0.04em] text-text">
+      {item.href ? (
+        <a href={item.href} target="_blank" rel="noopener noreferrer" className="hover:text-accent">
+          {item.value}
+          {item.suffix && <span className="ml-1.5 text-[0.42em] tracking-normal text-muted">{item.suffix}</span>}
+        </a>
+      ) : (
+        item.value
+      )}
+    </dd>
+    <dd className="relative mt-2.5 text-sm text-muted">{item.caption}</dd>
+  </div>
+);
 
-    // Targets inside the hero
-    const greet   = el.querySelector('.hero-greet');
-    const title   = el.querySelector('.hero-title');
-    const sub     = el.querySelector('.hero-sub');
-    const tag     = el.querySelector('.hero-tag');
-    const cta     = el.querySelector('.hero-cta');
-    const stats   = el.querySelector('.hero-stats');
-    const orbit   = el.querySelector('.tech-orbit');
-    const scrollI = el.querySelector('.scroll-ind');
-    const bubbles = el.querySelectorAll('.tech-bubble');
+// Summary text from data/profile.js, with PROFILE.summaryHighlight shown brighter
+const Summary = () => {
+  const { summary, summaryHighlight } = PROFILE;
+  const start = summaryHighlight ? summary.indexOf(summaryHighlight) : -1;
+  if (start === -1) return summary; // no highlight phrase found: plain text
+  const end = start + summaryHighlight.length;
+  return (
+    <>
+      {summary.slice(0, start)}
+      <span className="text-text">{summaryHighlight}</span>
+      {summary.slice(end)}
+    </>
+  );
+};
 
-    // Hide everything immediately (before loader fades)
-    gsap.set([greet, title, sub, tag, cta, stats, orbit, scrollI], { opacity: 0, y: 30 });
-    gsap.set(bubbles, { opacity: 0, scale: 0 });
-
-    // Staggered entrance after loader (1.8 s)
-    const tl = gsap.timeline({ delay: 1.9 });
-
-    tl.to(greet,   { opacity: 1, y: 0, duration: 0.9 })
-      .to(title,   { opacity: 1, y: 0, duration: 1   }, '-=0.6')
-      .to(sub,     { opacity: 1, y: 0, duration: 0.9 }, '-=0.6')
-      .to(tag,     { opacity: 1, y: 0, duration: 0.9 }, '-=0.7')
-      .to(cta,     { opacity: 1, y: 0, duration: 0.7 }, '-=0.6')
-      .to(stats,   { opacity: 1, y: 0, duration: 0.6 }, '-=0.5')
-      .to(scrollI, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
-      .to(orbit,   { opacity: 1, y: 0, duration: 0.5 }, '-=0.8')
-      .to(bubbles, {
-        opacity: 1, scale: 1, duration: 0.7,
-        stagger: 0.12, ease: 'back.out(2)',
-      }, '-=0.5');
-
-    return () => tl.kill();
-  }, []);
-
-  const firstName = name ? name.split(' ')[0] : 'Rahman';
-  const lastName  = name ? name.split(' ').slice(1).join(' ') : 'Shishir';
+// Homepage intro: availability, headline, summary, calls to action, portrait and key figures.
+// projectCount: number of work projects in the Work section, or undefined while they are loading.
+const Hero = ({ projectCount }) => {
+  const highlights = HIGHLIGHTS.map((item) =>
+    item.countsWorkProjects && projectCount !== undefined ? { ...item, value: String(projectCount) } : item
+  );
 
   return (
-    <section
-      id="home"
-      ref={containerRef}
-      className="min-h-screen flex flex-col items-center justify-center relative"
-      style={{ paddingTop: '100px' }}
-    >
-      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center w-full">
-
-        {/* ── LEFT: Text content ─────────────────────────────── */}
-        <div className="relative" style={{ zIndex: 2 }}>
-
-          {/* Greeting */}
-          <div className="hero-greet mb-6">
-            Hi there, my name is
-          </div>
-
-          {/* Name */}
-          <div className="hero-title mb-6">
-            <h1
-              className="font-black tracking-tighter leading-none"
-              style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(48px, 7vw, 100px)' }}
-            >
-              <span className="hero-name-first">{firstName}.</span>
-              <span className="hero-name-last">{lastName}.</span>
+    <section id="home" className="pb-12 pt-32 md:pb-16 md:pt-40">
+      <div className="container">
+        <div className="flex flex-wrap items-center gap-14">
+          <div className="min-w-0 flex-[1_1_460px]">
+            {PROFILE.availableForWork && (
+              <p className="nav-glass mb-7 inline-flex items-center gap-2.5 rounded-full py-1.5 pl-3 pr-3.5 text-[13px] font-medium text-muted">
+                <span aria-hidden="true" className="animate-pulse-ring h-2 w-2 rounded-full bg-accent2" />
+                Available for new opportunities
+              </p>
+            )}
+            <p className="mb-5 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-heading">
+              <span className="text-[clamp(18px,1.6vw,22px)] font-semibold tracking-tight text-text">{PROFILE.name}</span>
+              <span className="text-[clamp(15px,1.3vw,18px)] text-muted2">{PROFILE.role}</span>
+            </p>
+            <h1 className="text-balance font-heading text-[clamp(44px,5.6vw,80px)] font-semibold leading-none tracking-[-0.05em] text-text">
+              <span className="gradient-text">Secure</span> software for modern banking.
             </h1>
-          </div>
-
-
-          {/* Sub headline */}
-          <div className="hero-sub mb-4">
-            <p style={{ fontSize: '1.25rem', color: 'var(--text-dim)', fontWeight: 300 }}>
-              I'm a{' '}
-              <b style={{ color: 'var(--cyan)', fontWeight: 600 }}>
-                Java Full-Stack Engineer.
-              </b>
+            <p className="mt-7 max-w-[34em] text-[clamp(16px,1.35vw,19px)] leading-relaxed text-muted">
+              <Summary />
             </p>
-          </div>
-
-          {/* Tag line */}
-          <div className="hero-tag mb-10">
-            <p style={{ fontSize: '16px', color: 'var(--text-dim)', lineHeight: 1.75, maxWidth: '520px' }}>
-              {headline || 'Building secure, scalable systems with a security-first mindset. Specializing in FinTech, Spring Boot & modern web engineering.'}
-            </p>
-          </div>
-
-          {/* CTA buttons */}
-          <div className="hero-cta flex flex-wrap gap-4 mb-16">
-            <a
-              href="#projects"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '10px',
-                padding: '16px 32px', borderRadius: '999px',
-                fontWeight: 600, fontSize: '15px',
-                background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
-                color: '#08081a',
-                boxShadow: '0 8px 30px rgba(0,240,255,0.35)',
-                transition: 'transform 0.3s, box-shadow 0.3s',
-                textDecoration: 'none',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = '0 14px 40px rgba(177,74,255,0.5)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = '';
-                e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,240,255,0.35)';
-              }}
-            >
-              View My Work →
-            </a>
-            <a
-              href="#contact"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '10px',
-                padding: '16px 32px', borderRadius: '999px',
-                fontWeight: 600, fontSize: '15px',
-                background: 'transparent', color: 'var(--text)',
-                border: '1px solid var(--glass-border)',
-                transition: 'transform 0.3s, border-color 0.3s, color 0.3s',
-                textDecoration: 'none',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.borderColor = 'var(--cyan)';
-                e.currentTarget.style.color = 'var(--cyan)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = '';
-                e.currentTarget.style.borderColor = 'var(--glass-border)';
-                e.currentTarget.style.color = 'var(--text)';
-              }}
-            >
-              Contact Me
-            </a>
-          </div>
-
-          {/* Snapshot stats */}
-          <div
-            className="hero-stats hidden lg:grid grid-cols-4 gap-8 border-t pt-8"
-            style={{ borderColor: 'var(--glass-border)' }}
-          >
-            {SNAPSHOT_ITEMS.map((item, i) => {
-              const content = (
-                <div className="flex flex-col gap-1">
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)', fontSize: '11px',
-                      color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px',
-                    }}
-                  >
-                    {item.label}
-                  </span>
-                  <div className="flex items-center gap-2 font-bold text-white text-lg">
-                    {item.value}
-                    {React.cloneElement(item.icon, { className: `w-4 h-4 ${item.color} opacity-80` })}
-                  </div>
-                </div>
-              );
-              return item.link
-                ? <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">{content}</a>
-                : <div key={i}>{content}</div>;
-            })}
-          </div>
-        </div>
-
-        {/* ── RIGHT: Profile photo inside tech orbit ──────────── */}
-        <div className="relative flex items-center justify-center mt-12 lg:mt-0 w-full" style={{ zIndex: 2 }}>
-          <div className="tech-orbit" style={{ position: 'relative', width: '100%', height: 'min(520px, 100vw)' }}>
-
-            {/* Unified perfectly square orbit container */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(490px, 94vw)', height: 'min(490px, 94vw)'
-            }}>
-              
-              {/* Glow behind photo */}
-              <div style={{
-                position: 'absolute', top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '69%', height: '69%', borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(177,74,255,0.14) 50%, transparent 70%)',
-                filter: 'blur(28px)',
-              }} />
-
-              {/* Orbit ring 1 */}
-              <div style={{
-                position: 'absolute', top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '77.5%', height: '77.5%', borderRadius: '50%',
-                border: '1px dashed rgba(0,240,255,0.22)',
-              }} />
-
-              {/* Orbit ring 2 */}
-              <div style={{
-                position: 'absolute', top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '100%', height: '100%', borderRadius: '50%',
-                border: '1px dashed rgba(177,74,255,0.15)',
-              }} />
-
-              {/* Profile photo — centred in the orbit */}
-              <div style={{
-                position: 'absolute', top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '61%', height: '61%', borderRadius: '50%',
-                overflow: 'hidden',
-                border: '2.5px solid rgba(0,240,255,0.4)',
-                boxShadow: '0 0 40px rgba(0,240,255,0.25), 0 0 80px rgba(177,74,255,0.15)',
-                background: 'rgba(0,0,0,0.4)',
-                backdropFilter: 'blur(4px)',
-                zIndex: 3,
-              }}>
-                <img
-                  src="/assets/profile2.png"
-                  alt="Rahman Shishir"
-                  style={{
-                    width: '100%', height: '100%',
-                    objectFit: 'cover', objectPosition: 'top center',
-                    filter: 'grayscale(20%)',
-                    transition: 'filter 0.5s ease, transform 0.5s ease',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.filter = 'grayscale(0%)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.filter = 'grayscale(20%)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                />
-              </div>
-
-              {/* Badge bubbles */}
-              {TECH_BADGES.map((badge, i) => (
-                <div key={i} className="tech-bubble" style={{ ...badge.style, marginLeft: '-32px', marginTop: '-32px' }}>
-                  {badge.label}
-                </div>
-              ))}
-
+            <div className="mt-9 flex flex-wrap gap-3">
+              <a href="#projects" className="btn-primary h-[52px] px-6 text-[15px]">
+                View selected work <ArrowRight className="h-[18px] w-[18px]" aria-hidden="true" />
+              </a>
+              <a href="#contact" className="btn-secondary h-[52px] px-6 text-[15px] font-medium">Get in touch</a>
             </div>
+            <ul className="mt-11 flex flex-wrap gap-x-7 gap-y-3 border-t border-stroke pt-6 text-sm text-muted">
+              <li className="flex items-center gap-2"><MapPin className="h-4 w-4" aria-hidden="true" /> {PROFILE.location}</li>
+              <li className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" aria-hidden="true" />
+                <a href={PROFILE.company.href} target="_blank" rel="noopener noreferrer" className="text-text/85 hover:text-text">{PROFILE.company.name}</a>
+              </li>
+              <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" aria-hidden="true" /> E|HE certified</li>
+            </ul>
           </div>
+
+          <Portrait />
         </div>
 
-      </div>
-
-      {/* ── Scroll indicator ──────────────────────────────────── */}
-      <div
-        className="scroll-ind absolute"
-        style={{ bottom: '36px', left: '50%', transform: 'translateX(-50%)' }}
-      >
-        Scroll
+        <h2 className="sr-only">Key figures</h2>
+        <dl className="mt-16 grid grid-cols-2 gap-4 md:mt-20 lg:grid-cols-4">
+          {highlights.map((item) => (
+            <StatTile key={item.label} item={item} />
+          ))}
+        </dl>
       </div>
     </section>
   );
