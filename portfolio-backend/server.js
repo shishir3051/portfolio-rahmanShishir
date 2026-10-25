@@ -186,7 +186,8 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     if (process.env.RESEND_API_KEY) {
       try {
-        await resend.emails.send({
+        // Resend reports API failures in the returned `error` instead of throwing.
+        const { error: emailError } = await resend.emails.send({
           from: 'Portfolio Contact <onboarding@resend.dev>',
           to: 'gaziur.rahman4311@gmail.com',
           replyTo: email,
@@ -232,6 +233,8 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
             </div>
           `
         });
+        // The message is already saved, so the visitor still gets ok:true; just log the failure.
+        if (emailError) console.error('Email failed:', emailError);
       } catch (emailError) {
         console.error('Email failed:', emailError);
       }

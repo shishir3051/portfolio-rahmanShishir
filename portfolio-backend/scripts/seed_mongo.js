@@ -82,12 +82,16 @@ async function seed() {
   await connectDB();
 
   console.log("Seeding Admin account...");
+  // The admin password comes from the environment so it never lives in source control.
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
   const existingAdmin = await Admin.findOne({ username: 'admin' });
   if (existingAdmin) {
     console.log("Admin account already exists.");
+  } else if (!adminPassword) {
+    console.warn("SEED_ADMIN_PASSWORD is not set. Skipping admin account creation.");
   } else {
     const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash("A/e43117278", salt);
+    const hash = await bcrypt.hash(adminPassword, salt);
     const newAdmin = new Admin({ username: 'admin', passwordHash: hash });
     await newAdmin.save();
     console.log("Successfully created admin account: admin");
