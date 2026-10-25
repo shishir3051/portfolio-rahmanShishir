@@ -1,79 +1,43 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, MapPin, Briefcase, GraduationCap } from 'lucide-react';
-
-const TimelineItem = ({ item, index, isEducation, isLast }) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ margin: "-50px" }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            className={`relative pl-16 md:pl-0 md:grid md:grid-cols-9 gap-4 ${isLast ? 'pb-0' : 'pb-12'}`}
-        >
-            {/* Date for Desktop (Left) */}
-            <div className="hidden md:flex md:col-span-4 justify-end items-start text-right">
-                <div className="bg-accent/5 border border-accent/20 px-4 py-2 rounded-xl">
-                    <span className="text-sm font-bold text-accent font-mono">{item.date || item.year}</span>
-                </div>
+// Work history as a glowing vertical timeline. The current role gets a lit dot and a "Current" badge.
+// Each item: { title, entity, location, period, summary, current? }
+const Timeline = ({ items }) => {
+  return (
+    <ol>
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        return (
+          <li key={`${item.title}-${item.period}`} className={`relative grid grid-cols-[16px_minmax(0,1fr)] gap-5 ${isLast ? '' : 'pb-9'}`}>
+            {/* Rail to the next entry */}
+            {!isLast && (
+              <span
+                aria-hidden="true"
+                className="absolute bottom-0 left-[7px] top-[26px] w-0.5"
+                style={{ background: item.current ? 'linear-gradient(180deg, var(--aurora-1), var(--stroke))' : 'var(--stroke)' }}
+              />
+            )}
+            {item.current ? (
+              <span aria-hidden="true" className="relative mt-[5px] h-4 w-4 rounded-full" style={{ background: 'var(--aurora-1)', boxShadow: '0 0 0 5px var(--accent-soft), 0 0 24px var(--glow)' }} />
+            ) : (
+              <span aria-hidden="true" className="relative mt-[5px] h-4 w-4 rounded-full border-2 border-stroke-strong bg-bg" />
+            )}
+            <div>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5">
+                <h3 className="font-heading text-[clamp(18px,1.8vw,22px)] font-semibold tracking-tight text-text">{item.title}</h3>
+                <p className="font-mono text-[13px] text-muted2">{item.period}</p>
+              </div>
+              <p className="mt-1.5 flex flex-wrap items-center gap-2.5 text-sm text-muted2">
+                {[item.entity, item.location].filter(Boolean).join(' · ')}
+                {item.current && (
+                  <span className="rounded-full border border-accent2/30 bg-accent2/10 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-accent2">Current</span>
+                )}
+              </p>
+              <p className="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-muted">{item.summary}</p>
             </div>
-
-            {/* Center Line and Icon */}
-            <div className="absolute left-0 md:relative md:left-auto md:col-span-1 flex flex-col items-center h-full">
-                <div className="w-10 h-10 rounded-full bg-panel border-2 border-stroke flex items-center justify-center z-10 shadow-xl group-hover:border-accent transition-colors shrink-0">
-                    {isEducation ? <GraduationCap className="w-5 h-5 text-accent2" /> : <Briefcase className="w-5 h-5 text-accent" />}
-                </div>
-                {!isLast && <div className="w-px h-full bg-gradient-to-b from-stroke via-stroke/50 to-transparent absolute top-10 transform translate-y-0"></div>}
-            </div>
-
-            {/* Content (Right) */}
-            <div className="md:col-span-4 group">
-                <div className="glass p-6 hover:border-accent/40 transition-all">
-                    <div className="md:hidden mb-2 inline-block bg-accent/5 border border-accent/20 px-3 py-1 rounded-lg">
-                        <span className="text-xs font-bold text-accent font-mono">{item.date || item.year}</span>
-                    </div>
-
-                    <h4 className="text-xl font-bold mb-1 group-hover:text-accent transition-colors">{item.title}</h4>
-
-                    <div className="flex flex-wrap gap-3 text-sm text-muted2 mb-4">
-                        <div className="flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5" />
-                            <span>{item.location}</span>
-                        </div>
-                    </div>
-
-                    {item.tasks && (
-                        <ul className="space-y-3">
-                            {item.tasks.map((task, i) => (
-                                <li key={i} className="text-muted text-sm leading-relaxed flex gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent/40 shrink-0"></span>
-                                    {task}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-
-                    {item.desc && <p className="text-muted text-sm leading-relaxed">{item.desc}</p>}
-                </div>
-            </div>
-        </motion.div>
-    );
-};
-
-const Timeline = ({ items, type = "experience" }) => {
-    return (
-        <div className="relative py-8">
-            {items.map((item, index) => (
-                <TimelineItem
-                    key={index}
-                    item={item}
-                    index={index}
-                    isEducation={type === "education"}
-                    isLast={index === items.length - 1}
-                />
-            ))}
-        </div>
-    );
+          </li>
+        );
+      })}
+    </ol>
+  );
 };
 
 export default Timeline;

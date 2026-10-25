@@ -1,249 +1,249 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, User, ShieldCheck, AlertCircle, ArrowRight } from 'lucide-react';
+import { Lock, KeyRound, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 import { API_BASE } from '../config';
 
+// Labelled text input. `action` is an optional element shown on the right of the label row
+// (used for the "Forgot password?" link).
+const Field = ({ id, label, action, ...inputProps }) => (
+  <div>
+    <div className="mb-2 flex min-h-[24px] items-center justify-between gap-2">
+      <label htmlFor={id} className="label mb-0">{label}</label>
+      {action}
+    </div>
+    <input id={id} className="input" required {...inputProps} />
+  </div>
+);
+
+// Plain-sentence status message under the form fields.
+// Errors use role="alert" (announced immediately), success uses role="status" (announced politely).
+// No tinted background on purpose: plain text on the card keeps AA contrast in both themes.
+const STATUS_STYLES = {
+  error: { role: 'alert', className: 'text-danger' },
+  success: { role: 'status', className: 'text-accent2' },
+};
+
+const StatusMessage = ({ type, children }) => {
+  const style = STATUS_STYLES[type];
+  return (
+    <p role={style.role} className={`text-sm leading-relaxed ${style.className}`}>
+      {children}
+    </p>
+  );
+};
+
+// Shared look for the small inline text buttons ("Forgot password?", "Back to sign in").
+// py-0.5 on a 20px line keeps the click target at least 24px tall.
+const TEXT_BUTTON_CLASS = 'inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 text-[13px] font-medium leading-5 transition-colors';
+
+// Pill with a pulsing green "live" dot, shown next to the lock icon
+const SecureBadge = () => (
+  <span className="chip gap-2 px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-muted2">
+    <span className="animate-pulse-ring h-1.5 w-1.5 rounded-full bg-accent2" aria-hidden="true" />
+    Secure
+  </span>
+);
+
 const Login = ({ onLoginSuccess }) => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [showRecovery, setShowRecovery] = useState(false);
-    const [recoveryKey, setRecoveryKey] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [message, setMessage] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryKey, setRecoveryKey] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [message, setMessage] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setMessage('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
 
-        try {
-            const res = await fetch(`${API_BASE}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
 
-            const data = await res.json();
-            if (res.ok && data.ok) {
-                localStorage.setItem('adminToken', data.token);
-                localStorage.setItem('isAdmin', 'true');
-                onLoginSuccess(data.user);
-            } else {
-                setError(data.error || 'Invalid username or password');
-            }
-        } catch (err) {
-            setError('Failed to connect to the server');
-        } finally {
-            setLoading(false);
-        }
-    };
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('isAdmin', 'true');
+        onLoginSuccess(data.user);
+      } else {
+        setError(data.error || 'Invalid username or password');
+      }
+    } catch (err) {
+      console.error('Login request failed:', err);
+      setError('Failed to connect to the server');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleReset = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setMessage('');
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
 
-        try {
-            const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ recoveryKey, newPassword }),
-            });
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recoveryKey, newPassword }),
+      });
 
-            const data = await res.json();
-            if (res.ok && data.ok) {
-                setMessage('Password reset successful. You can now login.');
-                setShowRecovery(false);
-                setRecoveryKey('');
-                setNewPassword('');
-            } else {
-                setError(data.error || 'Reset failed');
-            }
-        } catch (err) {
-            setError('Failed to connect to the server');
-        } finally {
-            setLoading(false);
-        }
-    };
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setMessage('Password reset successful. You can now login.');
+        setShowRecovery(false);
+        setRecoveryKey('');
+        setNewPassword('');
+      } else {
+        setError(data.error || 'Reset failed');
+      }
+    } catch (err) {
+      console.error('Password reset request failed:', err);
+      setError('Failed to connect to the server');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-transparent relative z-10">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="glass max-w-md w-full p-8 md:p-10 border border-white/10 shadow-2xl overflow-hidden relative"
-            >
-                {/* Decorative Background Elements */}
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent2/20 rounded-full blur-3xl"></div>
+  // Lock for signing in, key for the recovery flow
+  const ModeIcon = showRecovery ? KeyRound : Lock;
 
-                <div className="text-center mb-8 relative z-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent2 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-accent/30">
-                        <ShieldCheck className="w-8 h-8 text-white" />
-                    </div>
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2">
-                        {showRecovery ? 'EMERGENCY' : 'RESTRICTED'} <span className="text-accent">{showRecovery ? 'RECOVERY' : 'AREA'}</span>
-                    </h1>
-                    <p className="text-muted text-sm font-medium tracking-wide">SHISHIR PORTFOLIO OS v1.0 {showRecovery ? 'RECOVERY PROTOCOL' : 'AUTHENTICATION'}</p>
+  return (
+    // Login is shown without a footer, so the screen itself centres the card below the floating navbar
+    <div className="flex min-h-screen items-center justify-center px-4 pb-16 pt-28">
+      <div className="animate-fade-in-up relative isolate w-full max-w-sm">
+        {/* Soft aurora glow behind the card (decorative) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-12 -top-16 bottom-0 -z-10 rounded-full blur-[50px]"
+          style={{ background: 'radial-gradient(closest-side, var(--glow), transparent)', opacity: 'var(--orb-opacity)' }}
+        />
+
+        <section aria-labelledby="login-title" className="gradient-border">
+          <div className="gradient-border-inner relative overflow-hidden px-6 pb-6 pt-7 sm:px-8 sm:pb-7 sm:pt-8">
+            {/* Thin accent highlight along the top edge */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-[18%] top-0 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)' }}
+            />
+
+            <header className="mb-7">
+              <div className="flex items-center justify-between gap-3">
+                <span className="icon-box h-11 w-11">
+                  <ModeIcon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <SecureBadge />
+              </div>
+              <h1 id="login-title" className="mt-6 font-heading text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-text">
+                {showRecovery ? 'Reset password' : 'Admin sign in'}
+              </h1>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted">
+                {showRecovery
+                  ? 'Enter the recovery key and choose a new password.'
+                  : 'Sign in to manage your portfolio content.'}
+              </p>
+            </header>
+
+            {!showRecovery ? (
+              <form onSubmit={handleSubmit} aria-labelledby="login-title" className="space-y-5">
+                {message && <StatusMessage type="success">{message}</StatusMessage>}
+
+                <Field
+                  id="login-username"
+                  label="Username"
+                  type="text"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+
+                <Field
+                  id="login-password"
+                  label="Password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => setShowRecovery(true)}
+                      className={`${TEXT_BUTTON_CLASS} -mr-1 text-accent hover:text-text`}
+                    >
+                      Forgot password?
+                    </button>
+                  }
+                />
+
+                {error && <StatusMessage type="error">{error}</StatusMessage>}
+
+                <button type="submit" disabled={loading} className="btn-primary h-12 w-full text-[15px]">
+                  {loading ? 'Signing in…' : 'Sign in'}
+                  {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleReset} aria-labelledby="login-title" className="space-y-5">
+                <Field
+                  id="reset-recovery-key"
+                  label="Recovery key"
+                  type="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={recoveryKey}
+                  onChange={(e) => setRecoveryKey(e.target.value)}
+                />
+
+                <Field
+                  id="reset-new-password"
+                  label="New password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+
+                {error && <StatusMessage type="error">{error}</StatusMessage>}
+
+                <button type="submit" disabled={loading} className="btn-primary h-12 w-full text-[15px]">
+                  {loading ? 'Resetting…' : 'Reset password'}
+                </button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowRecovery(false)}
+                    className={`${TEXT_BUTTON_CLASS} text-muted hover:text-text`}
+                  >
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    Back to sign in
+                  </button>
                 </div>
+              </form>
+            )}
 
-                {!showRecovery ? (
-                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-muted2 ml-1">Identity UID</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted group-focus-within:text-accent transition-colors">
-                                    <User className="w-4 h-4" />
-                                </div>
-                                <input
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full bg-[#111111] border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:bg-[#1a1a1a] transition-all text-sm font-bold text-white placeholder:text-muted2"
-                                    placeholder="Username"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center ml-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted2">Access Cipher</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowRecovery(true)}
-                                    className="text-[9px] text-accent/50 font-bold uppercase tracking-widest hover:text-accent transition-colors"
-                                >
-                                    Forgot Password?
-                                </button>
-                            </div>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted group-focus-within:text-accent transition-colors">
-                                    <Lock className="w-4 h-4" />
-                                </div>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-[#111111] border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:bg-[#1a1a1a] transition-all text-sm font-bold text-white placeholder:text-muted2"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {error && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold"
-                            >
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                <span>{error}</span>
-                            </motion.div>
-                        )}
-
-                        {message && (
-                            <div className="p-4 bg-accent/10 border border-accent/20 rounded-xl text-accent text-xs font-bold">
-                                {message}
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full group relative overflow-hidden bg-gradient-to-r from-accent to-accent2 py-4 rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-accent/20 hover:shadow-accent/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
-                        >
-                            <div className="relative z-10 flex items-center justify-center gap-2">
-                                {loading ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    <>
-                                        <span>Initialize Dashboard</span>
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </>
-                                )}
-                            </div>
-                        </button>
-                    </form>
-                ) : (
-                    <form onSubmit={handleReset} className="space-y-6 relative z-10">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-muted2 ml-1">Recovery Key</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted group-focus-within:text-accent transition-colors">
-                                    <ShieldCheck className="w-4 h-4" />
-                                </div>
-                                <input
-                                    type="text"
-                                    value={recoveryKey}
-                                    onChange={(e) => setRecoveryKey(e.target.value)}
-                                    className="w-full bg-[#111111] border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:bg-[#1a1a1a] transition-all text-sm font-bold text-white placeholder:text-muted2"
-                                    placeholder="Enter System Recovery Key"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-muted2 ml-1">New Access Cipher</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted group-focus-within:text-accent transition-colors">
-                                    <Lock className="w-4 h-4" />
-                                </div>
-                                <input
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full bg-[#111111] border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-accent/50 focus:bg-[#1a1a1a] transition-all text-sm font-bold text-white placeholder:text-muted2"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {error && (
-                            <div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        <div className="flex gap-4">
-                            <button
-                                type="button"
-                                onClick={() => setShowRecovery(false)}
-                                className="flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl text-muted font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
-                            >
-                                Back
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="flex-[2] bg-accent py-4 rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-accent/20 hover:shadow-accent/40 transition-all disabled:opacity-50"
-                            >
-                                {loading ? 'Processing...' : 'Reset Access'}
-                            </button>
-                        </div>
-                    </form>
-                )}
-
-                <div className="mt-8 text-center relative z-10">
-                    <p className="text-[9px] text-muted2 font-bold uppercase tracking-[0.2em] leading-relaxed">
-                        {showRecovery
-                            ? "Emergency access requires the server administrator key."
-                            : "Unauthorized access attempts are logged."}
-                        <br />
-                        IP: {"CALCULATING..."} • PORT: 443
-                    </p>
-                </div>
-            </motion.div>
-        </div>
-    );
+            {/* Short note at the foot of the card */}
+            <p className="mt-7 flex items-start gap-2.5 border-t border-stroke pt-5 text-xs leading-relaxed text-muted2">
+              <ShieldCheck className="mt-px h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
+              <span>
+                {showRecovery
+                  ? 'The recovery key is configured on the server by the site administrator.'
+                  : 'This area is restricted to the site owner.'}
+              </span>
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

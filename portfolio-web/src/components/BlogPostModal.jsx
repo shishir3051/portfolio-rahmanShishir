@@ -1,22 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { X, Share2, Bookmark } from 'lucide-react';
+import { formatBlogText } from '../utils/formatBlogText';
+import { useDialog } from '../hooks/useDialog';
+
+// Aurora gradient used for the lead paragraph's rule and the list bullets
+const AURORA_GRADIENT = 'linear-gradient(180deg, var(--aurora-1), var(--aurora-2))';
+
+// Bright "Featured" pill (same style as the homepage's "Core focus" badge). Also used by the blog cards.
+export const FeaturedBadge = () => (
+  <span className="brand-badge inline-flex h-[26px] shrink-0 items-center rounded-full px-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.1em]">
+    Featured
+  </span>
+);
+
+// Long date for the article header, e.g. "October 25, 2026". Older records may use a different casing
+// for createdAt. Returns an empty string when the post has no valid date instead of inventing one.
+const formatPostDate = (post) => {
+  const date = new Date(post.createdAt || post.createdat || post.CreatedAt);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+};
 
 const BlogPostModal = ({ post, onClose }) => {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  // Check if post is bookmarked on mount. Blog gives the modal key={post._id}, so each post gets a fresh mount.
+  const [isBookmarked, setIsBookmarked] = useState(() => {
+    if (!post) return false;
+    const bookmarked = JSON.parse(localStorage.getItem('bookmarked-posts') || '[]');
+    // MongoDB documents are identified by _id (there is no `id` field)
+    return bookmarked.some(p => p._id === post._id);
+  });
   const [showCopied, setShowCopied] = useState(false);
+  const closeButtonRef = useRef(null);
+  const isOpen = Boolean(post);
 
-  // Check if post is bookmarked on mount
-  useEffect(() => {
-    if (post) {
-      const bookmarked = JSON.parse(localStorage.getItem('bookmarked-posts') || '[]');
-      setIsBookmarked(bookmarked.some(p => p.id === post.id));
-    }
-  }, [post]);
+  // Scroll lock, focus handling (incl. Tab trap) and Escape-to-close; on close the
+  // previous scroll setting and the previously focused element (the post card) are restored.
+  const dialogRef = useRef(null);
+  useDialog(dialogRef, onClose, { enabled: isOpen, initialFocusRef: closeButtonRef });
 
   const handleBookmark = () => {
     const bookmarked = JSON.parse(localStorage.getItem('bookmarked-posts') || '[]');
 
     if (isBookmarked) {
-      const filtered = bookmarked.filter(p => p.id !== post.id);
+      const filtered = bookmarked.filter(p => p._id !== post._id);
       localStorage.setItem('bookmarked-posts', JSON.stringify(filtered));
       setIsBookmarked(false);
     } else {
@@ -50,188 +77,167 @@ const BlogPostModal = ({ post, onClose }) => {
     }
   };
 
-  const parseFormatting = (text) => {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-text font-bold">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-      .replace(/~~(.*?)~~/g, '<del class="opacity-50 line-through">$1</del>')
-      .replace(/<sub>(.*?)<\/sub>/g, '<sub class="text-xs mr-0.5">$1</sub>')
-      .replace(/<sup>(.*?)<\/sup>/g, '<sup class="text-xs ml-0.5">$1</sup>')
-      .replace(/<mark>(.*?)<\/mark>/g, '<mark class="bg-yellow-400/30 text-yellow-200 px-1 rounded-sm">$1</mark>')
-      .replace(/<u>(.*?)<\/u>/g, '<u class="decoration-accent/40 underline-offset-8 decoration-2 font-medium">$1</u>')
-      .replace(/<span style="color:(.*?)">(.*?)<\/span>/g, '<span style="color:$1">$2</span>');
-  };
-
   if (!post) return null;
+
+  const meta = [formatPostDate(post), post.readtime || post.readTime].filter(Boolean).join(' · ');
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
-      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="blog-post-modal-title"
     >
-      <div
-        className="bg-bg border border-stroke rounded-[32px] max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] relative"
-        onClick={(e) => e.stopPropagation()}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
+
+      {/* Glass frame on a solid surface (--card-solid) so long-form text keeps full contrast in both themes.
+          `isolate` lets the decorative glow below sit behind the content with -z-10. */}
+      <article
+        ref={dialogRef}
+        className="glass animate-fade-in-up relative isolate flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px]"
+        style={{ background: 'var(--card-solid)' }}
       >
-        {/* Header */}
-        <div className="sticky top-0 bg-bg/80 backdrop-blur-md border-b border-stroke px-8 py-6 flex items-center justify-between z-10">
-          <div className="flex items-center gap-3">
-            {post.featured && (
-              <span className="px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-widest shadow-sm">
-                Featured
-              </span>
-            )}
-            <span className="px-4 py-1.5 rounded-full bg-panel border border-stroke text-[10px] text-muted font-black uppercase tracking-widest shadow-sm">
-              {post.category}
+        {/* Decorative aurora light: a hairline across the top edge and a soft glow behind the title bar */}
+        <div aria-hidden="true" className="absolute inset-x-[15%] top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)' }} />
+        <div aria-hidden="true" className="absolute -top-36 left-1/2 -z-10 h-64 w-[70%] -translate-x-1/2 rounded-full opacity-50 blur-[70px]" style={{ background: 'var(--glow)' }} />
+
+        {/* Title bar: category and featured marker on the left, close on the right.
+            It stays visible while the post body scrolls. */}
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-stroke py-3 pl-6 pr-3 md:pl-10 md:pr-5">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="chip h-[26px] min-w-0 text-xs font-medium">
+              <span className="truncate">{post.category || 'Post'}</span>
             </span>
+            {post.featured && <FeaturedBadge />}
           </div>
-          <button
-            onClick={onClose}
-            className="w-11 h-11 rounded-2xl border border-stroke hover:border-red-500/50 hover:bg-red-500/5 hover:text-red-500 transition-all grid place-items-center group shadow-sm bg-panel"
-            aria-label="Close"
-          >
-            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-10 md:p-14">
-          {/* Metadata */}
-          <div className="flex items-center gap-4 text-[11px] font-black text-muted2 mb-8 uppercase tracking-[0.2em]">
-            <span>{new Date(post.createdat || post.CreatedAt || Date.now()).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-            <span className="opacity-30">•</span>
-            <span>{post.readtime || post.readTime}</span>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-8 leading-[1.2] text-text font-heading">
-            {post.title}
-          </h1>
-
-          {/* Excerpt */}
-          <div className="relative mb-10">
-            <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent to-accent/20 rounded-full"></div>
-            <p className="text-lg md:text-xl text-muted leading-relaxed pl-8 py-1 font-medium italic opacity-90">
-              {post.excerpt}
-            </p>
-          </div>
-
-          {/* Full Content */}
-          <div className="max-w-none">
-            <div className="text-muted leading-relaxed text-base md:text-lg space-y-6">
-              {(post.content || "").split('\n').map((line, i) => {
-                const trimmed = line.trim();
-                if (!trimmed) return <div key={i} className="h-4" />;
-
-                // Handle Alignment Wrappers (<div align="center">...</div>)
-                let alignmentClass = "";
-                let processedLine = trimmed;
-                if (trimmed.includes('align="center"')) {
-                  alignmentClass = "text-center";
-                } else if (trimmed.includes('align="right"')) {
-                  alignmentClass = "text-right";
-                } else if (trimmed.includes('align="left"')) {
-                  alignmentClass = "text-left";
-                } else if (trimmed.includes('align="justify"')) {
-                  alignmentClass = "text-justify";
-                }
-
-                if (alignmentClass !== "") {
-                  processedLine = trimmed.replace(/<div align="(.*?)">/g, '').replace(/<\/div>/g, '');
-                }
-
-                // H1 Heading
-                if (processedLine.startsWith('# ')) {
-                  return <h2 key={i} className={`text-text font-black text-2xl md:text-3xl mt-10 mb-4 border-b border-stroke pb-2 ${alignmentClass}`}>{processedLine.replace('# ', '')}</h2>;
-                }
-                // H2 Heading
-                if (processedLine.startsWith('## ')) {
-                  return <h3 key={i} className={`text-text font-bold text-xl md:text-2xl mt-8 mb-3 ${alignmentClass}`}>{processedLine.replace('## ', '')}</h3>;
-                }
-                // H3 Heading
-                if (processedLine.startsWith('### ')) {
-                  return <h4 key={i} className={`text-text font-bold text-lg md:text-xl mt-6 mb-2 ${alignmentClass}`}>{processedLine.replace('### ', '')}</h4>;
-                }
-                // Universal List Detection Logic
-                const listMatch = processedLine.match(/^(\s*)([ivxIVX]+[\.\)]|\d+[\.\)]|[a-zA-Z][\.\)]|[\-■‣•\*]| {4})(.*)/);
-
-                if (listMatch) {
-                  const indent = listMatch[1];
-                  const marker = listMatch[2].trim();
-                  const content = listMatch[3];
-
-                  return (
-                    <div key={i} className={`flex gap-3 items-start ml-2 ${alignmentClass}`} style={{ paddingLeft: `${indent.length * 8}px` }}>
-                      {marker && marker !== "" ? (
-                        <span className="text-accent font-black text-sm mt-0.5 shrink-0 min-w-[1.2rem] text-right">
-                          {marker.length === 1 && !/[\.\)]/.test(marker) ? (
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 block mx-auto"></span>
-                          ) : marker}
-                        </span>
-                      ) : (
-                        <div className="w-[1.2rem] shrink-0" /> // Spacer for "None" style
-                      )}
-                      <p className="text-muted text-base md:text-lg" dangerouslySetInnerHTML={{ __html: parseFormatting(content.trim()) }} />
-                    </div>
-                  );
-                }
-
-                return (
-                  <p
-                    key={i}
-                    className={`transition-colors hover:text-text cursor-default leading-relaxed ${alignmentClass} text-muted text-base md:text-lg`}
-                    dangerouslySetInnerHTML={{ __html: parseFormatting(processedLine) }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Footer Actions */}
-          <div className="mt-16 pt-10 border-t border-stroke flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleShare}
-                className="relative h-12 px-6 rounded-2xl border border-stroke hover:border-accent hover:text-accent transition-all text-xs font-black uppercase tracking-widest flex items-center gap-3 bg-panel shadow-sm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                Share
-                {showCopied && (
-                  <span className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-accent text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl animate-bounce">
-                    Link copied!
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={handleBookmark}
-                className={`h-12 px-6 rounded-2xl border transition-all text-xs font-black uppercase tracking-widest flex items-center gap-3 shadow-sm ${isBookmarked
-                    ? 'border-accent text-accent bg-accent/10'
-                    : 'border-stroke text-muted hover:border-accent hover:text-accent bg-panel'
-                  }`}
-              >
-                <svg className="w-4 h-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                {isBookmarked ? 'Saved' : 'Save'}
-              </button>
-            </div>
-            <button
-              onClick={onClose}
-              className="h-12 px-10 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(127,90,240,0.4)] hover:-translate-y-1 transition-all w-full sm:w-auto"
-            >
-              Close Post
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="kbd hidden sm:inline-flex" aria-hidden="true">Esc</span>
+            <button ref={closeButtonRef} type="button" onClick={onClose} className="icon-btn" aria-label="Close post">
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
-      </div>
+
+        {/* Scrollable post body */}
+        <div className="min-h-0 overflow-y-auto px-6 pb-10 pt-8 md:px-10 md:pb-12 md:pt-10">
+          <h2
+            id="blog-post-modal-title"
+            className="text-balance font-heading text-[clamp(28px,3.6vw,42px)] font-semibold leading-[1.1] tracking-[-0.035em] text-text"
+          >
+            {post.title}
+          </h2>
+          {meta && <p className="mt-4 font-mono text-xs uppercase tracking-[0.12em] text-muted2">{meta}</p>}
+
+          {/* Summary as a lead paragraph, set off by a thin aurora rule */}
+          {post.excerpt && (
+            <p className="relative mt-8 pl-5 text-[17px] leading-relaxed text-text/85 md:text-lg">
+              <span aria-hidden="true" className="absolute inset-y-1 left-0 w-0.5 rounded-full" style={{ background: AURORA_GRADIENT }} />
+              {post.excerpt}
+            </p>
+          )}
+
+          {/* Full Content: each line of the editor's text becomes a heading, list item or paragraph.
+              [&_mark]:text-text keeps highlighted text readable on the light theme too. */}
+          <div className="mt-8 flex flex-col gap-4 border-t border-stroke pt-8 text-base leading-[1.8] text-muted md:text-[17px] [&_mark]:text-text">
+            {(post.content || "").split('\n').map((line, i) => {
+              const trimmed = line.trim();
+              if (!trimmed) return <div key={i} className="h-1" aria-hidden="true" />;
+
+              // Handle Alignment Wrappers (<div align="center">...</div>)
+              let alignmentClass = "";
+              let processedLine = trimmed;
+              if (trimmed.includes('align="center"')) {
+                alignmentClass = "text-center";
+              } else if (trimmed.includes('align="right"')) {
+                alignmentClass = "text-right";
+              } else if (trimmed.includes('align="left"')) {
+                alignmentClass = "text-left";
+              } else if (trimmed.includes('align="justify"')) {
+                alignmentClass = "text-justify";
+              }
+
+              // Always strip the editor's alignment wrappers; the closing </div> sits on its own line
+              processedLine = trimmed.replace(/<div align="[^"]*">/g, '').replace(/<\/div>/g, '').trim();
+              if (!processedLine) return null;
+
+              // H1 Heading
+              if (processedLine.startsWith('# ')) {
+                return <h2 key={i} className={`mt-6 font-heading text-[clamp(22px,2.2vw,28px)] font-semibold leading-snug tracking-[-0.03em] text-text first:mt-0 ${alignmentClass}`}>{processedLine.replace('# ', '')}</h2>;
+              }
+              // H2 Heading
+              if (processedLine.startsWith('## ')) {
+                return <h3 key={i} className={`mt-5 font-heading text-xl font-semibold leading-snug tracking-[-0.025em] text-text first:mt-0 md:text-[22px] ${alignmentClass}`}>{processedLine.replace('## ', '')}</h3>;
+              }
+              // H3 Heading
+              if (processedLine.startsWith('### ')) {
+                return <h4 key={i} className={`mt-3 font-heading text-lg font-semibold tracking-[-0.02em] text-text first:mt-0 ${alignmentClass}`}>{processedLine.replace('### ', '')}</h4>;
+              }
+              // Universal List Detection Logic
+              const listMatch = processedLine.match(/^(\s*)([ivxIVX]+[.)]|\d+[.)]|[a-zA-Z][.)]|[-■‣•*]| {4})(.*)/);
+
+              if (listMatch) {
+                const indent = listMatch[1];
+                const marker = listMatch[2].trim();
+                const content = listMatch[3];
+
+                return (
+                  <div key={i} className={`flex gap-3 items-start ml-2 ${alignmentClass}`} style={{ paddingLeft: `${indent.length * 8}px` }}>
+                    {marker && marker !== "" ? (
+                      <span className="min-w-[1.2rem] shrink-0 text-right font-mono text-[0.9em] font-medium tabular-nums text-muted2">
+                        {marker.length === 1 && !/[.)]/.test(marker) ? (
+                          // Bullet: a small aurora dot, centred on the first line of text
+                          <span className="inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ background: AURORA_GRADIENT }} aria-hidden="true" />
+                        ) : marker}
+                      </span>
+                    ) : (
+                      <div className="w-[1.2rem] shrink-0" /> // Spacer for "None" style
+                    )}
+                    <p className="min-w-0 flex-1" dangerouslySetInnerHTML={{ __html: formatBlogText(content.trim()) }} />
+                  </div>
+                );
+              }
+
+              return (
+                <p
+                  key={i}
+                  className={alignmentClass}
+                  dangerouslySetInnerHTML={{ __html: formatBlogText(processedLine) }}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-t border-stroke px-6 py-4 md:px-10" style={{ background: 'var(--fill-1)' }}>
+          <button type="button" onClick={handleShare} className="btn-secondary h-10 px-4">
+            <Share2 className="h-4 w-4" aria-hidden="true" />
+            Share
+          </button>
+          <button
+            type="button"
+            onClick={handleBookmark}
+            className={`btn-secondary h-10 px-4 ${isBookmarked
+              ? 'border-accent/50 bg-accent/10 text-accent hover:border-accent/70 hover:bg-accent/15'
+              : ''
+              }`}
+          >
+            <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} aria-hidden="true" />
+            {isBookmarked ? 'Saved' : 'Save'}
+          </button>
+
+          {/* Short confirmation after copying; role="status" announces it to screen readers */}
+          <p role="status" className="text-sm text-accent2">
+            {showCopied && 'Link copied.'}
+          </p>
+
+          <button type="button" onClick={onClose} className="btn-primary ml-auto h-10 px-5">
+            Close
+          </button>
+        </div>
+      </article>
     </div>
   );
 };
 
 export default BlogPostModal;
-
-

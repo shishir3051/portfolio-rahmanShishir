@@ -1,125 +1,83 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { Shield, Lock, Eye, FileText, Mail, Terminal } from 'lucide-react';
+import PolicyPage from '../components/PolicyPage';
+import { PROFILE } from '../data/profile';
 
-const Legal = () => {
-  return (
-    <div className="min-h-screen pt-32 pb-20">
-      <Helmet>
-        <title>Privacy Policy | Rahman Shishir</title>
-        <meta name="description" content="Privacy Protocol and Information Collection details for Rahman Shishir's portfolio." />
-      </Helmet>
-      {/* Hero Section */}
-      <section className="mb-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-widest mb-6">
-              <Shield className="w-3 h-3" /> Compliance Archive
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 uppercase italic">
-              Privacy <span className="text-accent">/ Protocol</span>
-            </h1>
-            <p className="text-muted font-bold uppercase tracking-widest text-xs">
-              Last Hash Update: <span className="text-text">February 02, 2026</span>
-            </p>
-          </motion.div>
-        </div>
-      </section>
+// Privacy policy. Keep it accurate: describe only what the site really does.
+// Sources of truth: POST /api/contact in portfolio-backend/server.js (what is stored and emailed)
+// and the localStorage keys used in src/ (theme, bookmarked-posts, adminToken / isAdmin).
+const SECTIONS = [
+  {
+    id: 'overview',
+    title: 'Overview',
+    blocks: [
+      `This is the personal portfolio of ${PROFILE.name}. Visitors do not need an account, and the site has no advertising, analytics or tracking.`,
+      'This page explains the small amount of data the site does handle.',
+    ],
+  },
+  {
+    id: 'contact-form',
+    title: 'Contact form',
+    blocks: [
+      'When you send a message through the contact form, the following is saved in the site’s database (MongoDB):',
+      [
+        'Your name, email address and message.',
+        'Your IP address and browser user agent, recorded automatically to help spot spam and abuse.',
+      ],
+      'Your name, email address and message are also sent to me as an email notification through Resend, an email delivery service.',
+      'I use this information only to read and reply to your message. It is never sold or shared for marketing.',
+    ],
+  },
+  {
+    id: 'browser-storage',
+    title: 'Data stored in your browser',
+    blocks: [
+      'The site uses your browser’s local storage to remember a few things on your device:',
+      [
+        'Your theme preference (light or dark).',
+        'Blog posts you bookmark.',
+        'For the site owner only: an admin session token used to sign in to the dashboard.',
+      ],
+      'Your theme and bookmarks stay on your device and are never sent to the server. You can remove them at any time by clearing this site’s data in your browser.',
+    ],
+  },
+  {
+    id: 'cookies',
+    title: 'Cookies and third parties',
+    blocks: [
+      'The site does not set cookies and does not use analytics, advertising or tracking scripts.',
+      'The site is hosted on Vercel and loads its font from Google Fonts. As with any website, these providers receive basic connection details, such as your IP address, when your browser requests files from them.',
+      'Links to other sites, such as GitHub and LinkedIn, are covered by those sites’ own privacy policies.',
+    ],
+  },
+  {
+    id: 'your-data',
+    title: 'Keeping and deleting your data',
+    blocks: [
+      'Contact messages are kept until I remove them manually from the database.',
+      `You can ask to see or delete any message you have sent at any time by emailing ${PROFILE.email}; I will remove it by hand and confirm by email.`,
+    ],
+  },
+  {
+    id: 'changes',
+    title: 'Changes to this policy',
+    blocks: ['If the site starts handling data differently, this page will be updated and the date at the top will change.'],
+  },
+];
 
-      {/* Content */}
-      <section>
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto space-y-20">
-            {[
-              {
-                title: "Information Collection",
-                icon: <Eye className="w-6 h-6" />,
-                content: [
-                  "We collect personally identifiable information that you voluntarily provide when you submit a contact form or request architectural audits.",
-                  "Automatically collected data includes IP addresses, browser fingerprints, and system telemetry to monitor and optimize site security.",
-                  "All data collection is performed under strict encryption and is necessary for providing requested professional services."
-                ]
-              },
-              {
-                title: "Data Utilization",
-                icon: <Lock className="w-6 h-6" />,
-                content: [
-                  "Your information is primarily used to respond to inquiries, send technical advisories, and maintain the integrity of our digital environment.",
-                  "We analyze usage patterns exclusively to detect and prevent unauthorized access or system vulnerabilities.",
-                  "We do not sell or monetize user data under any circumstances."
-                ]
-              },
-              {
-                title: "Security Measures",
-                icon: <Shield className="w-6 h-6" />,
-                content: [
-                  "We implement enterprise-grade technical and organizational security measures to protect your personal information against unauthorized disclosure.",
-                  "Secure connections (TLS/SSL) are mandated for all data transmissions.",
-                  "Note: No electronic transmission or persistent storage technology can be guaranteed to be 100% impenetrable."
-                ]
-              },
-              {
-                title: "Your Rights (GDPR/APAA)",
-                icon: <FileText className="w-6 h-6" />,
-                content: [
-                  "Right to Access: You may request copies of any personal datasets we hold.",
-                  "Right to Erasure: You have the right to request the permanent deletion of your data from our active systems.",
-                  "Right to Object: You may object to our processing of your personal data at any point."
-                ]
-              }
-            ].map((section, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ margin: "-100px" }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-2xl bg-panel border border-stroke flex items-center justify-center text-accent">
-                    {section.icon}
-                  </div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight italic">{section.title}</h2>
-                </div>
-                <div className="space-y-4 pl-16">
-                  {section.content.map((para, pIdx) => (
-                    <p key={pIdx} className="text-muted leading-relaxed font-bold border-l-2 border-stroke pl-6 hover:border-accent transition-colors">
-                      {para}
-                    </p>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-
-            {/* Contact Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              className="glass p-12 border-dashed border-2 border-accent/20"
-            >
-              <div className="flex flex-col md:flex-row gap-8 items-center justify-between">
-                <div>
-                  <h2 className="text-3xl font-black mb-4 uppercase italic">Legal Inquiry</h2>
-                  <p className="text-muted font-bold">For transparency requests or privacy concerns, contact the security office directly.</p>
-                </div>
-                <a
-                  href="mailto:privacy@rahmanshishir.com"
-                  className="flex items-center gap-3 px-8 py-4 bg-text text-bg rounded-xl font-black hover:scale-[1.05] transition-all uppercase tracking-widest whitespace-nowrap"
-                >
-                  <Mail className="w-5 h-5" /> Secure Channel
-                </a>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
+const Legal = () => (
+  <PolicyPage
+    metaTitle={`Privacy Policy | ${PROFILE.name}`}
+    metaDescription={`How ${PROFILE.name}'s portfolio handles contact form messages and the settings stored in your browser.`}
+    eyebrow="Privacy"
+    title={
+      <>
+        Privacy <span className="gradient-text">policy</span>
+      </>
+    }
+    description="What this site collects, why, and how to have it removed. In short: only what you send through the contact form."
+    lastUpdated="2026-10-25"
+    sections={SECTIONS}
+    contactNote={`Questions about this policy, or want a message deleted? Email ${PROFILE.email}.`}
+  />
+);
 
 export default Legal;

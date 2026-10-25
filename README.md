@@ -1,6 +1,6 @@
 # ✨ Rahman Shishir - Full Stack Developer Portfolio
 
-Welcome to the source code of **Rahman Shishir's personal developer portfolio**! This is a modern, unified full-stack application built to showcase projects, skills, and interactive experiences. It features a highly animated 3D interface using Three.js and Framer Motion, paired with a robust and scalable backend architecture powered by Express and MongoDB.
+Welcome to the source code of **Rahman Shishir's personal developer portfolio**! This is a modern, unified full-stack application built to showcase projects, skills, and experience. It uses an "Aurora glass" design (drifting aurora light, frosted glass cards, dark and light themes) that works from phones to wide screens, built with React and Tailwind CSS and paired with a backend powered by Express and MongoDB.
 
 ## 🚀 About the Project
 
@@ -12,10 +12,17 @@ The application has been unified for deployment on **Vercel**, migrating from a 
 
 ### Frontend (`/portfolio-web`)
 - **React (v19)** powered by **Vite** for incredibly fast local development and optimized production builds.
-- **Three.js** (`@react-three/fiber`, `@react-three/drei`) for engaging, performant 3D experiences.
-- **Framer Motion** for smooth, complex micro-animations and seamless page transitions.
-- **Tailwind CSS** for responsive, utility-first styling.
-- **Lucide React** for beautiful UI icons.
+- **Tailwind CSS** for responsive, utility-first styling. Colors are CSS variables (design tokens) defined in `src/index.css`, together with shared UI classes (`.btn-primary`, `.chip`, `.input`, `.glass`, `.gradient-border`, ...).
+- **Fonts**: Sora (headings), Inter (body) and JetBrains Mono (labels), loaded from Google Fonts in `index.html`.
+- **Framer Motion** and CSS keyframes for subtle motion (aurora drift, entrance fades), all turned off for visitors who prefer reduced motion.
+- **Project illustrations**: each work card gets an animated SVG illustration (`src/components/ProjectArt.jsx`), matched to the project's tag, title and description by `src/utils/projectArt.js`. There are 10 illustrations, and none repeats within each group of 10 cards (cards 1-10, 11-20, ...).
+- **Mobile layout**: on phones each work card is a short row with a square illustration; tablets show 2 cards per row, laptops 3 and wide screens 4.
+- **Lucide React** for UI icons.
+
+### Editing content
+All portfolio text (profile, about, skills, experience, education, services, contact details) lives in
+`portfolio-web/src/data/profile.js`, so you can update content without touching components.
+Projects and blog posts come from the API and are managed in the admin dashboard (`/#admin`).
 
 ### Backend (`/portfolio-backend`)
 - **Node.js** & **Express** as the core web framework.
@@ -44,8 +51,10 @@ To run this application locally, you will need Node.js and an active MongoDB dat
    ```
 
 2. **Setup environment variables:**
-   - Copy `.env.example` to `.env` in the root folder.
-   - Fill in your `MONGODB_URI`, `JWT_SECRET`, and `RESEND_API_KEY`.
+   - Copy `.env.example` to `portfolio-backend/.env` (the server loads `.env` from its own folder).
+   - Fill in your `MONGODB_URI`, `JWT_SECRET`, `ADMIN_KEY` and `RESEND_API_KEY`.
+   - `SEED_ADMIN_PASSWORD` is only needed when running `scripts/seed_mongo.js` to create the `admin` account.
+   - Never commit `.env` files; in production set these values in your hosting provider's environment settings.
 
 3. **Install Dependencies:**
    Install dependencies for both workspaces:

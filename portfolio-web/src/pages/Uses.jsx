@@ -1,149 +1,171 @@
-import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { Terminal, Code, Cpu, Shield, Layout, Settings } from 'lucide-react';
+import { ArrowRight, CodeXml, Cpu, Database, LayoutTemplate, ShieldCheck } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { trackSpotlight } from '../utils/spotlight';
 
-const Uses = () => {
-  const categories = [
-    {
-      title: "Core Stack",
-      icon: <Code className="w-6 h-6" />,
-      items: [
-        { name: "Visual Studio Code", description: "Primary code editor with high-performance extensions for Java, React, and Python." },
-        { name: "IntelliJ IDEA", description: "The definitive IDE for enterprise Spring Boot and monolithic Java systems." },
-        { name: "Docker & Kubernetes", description: "Container orchestration for scalable microservices deployment." },
-        { name: "GitHub Actions", description: "Automated CI/CD pipelines for secure software delivery." }
-      ]
-    },
-    {
-      title: "Frontend Engineering",
-      icon: <Layout className="w-6 h-6" />,
-      items: [
-        { name: "React / Next.js", description: "High-performance framework for building SEO-optimized, interactive UIs." },
-        { name: "Tailwind CSS", description: "Utility-first styling system for rapid industrial-grade design." },
-        { name: "Framer Motion", description: "Advanced physics-based animation engine for immersive web experiences." }
-      ]
-    },
-    {
-      title: "Data & Systems",
-      icon: <Cpu className="w-6 h-6" />,
-      items: [
-        { name: "Spring Boot", description: "Robust backend infrastructure for secure, scalable enterprise APIs." },
-        { name: "Neo4j Graph DB", description: "Visualizing complex network relationships and threat intelligence." },
-        { name: "MS SQL Server", description: "Enterprise relational data management for high-concurrency systems." }
-      ]
-    },
-    {
-      title: "Security & Auditing",
-      icon: <Shield className="w-6 h-6" />,
-      items: [
-        { name: "Burp Suite Pro", description: "Industry-standard toolkit for web application penetration testing." },
-        { name: "Metasploit", description: "Vulnerability analysis and exploit development for cybersecurity audits." },
-        { name: "Wireshark", description: "Deep packet inspection for network-level threat detection." }
-      ]
-    },
-    {
-      title: "Hardware Lab",
-      icon: <Settings className="w-6 h-6" />,
-      items: [
-        { name: "Workstation", description: "Rizen 9 / 64GB RAM / RTX 4080 — Built for intensive compilation and virtualization." },
-        { name: "Triple Monitor Setup", description: "3x 27\" 4K displays for real-time monitoring and multi-IDE workflows." },
-        { name: "Custom Mechanical KB", description: "Keychron Q3 with tactile switches for high-speed, reliable engineering sessions." }
-      ]
-    }
-  ];
+// Tools grouped by area. Defined outside the component so the list is not rebuilt on every render.
+// `title` is the readable heading of each card, `icon` the lucide icon in its tinted box,
+// and `id` links each heading to its section for screen readers.
+const TOOL_GROUPS = [
+  {
+    id: 'development',
+    icon: CodeXml,
+    title: 'Development & DevOps',
+    items: [
+      { name: 'Visual Studio Code', description: 'Primary editor, set up for Java, React and Python.' },
+      { name: 'IntelliJ IDEA', description: 'IDE for Spring Boot services and large Java codebases.' },
+      { name: 'Docker & Kubernetes', description: 'Containers and orchestration for deploying microservices.' },
+      { name: 'GitHub Actions', description: 'CI/CD pipelines for automated builds, tests and releases.' },
+    ],
+  },
+  {
+    id: 'frontend',
+    icon: LayoutTemplate,
+    title: 'Frontend',
+    items: [
+      { name: 'React / Next.js', description: 'Interactive, SEO-friendly user interfaces.' },
+      { name: 'Tailwind CSS', description: 'Utility-first CSS for fast, consistent styling.' },
+      { name: 'Framer Motion', description: 'Animations and transitions in React.' },
+    ],
+  },
+  {
+    id: 'backend',
+    icon: Database,
+    title: 'Backend & Data',
+    items: [
+      { name: 'Spring Boot', description: 'Secure, scalable REST APIs and backend services.' },
+      { name: 'Neo4j', description: 'Graph database for modelling network relationships and threat data.' },
+      { name: 'MS SQL Server', description: 'Relational database for high-concurrency enterprise systems.' },
+    ],
+  },
+  {
+    id: 'security',
+    icon: ShieldCheck,
+    title: 'Security',
+    items: [
+      { name: 'Burp Suite Pro', description: 'Web application penetration testing.' },
+      { name: 'Metasploit', description: 'Vulnerability analysis and exploit testing during security audits.' },
+      { name: 'Wireshark', description: 'Packet capture and network traffic analysis.' },
+    ],
+  },
+  {
+    id: 'hardware',
+    icon: Cpu,
+    title: 'Hardware',
+    items: [
+      { name: 'Workstation', description: 'Ryzen 9, 64 GB RAM, RTX 4080, for heavy builds and virtual machines.' },
+      { name: 'Monitors', description: 'Three 27" 4K displays for code, documentation and logs side by side.' },
+      { name: 'Keyboard', description: 'Keychron Q3 mechanical keyboard with tactile switches.' },
+    ],
+  },
+];
+
+const TOTAL_ITEMS = TOOL_GROUPS.reduce((sum, group) => sum + group.items.length, 0);
+
+// 4 -> "04": fixed-width counts, matching the small mono indices on the homepage
+const pad2 = (n) => String(n).padStart(2, '0');
+
+// One group as a frosted glass card: tinted icon + Sora heading on top,
+// then a clean list (tool name on the left, what I use it for on the right).
+const ToolGroup = ({ group }) => {
+  const { id, title, items } = group;
+  // Capitalised alias so the icon can be rendered as a JSX component
+  const Icon = group.icon;
+  const headingId = `uses-${id}`;
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
-      <Helmet>
-        <title>Uses & Tech Stack | Rahman Shishir</title>
-        <meta name="description" content="A curated inventory of the hardware, software, and development protocols I leverage to engineer secure digital environments." />
-      </Helmet>
-      {/* Hero Section */}
-      <section className="mb-20">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-widest mb-6">
-              <Terminal className="w-3 h-3" /> System Components
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 uppercase italic">
-              Uses <span className="text-accent">/ Tech Stack</span>
-            </h1>
-            <p className="text-xl text-muted leading-relaxed max-w-2xl font-medium">
-              A curated inventory of the hardware, software, and development protocols I leverage to engineer secure and high-performance digital environments.
-            </p>
-          </motion.div>
+    <section
+      aria-labelledby={headingId}
+      className="glass lift spotlight relative overflow-hidden rounded-3xl p-6 md:p-8"
+      onPointerMove={trackSpotlight}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span className="icon-box h-[42px] w-[42px]">
+            <Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h2 id={headingId} className="font-heading text-xl font-semibold tracking-[-0.03em] text-text">
+            {title}
+          </h2>
         </div>
-      </section>
+        {/* Visual count only; screen readers already announce the list length */}
+        <span className="font-mono text-xs text-muted2" aria-hidden="true">{pad2(items.length)}</span>
+      </div>
 
-      {/* Tools Grid */}
-      <section>
-        <div className="container mx-auto px-6">
-          <div className="space-y-24">
-            {categories.map((category, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ margin: "-100px" }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-              >
-                <div className="flex items-center gap-4 mb-10">
-                  <div className="w-12 h-12 rounded-2xl bg-panel border border-stroke flex items-center justify-center text-accent">
-                    {category.icon}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight">{category.title}</h2>
-                    <div className="h-px w-24 bg-accent mt-1"></div>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  {category.items.map((item, idx) => (
-                    <motion.div
-                      key={idx}
-                      whileHover={{ y: -5, scale: 1.01 }}
-                      className="glass p-8 group border-stroke hover:border-accent/40 transition-all duration-300"
-                    >
-                      <h3 className="text-lg font-black mb-3 group-hover:text-accent transition-colors">{item.name}</h3>
-                      <p className="text-sm text-muted leading-relaxed font-bold">{item.description}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
+      {/* Rows stack on phones and become two columns from `sm` */}
+      <dl className="mt-6 divide-y divide-stroke border-t border-stroke">
+        {items.map(({ name, description }) => (
+          <div key={name} className="grid gap-1 py-4 last:pb-0 sm:grid-cols-[11rem_1fr] sm:gap-6">
+            <dt className="text-[15px] font-medium text-text">{name}</dt>
+            <dd className="text-[15px] leading-relaxed text-muted">{description}</dd>
           </div>
-        </div>
-      </section>
+        ))}
+      </dl>
+    </section>
+  );
+};
 
-      {/* CTA Section */}
-      <section className="mt-32">
-        <div className="container mx-auto px-6">
-          <motion.div
-            whileInView={{ opacity: 1, scale: 1 }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            className="glass p-12 text-center max-w-3xl mx-auto border-dashed border-2 border-accent/20"
-          >
-            <h2 className="text-3xl font-black mb-4 uppercase">Refining the Stack</h2>
-            <p className="text-muted mb-10 font-bold">
-              My toolchain is constantly evolving as new security protocols and engineering paradigms emerge.
-            </p>
-            <button
-              onClick={() => {
-                window.location.hash = 'contact';
-              }}
-              className="px-8 py-4 bg-text text-bg rounded-xl font-black hover:scale-[1.05] active:scale-95 transition-all uppercase tracking-widest"
-            >
-              Propose an Upgrade
-            </button>
-          </motion.div>
-        </div>
-      </section>
-    </div>
+// "Uses" page: the hardware, software and tools I work with, tiled as glass cards.
+const Uses = () => {
+  return (
+    <>
+      <Helmet>
+        <title>Uses | Rahman Shishir</title>
+        <meta
+          name="description"
+          content="The hardware, software and tools Rahman Shishir uses for software development and security work."
+        />
+      </Helmet>
+
+      <PageHeader
+        eyebrow="Uses"
+        title={<>The <span className="gradient-text">tools</span> behind the work.</>}
+        description="The hardware, software and tools I use day to day for development and security work."
+      >
+        <p className="mt-7 font-mono text-xs uppercase tracking-[0.12em] text-muted2">
+          <span className="text-text">{pad2(TOOL_GROUPS.length)}</span> groups
+          <span className="mx-2.5" aria-hidden="true">·</span>
+          <span className="text-text">{pad2(TOTAL_ITEMS)}</span> items
+        </p>
+      </PageHeader>
+
+      {/* One card per row on phones, two from `lg`; the closing card fills the last cell */}
+      <div className="container grid gap-4 pb-20 md:pb-28 lg:grid-cols-2">
+        {TOOL_GROUPS.map((group) => (
+          <ToolGroup key={group.id} group={group} />
+        ))}
+
+        {/* Closing call to action: links back to the contact section on the homepage.
+            Spans the full row when the groups already fill every cell. */}
+        <section
+          aria-labelledby="uses-feedback"
+          className={`gradient-border flex ${TOOL_GROUPS.length % 2 === 0 ? 'lg:col-span-2' : ''}`}
+        >
+          <div className="gradient-border-inner relative flex flex-1 flex-col items-start justify-between gap-8 overflow-hidden p-6 md:p-8">
+            {/* Soft aurora glow in the corner (decorative) */}
+            <div
+              aria-hidden="true"
+              className="absolute -right-20 -top-24 h-[260px] w-[260px] rounded-full blur-[60px]"
+              style={{ background: 'var(--glow)', opacity: 'calc(0.6 * var(--orb-opacity))' }}
+            />
+            <div className="relative">
+              <h2
+                id="uses-feedback"
+                className="text-balance font-heading text-[clamp(26px,2.6vw,34px)] font-semibold leading-[1.1] tracking-[-0.03em] text-text"
+              >
+                Suggestions <span className="gradient-text">welcome</span>.
+              </h2>
+              <p className="mt-3 max-w-[30em] text-[15px] leading-relaxed text-muted">
+                This list changes as I try new tools. Have a recommendation, or a project in mind?
+              </p>
+            </div>
+            <a href="#contact" className="btn-primary relative h-[48px] px-6">
+              Get in touch <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
+        </section>
+      </div>
+    </>
   );
 };
 
