@@ -1,9 +1,13 @@
-// Native fetch is available in Node 18+ (User has v20)
-// If node-fetch isn't available, we'll use native fetch (Node 18+) or http module. 
-// Assuming Node 18+ for this environment which supports global fetch.
+// Adds sample projects through the running API (uses native fetch, Node 18+).
+// Usage: ADMIN_TOKEN=<JWT from /api/auth/login> node add_samples.js
 
-const API_URL = 'http://localhost:4000/api/projects';
-const ADMIN_KEY = 'A/e43117278';
+const API_URL = process.env.API_URL || 'http://localhost:4000/api/projects';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+
+if (!ADMIN_TOKEN) {
+  console.error("ADMIN_TOKEN is not set. Log in via /api/auth/login and pass the returned token.");
+  process.exit(1);
+}
 
 const projects = [
   {
@@ -81,7 +85,7 @@ async function addProjects() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': ADMIN_KEY
+          'Authorization': `Bearer ${ADMIN_TOKEN}`
         },
         body: JSON.stringify(p)
       });
