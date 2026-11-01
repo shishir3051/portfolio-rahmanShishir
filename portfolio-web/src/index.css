@@ -340,6 +340,8 @@ main [id] {
 .animate-float { animation-name: floatY; animation-duration: 7s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
 .animate-pulse-ring { animation: pulse-ring 2.4s ease-out infinite; }
 .animate-marquee { animation: marquee 52s linear infinite; }
+/* Tech ribbon (Ribbon.jsx): pause while the pointer is over it */
+.ribbon:hover .animate-marquee { animation-play-state: paused; }
 .animate-fade-in-up,
 .animate-fadeIn { animation: fade-in-up 0.2s ease-out both; }
 
@@ -348,8 +350,10 @@ main [id] {
 =============================== */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after {
+  /* Stop decorative motion, except the thin tech ribbon, which keeps sliding more slowly */
+  *:not(.animate-marquee), *::before, *::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }
+  .animate-marquee { animation-duration: 90s; }
 }

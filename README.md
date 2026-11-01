@@ -14,8 +14,8 @@ The application has been unified for deployment on **Vercel**, migrating from a 
 - **React (v19)** powered by **Vite** for incredibly fast local development and optimized production builds.
 - **Tailwind CSS** for responsive, utility-first styling. Colors are CSS variables (design tokens) defined in `src/index.css`, together with shared UI classes (`.btn-primary`, `.chip`, `.input`, `.glass`, `.gradient-border`, ...).
 - **Fonts**: Sora (headings), Inter (body) and JetBrains Mono (labels), loaded from Google Fonts in `index.html`.
-- **Framer Motion** and CSS keyframes for subtle motion (aurora drift, entrance fades), all turned off for visitors who prefer reduced motion.
-- **Project illustrations**: each work card gets an animated SVG illustration (`src/components/ProjectArt.jsx`), matched to the project's tag, title and description by `src/utils/projectArt.js`. There are 10 illustrations, and none repeats within each group of 10 cards (cards 1-10, 11-20, ...).
+- **Framer Motion** and CSS keyframes for subtle motion (aurora drift, entrance fades), all turned off for visitors who prefer reduced motion, except the technology ribbon, which keeps sliding more slowly (and pauses on hover).
+- **Project illustrations**: each work card gets an animated SVG illustration (`src/components/ProjectArt.jsx`), matched to the project's tag first, then its title and description, by `src/utils/projectArt.js`. The featured and personal grids each pick their own; there are 10 illustrations, and none repeats within a grid of up to 10 cards.
 - **Mobile layout**: on phones each work card is a short row with a square illustration; tablets show 2 cards per row, laptops 3 and wide screens 4.
 - **Lucide React** for UI icons.
 
@@ -67,6 +67,14 @@ To run this application locally, you will need Node.js and an active MongoDB dat
    cd ../portfolio-backend
    npm install
    ```
+
+4. **Optional: add the GitHub projects to the database:**
+   ```bash
+   cd portfolio-backend
+   npm run seed:github
+   ```
+   Adds LedgerFlow, HireReady, DocFlow and AI Doc Chat (from `scripts/seed_github_projects.js`) as personal projects.
+   Safe to re-run: projects that already exist are skipped, so dashboard edits are kept.
 ---
 
 ## ☁️ Deployment

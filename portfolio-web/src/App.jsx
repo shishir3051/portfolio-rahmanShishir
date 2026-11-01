@@ -331,10 +331,14 @@ function App() {
   const featuredProjects = professionalProjects.length > 0 ? professionalProjects : FALLBACK_PROJECTS;
   const personalProjects = projects.filter(p => !p.isProfessional);
 
-  // An illustration and colour pair per card, across both project grids (no illustration repeats within each group of 10 cards)
+  // All work projects, for the hero's "Projects" count
   const allWorkProjects = [...featuredProjects, ...personalProjects];
-  const artVariants = assignArtVariants(allWorkProjects);
-  const cardArt = (index) => ({ art: artVariants[index], tone: ART_TONES[index % ART_TONES.length] });
+
+  // Each grid picks its own illustrations, so every project can get its best-matching picture
+  // (no repeats within a grid of up to 10 cards); the colour pair continues across both grids
+  const featuredArt = assignArtVariants(featuredProjects);
+  const personalArt = assignArtVariants(personalProjects);
+  const cardArt = (variants, index, offset = 0) => ({ art: variants[index], tone: ART_TONES[(offset + index) % ART_TONES.length] });
 
   return (
     <Shell>
@@ -379,17 +383,17 @@ function App() {
           id="skills"
           index="02"
           label="Stack"
-          title="From banking back-ends to security tooling."
+          title="From banking back-ends to enterprise front-ends."
           intro="Java and Spring Boot at the core, React and ExtJS on the front, and SQL Server, Neo4j and MongoDB underneath."
         >
-          {/* Bento: two wide cards on top (featured Fintech + Backend), three below */}
-          <div className="grid gap-4 md:grid-cols-6">
-            {SKILL_GROUPS.map((group, i) => {
+          {/* Bento: 2 x 2 cards, the featured Fintech card first */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {SKILL_GROUPS.map((group) => {
               const Icon = group.icon;
               return (
                 <article
                   key={group.name}
-                  className={`glass lift relative overflow-hidden rounded-3xl p-7 ${i < 2 ? 'md:col-span-3' : 'md:col-span-2'}`}
+                  className="glass lift relative overflow-hidden rounded-3xl p-7"
                   style={group.featured ? { background: 'linear-gradient(135deg, var(--accent-soft), transparent 60%), var(--glass-bg)' } : undefined}
                 >
                   <div className="flex items-center justify-between gap-4">
@@ -472,7 +476,7 @@ function App() {
           id="projects"
           index="04"
           label="Selected work"
-          title="Software that moves money, and software that finds weak spots."
+          title="Software that moves money, and products I build on the side."
           action={
             <a href={SOCIAL_LINKS[0].href} target="_blank" rel="noopener noreferrer" className="btn-secondary h-[46px] font-medium">
               More on GitHub <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -482,7 +486,7 @@ function App() {
           {/* Compact cards: 1 per row on phones, 2 on tablets, 3 on laptops, 4 on wide screens */}
           <div className={PROJECT_GRID}>
             {featuredProjects.map((p, i) => (
-              <ProjectCard key={p.id || p.title} project={p} code={`P/${String(i + 1).padStart(2, '0')}`} {...cardArt(i)} onClick={() => setSelectedProject(p)} />
+              <ProjectCard key={p.id || p.title} project={p} code={`P/${String(i + 1).padStart(2, '0')}`} {...cardArt(featuredArt, i)} onClick={() => setSelectedProject(p)} />
             ))}
           </div>
 
@@ -491,7 +495,7 @@ function App() {
             {personalProjects.length > 0 ? (
               <div className={PROJECT_GRID}>
                 {personalProjects.map((p, i) => (
-                  <ProjectCard key={p.id || p.title} project={p} code={`OSS/${String(i + 1).padStart(2, '0')}`} {...cardArt(featuredProjects.length + i)} onClick={() => setSelectedProject(p)} />
+                  <ProjectCard key={p.id || p.title} project={p} code={`OSS/${String(i + 1).padStart(2, '0')}`} {...cardArt(personalArt, i, featuredProjects.length)} onClick={() => setSelectedProject(p)} />
                 ))}
               </div>
             ) : (

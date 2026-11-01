@@ -1,6 +1,6 @@
 // Chooses an illustration for each project card, with no repeats inside each group of 10 cards
-// (cards 1-10, 11-20, ...; there are 10 illustrations). Matching reads the project's tag, title
-// and description. Inside a group:
+// (cards 1-10, 11-20, ...; there are 10 illustrations). Matching reads the project's tag first,
+// then its title, then its description. Inside a group:
 //   1. each project gets its strongest keyword match, if no earlier card has taken it;
 //   2. projects still without one get any other matching illustration that is free;
 //   3. the rest get a free illustration from FALLBACK_ORDER (generic pictures first).
@@ -28,14 +28,20 @@ const KEYWORDS = [
 // Order for projects without a free match: generic pictures first, the most topic-specific last
 const FALLBACK_ORDER = ['code', 'terminal', 'browser', 'cloud', 'chart', 'graph', 'mobile', 'ai', 'security', 'payments'];
 
-const textOf = (project) => [project.tag, project.title, project.desc].filter(Boolean).join(' ');
+// Fields read for matching, most telling first: a tag such as "E-Commerce" says more about a
+// project than a passing word in its description
+const MATCH_FIELDS = ['tag', 'title', 'desc'];
 
-// Illustration names this project matches, strongest first
+// Illustration names this project matches, strongest first (tag matches, then title, then description)
 const matchesOf = (project) => {
-  const text = textOf(project);
-  return KEYWORDS
-    .filter(([, rules]) => [rules].flat().some((rule) => rule.test(text)))
-    .map(([name]) => name);
+  const names = [];
+  for (const field of MATCH_FIELDS) {
+    const text = project[field] || '';
+    for (const [name, rules] of KEYWORDS) {
+      if (!names.includes(name) && [rules].flat().some((rule) => rule.test(text))) names.push(name);
+    }
+  }
+  return names;
 };
 
 // Picks illustrations for one group of at most 10 projects (no repeats inside the group)

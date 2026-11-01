@@ -1,8 +1,8 @@
 // All portfolio content lives here, so components only deal with layout.
 // Edit this file to update text, links, experience or skills.
 import {
-  Github, Linkedin, Globe, Crosshair, Network, Filter, EyeOff, Layers,
-  Landmark, Server, Code2, Database, Lock, ArrowLeftRight, ShieldCheck,
+  Github, Linkedin, Globe, Network, Filter, ListChecks, Layers,
+  Landmark, Server, Code2, Database, ArrowLeftRight, LayoutGrid,
 } from 'lucide-react';
 
 // First professional role (internship). Used to keep "years of experience" current automatically.
@@ -30,7 +30,7 @@ export const PROFILE = {
   name: 'Rahman Shishir',
   role: 'Java Full-Stack Engineer',
   summary:
-    'Software engineer at naztech Inc, building secure banking software for the SWIFT ISO 20022 MT-to-MX migration with Java, Spring Boot, ExtJS and SQL Server. Cybersecurity background, E|HE certified.',
+    'Software engineer at naztech Inc, building secure banking software for the SWIFT ISO 20022 MT-to-MX migration with Java, Spring Boot, ExtJS and SQL Server. Cybersecurity background.',
   summaryHighlight: 'SWIFT ISO 20022 MT-to-MX migration', // phrase in the summary shown brighter in the hero
   location: 'Dhaka, Bangladesh',
   utcOffset: 'UTC+6',
@@ -50,7 +50,7 @@ export const SOCIAL_LINKS = [
 export const HERO_CHIPS = [
   { title: 'ISO 20022', caption: 'MT → MX migration', icon: ArrowLeftRight },
   { title: 'Spring Boot', caption: 'Java services', icon: Server },
-  { title: 'E|HE certified', caption: 'Ethical Hacking Essentials', icon: ShieldCheck, tone: 'success' },
+  { title: 'ExtJS', caption: 'Enterprise banking UIs', icon: LayoutGrid, tone: 'success' },
 ];
 
 // Key figures shown under the hero
@@ -65,17 +65,17 @@ export const HIGHLIGHTS = [
 // Scrolling ribbon of technologies between the hero and the about section
 export const RIBBON = [
   'Java', 'Spring Boot', 'ISO 20022', 'ExtJS', 'SQL Server', 'SWIFT MT/MX',
-  'React', 'Next.js', 'Node.js', 'Neo4j', 'Penetration testing',
+  'React', 'Next.js', 'Node.js', 'Neo4j', 'MongoDB',
 ];
 
 export const ABOUT = {
-  title: 'I treat security as part of the design.',
+  title: 'I build banking software that has to be right.',
   lead: "I'm a Java full-stack engineer at naztech Inc in Dhaka. I work on enterprise banking software, mainly tooling and workflows for the SWIFT ISO 20022 MT-to-MX transition, across Spring Boot services, ExtJS interfaces and SQL Server data layers.",
-  body: 'My degree is in Software Engineering with a major in Cybersecurity, and I hold the Ethical Hacking Essentials (E|HE) certification. That background shapes how I build: validate inputs, minimise exposure and treat security as part of the design.',
+  body: 'My degree is in Software Engineering with a major in Cybersecurity. That background shows in how I build: every input is validated, sensitive data stays tightly scoped, and the code is easy for the next engineer to review.',
   principles: [
-    { title: 'Validate inputs', text: 'Every boundary checks what it receives.', icon: Filter },
-    { title: 'Minimise exposure', text: 'Least access, smallest surface.', icon: EyeOff },
-    { title: 'Secure by design', text: 'Built in from the start, not bolted on.', icon: Layers },
+    { title: 'Validate every input', text: 'Each message and field is checked at the boundary.', icon: Filter },
+    { title: 'Follow the standard', text: 'SWIFT and ISO 20022 rules, applied exactly.', icon: ListChecks },
+    { title: 'Keep it maintainable', text: 'Clear code the next engineer can extend.', icon: Layers },
   ],
 };
 
@@ -85,7 +85,6 @@ export const SKILL_GROUPS = [
   { name: 'Backend', desc: 'Java and Spring Boot services, with Node.js and AWS where they fit.', items: ['Java', 'Spring Boot', 'Node.js', 'AWS'], icon: Server },
   { name: 'Frontend', desc: 'ExtJS for enterprise banking screens, React and Next.js for the web.', items: ['React', 'Next.js', 'ExtJS', 'Tailwind CSS'], icon: Code2 },
   { name: 'Databases', desc: 'Relational and graph data, from SQL Server to Neo4j.', items: ['MS SQL Server', 'Neo4j', 'MongoDB'], icon: Database },
-  { name: 'Security', desc: 'Offensive testing skills, backed by an E|HE certification.', items: ['Penetration testing', 'Vulnerability assessment', 'Ethical hacking (E|HE)'], icon: Lock },
 ];
 
 // Work history, newest first
@@ -126,7 +125,7 @@ export const CERTIFICATION = { label: 'Certification', title: 'Ethical Hacking E
 export const FALLBACK_PROJECTS = [
   {
     title: 'SWIFT ISO 20022 MT-MX Transition',
-    tag: 'Fintech · Security',
+    tag: 'Fintech · Banking',
     year: '2024',
     role: 'Junior Software Engineer',
     desc: 'A banking solution that helps banks automate workflows and stay compliant during the MT-to-MX migration.',
@@ -139,31 +138,31 @@ export const FALLBACK_PROJECTS = [
     isProfessional: true,
   },
   {
-    title: 'Cybersecurity Dashboard',
-    tag: 'Security · Neo4j',
-    year: '2024',
-    role: 'Lead Developer',
-    desc: 'A monitoring tool that finds and visualises security vulnerabilities in web applications, with automated scanning and graph views.',
+    title: 'SWIFT GPI Tracker',
+    tag: 'Banking Software',
+    year: '2026',
+    role: 'Frontend Lead',
+    desc: 'Built a real-time tracking tool for SWIFT Global Payments Innovation (GPI) cross-border transactions, providing end-to-end payment visibility for banking operations teams.',
     details: [
-      'Visualised network threats using Neo4j.',
-      'Automated vulnerability scanning.',
-      'Designed a dark-mode security analysis UI.',
+      'Built a real-time tracking tool for SWIFT Global Payments Innovation (GPI) cross-border transactions.',
+      'Provided end-to-end payment visibility for banking operations teams.',
+      'Integrated SWIFT gCCT/gCOV standards for full compliance and traceability.',
     ],
-    tech: ['React', 'Node.js', 'Neo4j', 'Tailwind'],
+    tech: ['React', 'TypeScript', 'Node.js', 'SWIFT APIs', 'WebSockets'],
     isProfessional: true,
   },
 ];
 
 export const SERVICES = [
   {
-    title: 'Secure web engineering',
-    desc: 'Full-stack applications in Java, Spring Boot and React, with input validation and minimal exposure designed in.',
-    icon: Globe,
+    title: 'Banking & payments software',
+    desc: 'SWIFT MT and ISO 20022 (MX) message handling, migration tooling and payment workflow automation.',
+    icon: Landmark,
   },
   {
-    title: 'Security assessments',
-    desc: 'Penetration testing and vulnerability assessments that show where a web application is exposed.',
-    icon: Crosshair,
+    title: 'Full-stack web engineering',
+    desc: 'Web applications in Java, Spring Boot and React, with validated inputs and clean, maintainable code.',
+    icon: Globe,
   },
   {
     title: 'Data architecture',

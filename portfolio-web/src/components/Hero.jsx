@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin, Building2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, MapPin, Building2 } from 'lucide-react';
 import { PROFILE, HERO_CHIPS, HIGHLIGHTS } from '../data/profile';
 
 // Where each floating chip sits around the portrait (the third one hides on small phones)
@@ -143,7 +143,6 @@ const Hero = ({ projectCount }) => {
                 <Building2 className="h-4 w-4" aria-hidden="true" />
                 <a href={PROFILE.company.href} target="_blank" rel="noopener noreferrer" className="text-text/85 hover:text-text">{PROFILE.company.name}</a>
               </li>
-              <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" aria-hidden="true" /> E|HE certified</li>
             </ul>
           </div>
 

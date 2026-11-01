@@ -8,7 +8,7 @@ import { trackSpotlight } from '../utils/spotlight';
 
 import { API_BASE } from '../config';
 
-const PAGE_DESCRIPTION = 'Articles on fintech, application security and backend engineering from my day-to-day work.';
+const PAGE_DESCRIPTION = 'Articles on fintech, Java and backend engineering from my day-to-day work.';
 
 // Filter options shown above the posts. "All" shows every post.
 const CATEGORIES = ["All", "FinTech", "Cybersecurity", "Web Development", "Backend", "Database", "Career", "Technology"];
@@ -144,7 +144,7 @@ const Blog = () => {
 
       <PageHeader
         eyebrow="Blog"
-        title={<>Field notes on <span className="gradient-text">secure</span> engineering.</>}
+        title={<>Field notes on <span className="gradient-text">software</span> engineering.</>}
         description={PAGE_DESCRIPTION}
       />
 

@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, CodeXml, Cpu, Database, LayoutTemplate, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CodeXml, Cpu, Database, LayoutTemplate } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { trackSpotlight } from '../utils/spotlight';
 
@@ -33,19 +33,9 @@ const TOOL_GROUPS = [
     icon: Database,
     title: 'Backend & Data',
     items: [
-      { name: 'Spring Boot', description: 'Secure, scalable REST APIs and backend services.' },
-      { name: 'Neo4j', description: 'Graph database for modelling network relationships and threat data.' },
+      { name: 'Spring Boot', description: 'Reliable, scalable REST APIs and backend services.' },
+      { name: 'Neo4j', description: 'Graph database for modelling connected data and relationships.' },
       { name: 'MS SQL Server', description: 'Relational database for high-concurrency enterprise systems.' },
-    ],
-  },
-  {
-    id: 'security',
-    icon: ShieldCheck,
-    title: 'Security',
-    items: [
-      { name: 'Burp Suite Pro', description: 'Web application penetration testing.' },
-      { name: 'Metasploit', description: 'Vulnerability analysis and exploit testing during security audits.' },
-      { name: 'Wireshark', description: 'Packet capture and network traffic analysis.' },
     ],
   },
   {
@@ -113,14 +103,14 @@ const Uses = () => {
         <title>Uses | Rahman Shishir</title>
         <meta
           name="description"
-          content="The hardware, software and tools Rahman Shishir uses for software development and security work."
+          content="The hardware, software and tools Rahman Shishir uses for software development."
         />
       </Helmet>
 
       <PageHeader
         eyebrow="Uses"
         title={<>The <span className="gradient-text">tools</span> behind the work.</>}
-        description="The hardware, software and tools I use day to day for development and security work."
+        description="The hardware, software and tools I use day to day for software development."
       >
         <p className="mt-7 font-mono text-xs uppercase tracking-[0.12em] text-muted2">
           <span className="text-text">{pad2(TOOL_GROUPS.length)}</span> groups

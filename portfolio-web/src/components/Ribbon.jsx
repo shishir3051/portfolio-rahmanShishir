@@ -16,11 +16,12 @@ const RibbonList = () => (
 
 // Slowly scrolling band of technologies. Decorative (the Stack section lists the same skills),
 // so it is hidden from screen readers; the list is rendered twice for a seamless loop.
+// It keeps sliding (slower) for visitors who prefer reduced motion and pauses on hover (see index.css).
 const Ribbon = () => {
   return (
     <div
       aria-hidden="true"
-      className="relative overflow-hidden border-y border-stroke py-5"
+      className="ribbon relative overflow-hidden border-y border-stroke py-5"
       style={{ maskImage: fadeEdges, WebkitMaskImage: fadeEdges }}
     >
       <div className="animate-marquee flex w-max">
